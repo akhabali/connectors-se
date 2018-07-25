@@ -23,17 +23,20 @@ import org.talend.components.service.Solr_connectorService;
 // this class role is to enable the work to be distributed in environments supporting it.
 //
 @Version(1) // default version is 1, if some configuration changes happen between 2 versions you can add a migrationHandler
-@Icon(Icon.IconType.STAR) // you can use a custom one using @Icon(value=CUSTOM, custom="filename") and adding icons/filename_icon32.png in resources
+@Icon(Icon.IconType.STAR) // you can use a custom one using @Icon(value=CUSTOM, custom="filename") and adding
+                          // icons/filename_icon32.png in resources
 @PartitionMapper(name = "tSolrInput")
 @Documentation("TODO fill the documentation for this mapper")
 public class TSolrInputMapper implements Serializable {
+
     private final TSolrInputMapperConfiguration configuration;
+
     private final Solr_connectorService service;
+
     private final JsonBuilderFactory jsonBuilderFactory;
 
     public TSolrInputMapper(@Option("configuration") final TSolrInputMapperConfiguration configuration,
-                        final Solr_connectorService service,
-                        final JsonBuilderFactory jsonBuilderFactory) {
+            final Solr_connectorService service, final JsonBuilderFactory jsonBuilderFactory) {
         this.configuration = configuration;
         this.service = service;
         this.jsonBuilderFactory = jsonBuilderFactory;

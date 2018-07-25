@@ -28,15 +28,19 @@ import org.talend.components.service.Solr_connectorService;
 @Slf4j
 @Documentation("TODO fill the documentation for this source")
 public class TSolrInputSource implements Serializable {
+
     private final TSolrInputMapperConfiguration configuration;
+
     private final Solr_connectorService service;
+
     private final JsonBuilderFactory jsonBuilderFactory;
+
     private List<SolrDocument> resultList;
+
     private Iterator<SolrDocument> iter;
 
     public TSolrInputSource(@Option("configuration") final TSolrInputMapperConfiguration configuration,
-                        final Solr_connectorService service,
-                        final JsonBuilderFactory jsonBuilderFactory) {
+            final Solr_connectorService service, final JsonBuilderFactory jsonBuilderFactory) {
         this.configuration = configuration;
         this.service = service;
         this.jsonBuilderFactory = jsonBuilderFactory;
@@ -74,8 +78,8 @@ public class TSolrInputSource implements Serializable {
     private void addSortParams(SolrQuery query) {
         if (StringUtils.isNotBlank(configuration.getSort())) {
             query.addSort(configuration.getSort(),
-                    configuration.getSortOrder() == TSolrInputMapperConfiguration.OrderEnum.ASC ?
-                            SolrQuery.ORDER.asc : SolrQuery.ORDER.desc);
+                    configuration.getSortOrder() == TSolrInputMapperConfiguration.OrderEnum.ASC ? SolrQuery.ORDER.asc
+                            : SolrQuery.ORDER.desc);
         }
     }
 
@@ -95,7 +99,7 @@ public class TSolrInputSource implements Serializable {
     public JsonObject next() {
         if (iter.hasNext()) {
             JsonObjectBuilder jsonBuilder = jsonBuilderFactory.createObjectBuilder();
-            iter.next().forEach((key, value) -> jsonBuilder.add(key, value.toString())); //todo need to add number support
+            iter.next().forEach((key, value) -> jsonBuilder.add(key, value.toString())); // todo need to add number support
             return jsonBuilder.build();
         }
         return null;

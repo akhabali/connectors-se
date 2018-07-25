@@ -11,15 +11,12 @@ import java.io.Serializable;
 
 @Data
 @GridLayout({
-    // the generated layout put one configuration entry per line,
-    // customize it as much as needed
-        @GridLayout.Row({"solrUrl"}),
-        @GridLayout.Row({"core"}),
-        @GridLayout.Row({"action"}
-    )
-})
+        // the generated layout put one configuration entry per line,
+        // customize it as much as needed
+        @GridLayout.Row({ "solrUrl" }), @GridLayout.Row({ "core" }), @GridLayout.Row({ "action" }) })
 @Documentation("TODO fill the documentation for this configuration")
 public class TSolrDeleteDocumentOutputConfiguration implements Serializable {
+
     @Option
     @Documentation("TODO fill the documentation for this parameter")
     private String solrUrl;
@@ -27,7 +24,7 @@ public class TSolrDeleteDocumentOutputConfiguration implements Serializable {
     @Option
     @Required
     @Documentation("TODO fill the documentation for this parameter")
-    @Suggestable(value = "coreList", parameters = {"solrUrl"})
+    @Suggestable(value = "coreList", parameters = { "solrUrl" })
     private String core;
 
     @Option

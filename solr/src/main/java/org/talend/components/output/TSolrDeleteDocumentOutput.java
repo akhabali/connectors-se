@@ -25,16 +25,20 @@ import static org.talend.components.output.ActionEnum.UPDATE;
 
 @Slf4j
 @Version(1) // default version is 1, if some configuration changes happen between 2 versions you can add a migrationHandler
-@Icon(Icon.IconType.STAR) // you can use a custom one using @Icon(value=CUSTOM, custom="filename") and adding icons/filename_icon32.png in resources
+@Icon(Icon.IconType.STAR) // you can use a custom one using @Icon(value=CUSTOM, custom="filename") and adding
+                          // icons/filename_icon32.png in resources
 @Processor(name = "tSolrDeleteDocument")
 @Documentation("TODO fill the documentation for this processor")
 public class TSolrDeleteDocumentOutput implements Serializable {
+
     private final TSolrDeleteDocumentOutputConfiguration configuration;
+
     private final Solr_connectorService service;
+
     private SolrClient solr;
 
     public TSolrDeleteDocumentOutput(@Option("configuration") final TSolrDeleteDocumentOutputConfiguration configuration,
-                          final Solr_connectorService service) {
+            final Solr_connectorService service) {
         this.configuration = configuration;
         this.service = service;
     }
@@ -52,8 +56,7 @@ public class TSolrDeleteDocumentOutput implements Serializable {
     }
 
     @ElementListener
-    public void onNext(
-            @Input final JsonObject record) {
+    public void onNext(@Input final JsonObject record) {
         // this is the method allowing you to handle the input(s) and emit the output(s)
         // after some custom logic you put here, to send a value to next element you can use an
         // output parameter and call emit(value).
@@ -92,14 +95,13 @@ public class TSolrDeleteDocumentOutput implements Serializable {
 
     private void deleteDocument(String id, boolean commit) {
         try {
-            solr.deleteByQuery("id:" + id); //TODO solr.deleteById(id) must be used
-            if (commit) solr.commit();
+            solr.deleteByQuery("id:" + id); // TODO solr.deleteById(id) must be used
+            if (commit)
+                solr.commit();
         } catch (SolrServerException | IOException e) {
             log.error(e.getMessage(), e);
         }
     }
-
-
 
     @AfterGroup
     public void afterGroup() {

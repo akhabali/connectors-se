@@ -14,15 +14,9 @@ import lombok.Data;
 
 @Data
 @DataSet("dataset")
-@GridLayout({
-        @GridLayout.Row({"solrUrl"}),
-        @GridLayout.Row({"core"}),
-        @GridLayout.Row({"filterQuery" }),
-        @GridLayout.Row({"start"}),
-        @GridLayout.Row({"rows"}),
-        @GridLayout.Row({"sort"}),
-        @GridLayout.Row({"sortOrder"})
-})
+@GridLayout({ @GridLayout.Row({ "solrUrl" }), @GridLayout.Row({ "core" }), @GridLayout.Row({ "filterQuery" }),
+        @GridLayout.Row({ "start" }), @GridLayout.Row({ "rows" }), @GridLayout.Row({ "sort" }),
+        @GridLayout.Row({ "sortOrder" }) })
 @Documentation("TODO fill the documentation for this configuration")
 public class TSolrInputMapperConfiguration implements Serializable {
 
@@ -34,7 +28,7 @@ public class TSolrInputMapperConfiguration implements Serializable {
     @Option
     @Required
     @Documentation("TODO fill the documentation for this parameter")
-    @Suggestable(value = "coreList", parameters = {"solrUrl"})
+    @Suggestable(value = "coreList", parameters = { "solrUrl" })
     private String core;
 
     @Option
