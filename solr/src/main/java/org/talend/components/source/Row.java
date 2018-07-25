@@ -6,6 +6,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 
 @Data
 public class Row {
+
     @Option
     @Documentation("TODO fill the documentation for this parameter")
     private String field;
@@ -14,4 +15,3 @@ public class Row {
     @Documentation("TODO fill the documentation for this parameter")
     private String value;
 }
-
