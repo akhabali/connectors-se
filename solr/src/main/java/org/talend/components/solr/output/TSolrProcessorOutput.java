@@ -1,4 +1,4 @@
-package org.talend.components.output;
+package org.talend.components.solr.output;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.solr.client.solrj.SolrClient;
@@ -7,12 +7,13 @@ import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
-import org.talend.components.service.Solr_connectorService;
+import org.talend.components.solr.service.Solr_connectorService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.processor.*;
+import org.talend.components.solr.service.Solr_connectorService;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -20,24 +21,24 @@ import javax.json.JsonObject;
 import java.io.IOException;
 import java.io.Serializable;
 
-import static org.talend.components.output.ActionEnum.DELETE;
-import static org.talend.components.output.ActionEnum.UPDATE;
+import static org.talend.components.solr.output.ActionEnum.DELETE;
+import static org.talend.components.solr.output.ActionEnum.UPDATE;
 
 @Slf4j
 @Version(1) // default version is 1, if some configuration changes happen between 2 versions you can add a migrationHandler
 @Icon(Icon.IconType.STAR) // you can use a custom one using @Icon(value=CUSTOM, custom="filename") and adding
                           // icons/filename_icon32.png in resources
-@Processor(name = "tSolrDeleteDocument")
+@Processor(name = "tSolrProcessor")
 @Documentation("TODO fill the documentation for this processor")
-public class TSolrDeleteDocumentOutput implements Serializable {
+public class TSolrProcessorOutput implements Serializable {
 
-    private final TSolrDeleteDocumentOutputConfiguration configuration;
+    private final TSolrProcessorOutputConfiguration configuration;
 
     private final Solr_connectorService service;
 
     private SolrClient solr;
 
-    public TSolrDeleteDocumentOutput(@Option("configuration") final TSolrDeleteDocumentOutputConfiguration configuration,
+    public TSolrProcessorOutput(@Option("configuration") final TSolrProcessorOutputConfiguration configuration,
             final Solr_connectorService service) {
         this.configuration = configuration;
         this.service = service;
@@ -45,7 +46,7 @@ public class TSolrDeleteDocumentOutput implements Serializable {
 
     @PostConstruct
     public void init() {
-        solr = new HttpSolrClient.Builder(configuration.getSolrUrl() + configuration.getCore()).build();
+        solr = new HttpSolrClient.Builder(configuration.getSolrConnection().getFullUrl()).build();
     }
 
     @BeforeGroup
@@ -61,11 +62,9 @@ public class TSolrDeleteDocumentOutput implements Serializable {
         // after some custom logic you put here, to send a value to next element you can use an
         // output parameter and call emit(value).
         ActionEnum action = configuration.getAction();
-        if (UPDATE == action) {
-            log.info("update");
+        if (ActionEnum.UPDATE == action) {
             update(record);
-        } else if (DELETE == action) {
-            log.info("delete");
+        } else if (ActionEnum.DELETE == action) {
             deleteDocument(record.getString("id"), true);
         }
     }
@@ -77,6 +76,7 @@ public class TSolrDeleteDocumentOutput implements Serializable {
             solr.add(doc);
             solr.commit();
         } catch (SolrServerException | IOException e) {
+            log.info("sergiiTest1");
             log.error(e.getMessage(), e);
         }
     }
@@ -99,6 +99,7 @@ public class TSolrDeleteDocumentOutput implements Serializable {
             if (commit)
                 solr.commit();
         } catch (SolrServerException | IOException e) {
+            log.info("sergiiTest2");
             log.error(e.getMessage(), e);
         }
     }

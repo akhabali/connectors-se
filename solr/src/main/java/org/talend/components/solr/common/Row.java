@@ -1,4 +1,4 @@
-package org.talend.components.source;
+package org.talend.components.solr.common;
 
 import lombok.Data;
 import org.talend.sdk.component.api.configuration.Option;

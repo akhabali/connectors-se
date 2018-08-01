@@ -1,4 +1,4 @@
-package org.talend.components.output;
+package org.talend.components.solr.output;
 
 public enum ActionEnum {
     DELETE,

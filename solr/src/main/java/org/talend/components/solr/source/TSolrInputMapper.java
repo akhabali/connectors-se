@@ -1,4 +1,4 @@
-package org.talend.components.source;
+package org.talend.components.solr.source;
 
 import static java.util.Collections.singletonList;
 
@@ -17,7 +17,7 @@ import org.talend.sdk.component.api.input.PartitionSize;
 import org.talend.sdk.component.api.input.Split;
 import org.talend.sdk.component.api.meta.Documentation;
 
-import org.talend.components.service.Solr_connectorService;
+import org.talend.components.solr.service.Solr_connectorService;
 
 //
 // this class role is to enable the work to be distributed in environments supporting it.

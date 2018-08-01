@@ -2,7 +2,7 @@
 // the components in the nested packages belong to
 @Components(family = "Solr", categories = "Misc")
 @Icon(value = Icon.IconType.CUSTOM, custom = "Solr")
-package org.talend.components;
+package org.talend.components.solr;
 
 import org.talend.sdk.component.api.component.Components;
 import org.talend.sdk.component.api.component.Icon;

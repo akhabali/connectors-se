@@ -1,6 +1,5 @@
-package org.talend.components.source;
+package org.talend.components.solr.source;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -13,7 +12,6 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -23,7 +21,7 @@ import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.meta.Documentation;
 
-import org.talend.components.service.Solr_connectorService;
+import org.talend.components.solr.service.Solr_connectorService;
 
 @Slf4j
 @Documentation("TODO fill the documentation for this source")
@@ -48,10 +46,9 @@ public class TSolrInputSource implements Serializable {
 
     @PostConstruct
     public void init() {
-        SolrClient solr = new HttpSolrClient.Builder(configuration.getSolrUrl() + configuration.getCore()).build();
+        SolrClient solr = new HttpSolrClient.Builder(configuration.getSolrConnection().getFullUrl()).build();
         SolrQuery query = new SolrQuery("*:*");
-        configuration.getFilterQuery().forEach(e -> query.addFilterQuery(e.getField() + ":" + wrapFqValue(e.getValue())));
-        addSortParams(query);
+        configuration.getFilterQuery().forEach(e -> query.addFilterQuery(e.getField() + ":" + e.getValue()));
         query.setRows(parseInt(configuration.getRows()));
         query.setStart(parseInt(configuration.getStart()));
         resultList = executeSolrQuery(solr, query);
@@ -73,14 +70,6 @@ public class TSolrInputSource implements Serializable {
             log.warn(e.getMessage());
         }
         return result;
-    }
-
-    private void addSortParams(SolrQuery query) {
-        if (StringUtils.isNotBlank(configuration.getSort())) {
-            query.addSort(configuration.getSort(),
-                    configuration.getSortOrder() == TSolrInputMapperConfiguration.OrderEnum.ASC ? SolrQuery.ORDER.asc
-                            : SolrQuery.ORDER.desc);
-        }
     }
 
     private List<SolrDocument> executeSolrQuery(SolrClient solr, SolrQuery query) {
