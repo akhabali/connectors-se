@@ -11,6 +11,7 @@ import org.apache.solr.client.solrj.response.schema.SchemaRepresentation;
 import org.apache.solr.client.solrj.response.schema.SchemaResponse;
 import org.apache.solr.common.params.CoreAdminParams;
 import org.talend.components.solr.common.SolrDataStore;
+import org.talend.components.solr.output.TSolrProcessorOutputConfiguration;
 import org.talend.components.solr.source.TSolrInputMapperConfiguration;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.service.Service;
@@ -48,6 +49,13 @@ public class Solr_connectorService {
 
     @DiscoverSchema("discoverSchema")
     public Schema guessTableSchema(TSolrInputMapperConfiguration config) {
+        HttpSolrClient solrClient = new HttpSolrClient.Builder(config.getSolrConnection().getFullUrl()).build();
+        SchemaRepresentation representation = getSchemaRepresentation(solrClient);
+        return getSchemaFromRepresentation(representation);
+    }
+
+    @DiscoverSchema("discoverOutPutSchema")
+    public Schema guessOutPutSchema(TSolrProcessorOutputConfiguration config) {
         HttpSolrClient solrClient = new HttpSolrClient.Builder(config.getSolrConnection().getFullUrl()).build();
         SchemaRepresentation representation = getSchemaRepresentation(solrClient);
         return getSchemaFromRepresentation(representation);

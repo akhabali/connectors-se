@@ -14,7 +14,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 import lombok.Data;
 
 @Data
-@DataSet("dataset")
+@DataSet("Solr Input")
 @GridLayout({ @GridLayout.Row({ "solrConnection" }), @GridLayout.Row({ "filterQuery" }), @GridLayout.Row({ "start" }),
         @GridLayout.Row({ "rows" }) })
 
