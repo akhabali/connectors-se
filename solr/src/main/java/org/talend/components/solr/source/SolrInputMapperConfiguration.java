@@ -4,9 +4,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.talend.components.solr.common.Row;
+import org.talend.components.solr.common.FilterCriteria;
 import org.talend.components.solr.common.SolrConnectionConfiguration;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.constraint.Pattern;
 import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Structure;
@@ -19,28 +20,30 @@ import lombok.Data;
         @GridLayout.Row({ "rows" }) })
 
 @GridLayout(value = { @GridLayout.Row({ "schema" }) }, names = { GridLayout.FormType.ADVANCED })
-@Documentation("TODO fill the documentation for this configuration")
-public class TSolrInputMapperConfiguration implements Serializable {
+@Documentation("Solr Input Configuration")
+public class SolrInputMapperConfiguration implements Serializable {
 
     @Option
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("Solr URL. Including core")
     private SolrConnectionConfiguration solrConnection;
 
     @Option
-    @Documentation("TODO fill the documentation for this parameter")
+    @Pattern("^[0-9]{0,9}$")
+    @Documentation("Start field. Points to a started document")
     private String start = "0";
 
     @Option
-    @Documentation("TODO fill the documentation for this parameter")
+    @Pattern("^[0-9]{0,9}$")
+    @Documentation("Rows field. Points to numbers of documents")
     private String rows = "10";
 
     @Option
-    @Documentation("The name of the row to be read")
-    private List<Row> filterQuery = new ArrayList<>();
+    @Documentation("Filter query table. Every row sets a new condition")
+    private List<FilterCriteria> filterQuery = new ArrayList<>();
 
     @Option
     @Structure(type = Structure.Type.OUT, discoverSchema = "discoverSchema")
-    @Documentation("")
+    @Documentation("Document schema")
     private List<String> schema;
 
 }

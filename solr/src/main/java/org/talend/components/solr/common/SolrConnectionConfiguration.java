@@ -12,12 +12,12 @@ import org.talend.sdk.component.api.meta.Documentation;
 public class SolrConnectionConfiguration {
 
     @Option
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("Solr server URL DataStore")
     private SolrDataStore solrUrl;
 
     @Option
     @Required
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("the name of Solr Core")
     @Suggestable(value = "coreList", parameters = { "solrUrl/url" })
     private String core;
 

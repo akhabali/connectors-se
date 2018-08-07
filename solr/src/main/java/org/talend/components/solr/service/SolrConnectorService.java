@@ -11,8 +11,8 @@ import org.apache.solr.client.solrj.response.schema.SchemaRepresentation;
 import org.apache.solr.client.solrj.response.schema.SchemaResponse;
 import org.apache.solr.common.params.CoreAdminParams;
 import org.talend.components.solr.common.SolrDataStore;
-import org.talend.components.solr.output.TSolrProcessorOutputConfiguration;
-import org.talend.components.solr.source.TSolrInputMapperConfiguration;
+import org.talend.components.solr.output.SolrProcessorOutputConfiguration;
+import org.talend.components.solr.source.SolrInputMapperConfiguration;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 
 @Slf4j
 @Service
-public class Solr_connectorService {
+public class SolrConnectorService {
 
     private static final String SOLR_FIELD_PROPERTY_INDEXED = "indexed";
 
@@ -48,14 +48,14 @@ public class Solr_connectorService {
     private static final Set SOLR_FIELD_PROPERTY_TYPES_BOOL = Stream.of("boolean").collect(Collectors.toSet());
 
     @DiscoverSchema("discoverSchema")
-    public Schema guessTableSchema(TSolrInputMapperConfiguration config) {
+    public Schema guessTableSchema(SolrInputMapperConfiguration config) {
         HttpSolrClient solrClient = new HttpSolrClient.Builder(config.getSolrConnection().getFullUrl()).build();
         SchemaRepresentation representation = getSchemaRepresentation(solrClient);
         return getSchemaFromRepresentation(representation);
     }
 
     @DiscoverSchema("discoverOutPutSchema")
-    public Schema guessOutPutSchema(TSolrProcessorOutputConfiguration config) {
+    public Schema guessOutPutSchema(SolrProcessorOutputConfiguration config) {
         HttpSolrClient solrClient = new HttpSolrClient.Builder(config.getSolrConnection().getFullUrl()).build();
         SchemaRepresentation representation = getSchemaRepresentation(solrClient);
         return getSchemaFromRepresentation(representation);
@@ -68,7 +68,7 @@ public class Solr_connectorService {
             SchemaResponse schemaResponse = schemaRequest.process(solrClient, null);
             representation = schemaResponse.getSchemaRepresentation();
         } catch (SolrServerException | IOException e) {
-            log.error(e.getMessage(), e);
+            log.error(e.getMessage());
         }
         return representation;
     }
@@ -137,7 +137,7 @@ public class Solr_connectorService {
         try {
             return request.process(solrClient);
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            log.error(e.getMessage());
         }
         return null;
     }
@@ -160,7 +160,6 @@ public class Solr_connectorService {
             request.process(solrClient);
             status.setStatus(HealthCheckStatus.Status.OK);
             status.setComment(i18n.healthCheckOk());
-
         } catch (Exception e) {
             status.setStatus(HealthCheckStatus.Status.KO);
             status.setComment(i18n.healthCheckFailed(e.getMessage()));

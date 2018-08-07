@@ -5,13 +5,13 @@ import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.meta.Documentation;
 
 @Data
-public class Row {
+public class FilterCriteria {
 
     @Option
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("Field name of criteria")
     private String field;
 
     @Option
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("Value of criteria")
     private String value;
 }

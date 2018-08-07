@@ -13,25 +13,22 @@ import java.util.List;
 
 @Data
 @DataSet("Solr Output")
-@GridLayout({
-        // the generated layout put one configuration entry per line,
-        // customize it as much as needed
-        @GridLayout.Row({ "schema" }), @GridLayout.Row({ "solrConnection" }), @GridLayout.Row({ "action" }) })
+@GridLayout({ @GridLayout.Row({ "schema" }), @GridLayout.Row({ "solrConnection" }), @GridLayout.Row({ "action" }) })
 @GridLayout(value = { @GridLayout.Row({ "schema" }) }, names = { GridLayout.FormType.ADVANCED })
 @Documentation("TODO fill the documentation for this configuration")
-public class TSolrProcessorOutputConfiguration implements Serializable {
+public class SolrProcessorOutputConfiguration implements Serializable {
 
     @Option
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("Solr URL. Including core")
     private SolrConnectionConfiguration solrConnection;
 
     @Option
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("Combobox field. Update and Delete values are available")
     private ActionEnum action = ActionEnum.UPDATE;
 
     @Option
     @Structure(type = Structure.Type.IN, discoverSchema = "discoverOutPutSchema")
-    @Documentation("")
+    @Documentation("Document Schema")
     private List<String> schema;
 
 }
