@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.json.JsonBuilderFactory;
 
+import org.talend.components.solr.service.SolrConnectorUtils;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
@@ -30,12 +31,15 @@ public class SolrInputMapper implements Serializable {
 
     private final SolrConnectorService service;
 
+    private final SolrConnectorUtils util;
+
     private final JsonBuilderFactory jsonBuilderFactory;
 
     public SolrInputMapper(@Option("configuration") final SolrInputMapperConfiguration configuration,
-            final SolrConnectorService service, final JsonBuilderFactory jsonBuilderFactory) {
+            final SolrConnectorService service, final JsonBuilderFactory jsonBuilderFactory, final SolrConnectorUtils util) {
         this.configuration = configuration;
         this.service = service;
+        this.util = util;
         this.jsonBuilderFactory = jsonBuilderFactory;
     }
 
@@ -51,6 +55,6 @@ public class SolrInputMapper implements Serializable {
 
     @Emitter
     public SolrInputSource createWorker() {
-        return new SolrInputSource(configuration, service, jsonBuilderFactory);
+        return new SolrInputSource(configuration, service, jsonBuilderFactory, util);
     }
 }
