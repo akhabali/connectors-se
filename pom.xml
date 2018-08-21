@@ -62,7 +62,7 @@
     <module>processing</module>
     <module>jdbc</module>
     <module>salesforce</module>
-    <module>jms</module>
+    <module>components-jms</module>
   </modules>
 
   <profiles>
