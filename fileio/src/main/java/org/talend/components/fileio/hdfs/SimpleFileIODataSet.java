@@ -11,7 +11,7 @@ import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.constraint.Required;
-import org.talend.sdk.component.api.configuration.type.DataStore;
+import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.OptionsOrder;
 import org.talend.sdk.component.api.meta.Documentation;
 
@@ -19,7 +19,7 @@ import lombok.Data;
 
 @Data
 @Icon(FILE_HDFS_O)
-@DataStore("SimpleFileIODataSet")
+@DataSet("SimpleFileIODataSet")
 @Documentation("Dataset of a HDFS source.")
 @OptionsOrder({ "datastore", "format", "path", "recordDelimiter", "specificRecordDelimiter", "fieldDelimiter",
         "specificFieldDelimiter", "limit" })

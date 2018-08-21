@@ -16,7 +16,7 @@
 #  limitations under the License.
 #
 
-export COMPONENT_SERVER_IMAGE_VERSION=1.0.2_20180704070238
+export COMPONENT_SERVER_IMAGE_VERSION=1.0.4
 
 export BASEDIR=$(cd "$(dirname "$0")" ; pwd -P)/../../../..
 export CONNECTOR_VERSION=$(grep "<version>" "$BASEDIR/pom.xml" | head -n 1 | sed "s/.*>\\(.*\\)<.*/\\1/")
