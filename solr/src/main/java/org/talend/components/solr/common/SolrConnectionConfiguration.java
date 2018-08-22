@@ -18,7 +18,7 @@ public class SolrConnectionConfiguration {
     @Option
     @Required
     @Documentation("the name of Solr Core")
-    @Suggestable(value = "coreList", parameters = { "solrUrl/url" })
+    @Suggestable(value = "coreList", parameters = { "solrUrl/url", "solrUrl/login", "solrUrl/password" })
     private String core;
 
     public String getFullUrl() {

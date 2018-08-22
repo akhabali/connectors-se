@@ -17,6 +17,7 @@ import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.request.QueryRequest;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrException;
 import org.talend.components.solr.service.SolrConnectorUtils;
@@ -59,16 +60,19 @@ public class SolrInputSource implements Serializable {
         configuration.getFilterQuery().forEach(e -> util.addFilterQuery(e, query));
         query.setRows(util.parseInt(configuration.getRows()));
         query.setStart(util.parseInt(configuration.getStart()));
-        resultList = executeSolrQuery(solr, query);
+        QueryRequest req = new QueryRequest(query);
+        req.setBasicAuthCredentials(configuration.getSolrConnection().getSolrUrl().getLogin(),
+                configuration.getSolrConnection().getSolrUrl().getPassword());
+        resultList = executeSolrQuery(solr, req);
         iter = resultList.iterator();
     }
 
-    private List<SolrDocument> executeSolrQuery(SolrClient solr, SolrQuery query) {
+    private List<SolrDocument> executeSolrQuery(SolrClient solr, QueryRequest req) {
         List<SolrDocument> resultList;
         try {
-            resultList = solr.query(query).getResults();
+            resultList = req.process(solr).getResults();
         } catch (SolrServerException | IOException | SolrException e) {
-            log.error(e.getMessage());
+            log.error(util.getMessages(e));
             resultList = new ArrayList<>();
         }
         return resultList;
@@ -89,11 +93,7 @@ public class SolrInputSource implements Serializable {
         try {
             solr.close();
         } catch (IOException e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e);
         }
-    }
-
-    public List<SolrDocument> getResultList() {
-        return resultList;
     }
 }

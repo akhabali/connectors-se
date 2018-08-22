@@ -63,10 +63,7 @@ public class SolrConnectorUtilsTest {
 
     @Test
     public void testCreateQueryFromPositive() {
-        JsonObject record = Json.createObjectBuilder()
-                .add("field1", "value1")
-                .add("field2", "value2")
-                .add("field3", "value3")
+        JsonObject record = Json.createObjectBuilder().add("field1", "value1").add("field2", "value2").add("field3", "value3")
                 .build();
         String result = util.createQueryFromRecord(record);
 
@@ -75,10 +72,7 @@ public class SolrConnectorUtilsTest {
 
     @Test
     public void testCreateQueryFromRecordWithWhiteSpaces() {
-        JsonObject record = Json.createObjectBuilder()
-                .add("field1", "value 1")
-                .add("field2", "value 2")
-                .add("field3", "value 3")
+        JsonObject record = Json.createObjectBuilder().add("field1", "value 1").add("field2", "value 2").add("field3", "value 3")
                 .build();
         String result = util.createQueryFromRecord(record);
 
@@ -87,11 +81,7 @@ public class SolrConnectorUtilsTest {
 
     @Test
     public void testCreateQueryFromRecordWithEmptyValue() {
-        JsonObject record = Json.createObjectBuilder()
-                .add("field1", "")
-                .add("field2", "value2")
-                .add("field3", "value3")
-                .build();
+        JsonObject record = Json.createObjectBuilder().add("field1", "").add("field2", "value2").add("field3", "value3").build();
         String result = util.createQueryFromRecord(record);
 
         assertEquals("field2:value2 AND field3:value3", result);
@@ -99,11 +89,7 @@ public class SolrConnectorUtilsTest {
 
     @Test
     public void testCreateQueryFromRecordShortString() {
-        JsonObject record = Json.createObjectBuilder()
-                .add("field1", "1")
-                .add("field2", "2")
-                .add("field3", "3")
-                .build();
+        JsonObject record = Json.createObjectBuilder().add("field1", "1").add("field2", "2").add("field3", "3").build();
         String result = util.createQueryFromRecord(record);
 
         assertEquals("field1:1 AND field2:2 AND field3:3", result);
@@ -155,7 +141,7 @@ public class SolrConnectorUtilsTest {
     }
 
     @Test
-    public void testAddFilterQueery() {
+    public void testAddFilterQuery() {
         FilterCriteria fc = new FilterCriteria();
         fc.setField("field");
         fc.setValue("value");

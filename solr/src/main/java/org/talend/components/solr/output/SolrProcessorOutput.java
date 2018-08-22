@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.talend.components.solr.service.SolrConnectorService;
@@ -35,6 +36,8 @@ public class SolrProcessorOutput implements Serializable {
 
     private SolrClient solr;
 
+    private UpdateRequest request;
+
     public SolrProcessorOutput(@Option("configuration") final SolrProcessorOutputConfiguration configuration,
             final SolrConnectorService service, final SolrConnectorUtils utils) {
         this.configuration = configuration;
@@ -45,10 +48,14 @@ public class SolrProcessorOutput implements Serializable {
     @PostConstruct
     public void init() {
         solr = new HttpSolrClient.Builder(configuration.getSolrConnection().getFullUrl()).build();
+        request = new UpdateRequest();
+        request.setBasicAuthCredentials(configuration.getSolrConnection().getSolrUrl().getLogin(),
+                configuration.getSolrConnection().getSolrUrl().getPassword());
     }
 
     @BeforeGroup
     public void beforeGroup() {
+        request.clear();
     }
 
     @ElementListener
@@ -57,46 +64,43 @@ public class SolrProcessorOutput implements Serializable {
         if (ActionEnum.UPDATE == action) {
             update(record);
         } else if (ActionEnum.DELETE == action) {
-            deleteDocument(record, true);
+            deleteDocument(record);
         }
     }
 
     private void update(JsonObject record) {
         SolrInputDocument doc = new SolrInputDocument();
-        record.keySet().forEach(e -> doc.addField(e, utils.trimQuotes(record.getString(e))));
-        try {
-            solr.add(doc);
-            solr.commit();
-        } catch (SolrServerException | IOException e) {
-            log.error(e.getMessage());
+        record.keySet().forEach(e -> doc.addField(e, utils.trimQuotes(getStringValue(record, e))));
+        request.add(doc);
+    }
+
+    private String getStringValue(JsonObject record, String key) {
+        if (record != null && record.get(key) != null) {
+            return record.get(key).toString();
         }
+        return "";
     }
 
     private void deleteDocument(JsonObject record) {
-        deleteDocument(record, false);
-    }
-
-    private void deleteDocument(JsonObject record, boolean commit) {
         String query = utils.createQueryFromRecord(record);
-        try {
-            solr.deleteByQuery(query);
-            if (commit)
-                solr.commit();
-        } catch (SolrServerException | IOException | SolrException e) {
-            log.error(e.getMessage());
-        }
+        request.deleteByQuery(query);
     }
 
     @AfterGroup
     public void afterGroup() {
+        try {
+            request.commit(solr, null);
+        } catch (SolrServerException | IOException | SolrException e) {
+            log.error(utils.getMessages(e));
+        }
     }
 
     @PreDestroy
     public void release() {
         try {
             solr.close();
-        } catch (IOException e) {
-            log.error(e.getMessage());
+        } catch (IOException | SolrException e) {
+            log.error(utils.getMessages(e));
         }
     }
 }

@@ -155,4 +155,22 @@ public class SolrConnectorUtils {
         return result;
     }
 
+    public String getMessages(Throwable e) {
+        Set<String> messages = new LinkedHashSet<>();
+        while (e != null) {
+            if (StringUtils.isNotBlank(e.getMessage())) {
+                messages.add(e.getMessage().trim());
+            }
+            e = e.getCause();
+        }
+        return messages.stream().collect(Collectors.joining("\n"));
+    }
+
+    public String getCustomLocalizedMessage(String message, Messages i18n) {
+        if (message.contains("Bad credentials")) {
+            return i18n.badCredentials();
+        }
+        return message;
+    }
+
 }

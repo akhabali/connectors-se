@@ -20,6 +20,7 @@
         <talend.documentation.htmlAndPdf>false</talend.documentation.htmlAndPdf>
         <solrj.version>7.4.0</solrj.version>
         <commons-logging.version>1.2</commons-logging.version>
+        <docker-maven-plugin.version>0.26.0</docker-maven-plugin.version>
         <talend.component.studioHome/>
     </properties>
 
@@ -81,6 +82,80 @@
                     <trimStackTrace>false</trimStackTrace>
                     <runOrder>alphabetical</runOrder>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <includes>
+                        <include>**/*IT.java</include>
+                    </includes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.junit.platform</groupId>
+                        <artifactId>junit-platform-surefire-provider</artifactId>
+                        <version>1.2.0</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.junit.jupiter</groupId>
+                        <artifactId>junit-jupiter-engine</artifactId>
+                        <version>5.2.0</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>${docker-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>start</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                        <configuration>
+                            <images>
+                                <image>
+                                    <name>skhylko/solr:1.0.0</name>
+                                    <run>
+                                        <ports>
+                                            <port>8983:8983</port>
+                                        </ports>
+                                        <wait>
+                                            <tcp>
+                                                <host>localhost</host>
+                                                <ports>
+                                                    <port>8983</port>
+                                                </ports>
+                                            </tcp>
+                                            <time>60000</time>
+                                        </wait>
+                                    </run>
+                                </image>
+                            </images>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>stop</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${really.skip.tests}</skip>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
