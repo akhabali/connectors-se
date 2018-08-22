@@ -2,6 +2,7 @@ package org.talend.components.jms.configuration;
 
 import lombok.Data;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
@@ -19,6 +20,7 @@ public class BasicConfiguration implements Serializable {
     private MessageType messageType = MessageType.TOPIC;
 
     @Option
+    @Required
     @Documentation("Input for TOPIC/QUEUE Name")
     private String destination;
 }
