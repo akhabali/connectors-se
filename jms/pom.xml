@@ -93,6 +93,8 @@
                     </includes>
                     <systemPropertyVariables>
                         <jms.port>${jms.port}</jms.port>
+                        <javax.net.ssl.trustStore>src\test\resources\client.ts</javax.net.ssl.trustStore>
+                        <javax.net.ssl.trustStorePassword>password</javax.net.ssl.trustStorePassword>
                     </systemPropertyVariables>
                 </configuration>
                 <executions>
@@ -120,27 +122,44 @@
                 <groupId>io.fabric8</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
                 <version>${docker-maven-plugin.version}</version>
+                <configuration>
+                    <images>
+                        <image>
+                            <alias>amqtest</alias>
+                            <name>vizotenko/activemq:1.0.0</name>
+                            <build>
+                                <dockerFileDir>demo</dockerFileDir>
+                            </build>
+                            <run>
+                                <ports>
+                                    <port>61617:61617</port>
+                                </ports>
+                            </run>
+                        </image>
+                    </images>
+                </configuration>
                 <executions>
                     <execution>
                         <id>start</id>
                         <phase>pre-integration-test</phase>
                         <goals>
+                            <goal>build</goal>
                             <goal>start</goal>
                         </goals>
                         <configuration>
                             <skip>${really.skip.tests}</skip>
                             <images>
                                 <image>
-                                    <name>webcenter/activemq:latest</name>
+                                    <name>vizotenko/activemq:1.0.0</name>
                                     <run>
                                         <ports>
-                                            <port>jms.port:61616</port>
+                                            <port>jms.port:61617</port>
                                         </ports>
                                         <wait>
                                             <tcp>
                                                 <host>localhost</host>
                                                 <ports>
-                                                    <port>61616</port>
+                                                    <port>61617</port>
                                                 </ports>
                                             </tcp>
                                             <time>60000</time>
