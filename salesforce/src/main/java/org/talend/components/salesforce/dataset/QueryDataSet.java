@@ -12,6 +12,7 @@ import org.talend.components.salesforce.datastore.BasicDataStore;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
+import org.talend.sdk.component.api.configuration.condition.ActiveIfs;
 import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.DefaultValue;
@@ -51,12 +52,14 @@ public class QueryDataSet implements Serializable {
     public String moduleName;
 
     @Option
-    @ActiveIf(target = "moduleName", value = { "" }, negate = true)
+    @ActiveIfs({ @ActiveIf(target = "sourceType", value = { "MODULE_SELECTION" }),
+            @ActiveIf(target = "moduleName", value = { "" }, negate = true) })
     @Documentation("")
     public List<String> selectColumnIds;
 
     @Option
-    @ActiveIf(target = "moduleName", value = { "" }, negate = true)
+    @ActiveIfs({ @ActiveIf(target = "sourceType", value = { "MODULE_SELECTION" }),
+            @ActiveIf(target = "moduleName", value = { "" }, negate = true) })
     @Documentation("")
     public String condition;
 
