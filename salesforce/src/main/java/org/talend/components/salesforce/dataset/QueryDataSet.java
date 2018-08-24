@@ -1,6 +1,6 @@
 package org.talend.components.salesforce.dataset;
 
-import static org.talend.components.salesforce.dataset.QueryDataSet.SourceType.SOQL_QUERY;
+import static org.talend.components.salesforce.dataset.QueryDataSet.SourceType.MODULE_SELECTION;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -14,6 +14,7 @@ import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.type.DataSet;
+import org.talend.sdk.component.api.configuration.ui.DefaultValue;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Code;
 import org.talend.sdk.component.api.meta.Documentation;
@@ -40,21 +41,22 @@ public class QueryDataSet implements Serializable {
     @Option
     @Required
     @Documentation("")
-    public SourceType sourceType = SOQL_QUERY;
+    public SourceType sourceType = MODULE_SELECTION;
 
     @Option
     @ActiveIf(target = "sourceType", value = { "MODULE_SELECTION" })
     @Suggestable(value = "loadSalesforceModules", parameters = { "dataStore" })
+    @DefaultValue("")
     @Documentation("")
     public String moduleName;
 
     @Option
-    @ActiveIf(target = "sourceType", value = { "MODULE_SELECTION" })
+    @ActiveIf(target = "moduleName", value = { "" }, negate = true)
     @Documentation("")
     public List<String> selectColumnIds;
 
     @Option
-    @ActiveIf(target = "sourceType", value = { "MODULE_SELECTION" })
+    @ActiveIf(target = "moduleName", value = { "" }, negate = true)
     @Documentation("")
     public String condition;
 
