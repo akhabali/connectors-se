@@ -47,10 +47,10 @@ public class SolrProcessorOutput implements Serializable {
 
     @PostConstruct
     public void init() {
-        solr = new HttpSolrClient.Builder(configuration.getSolrConnection().getFullUrl()).build();
+        solr = new HttpSolrClient.Builder(configuration.getSolrDataset().getFullUrl()).build();
         request = new UpdateRequest();
-        request.setBasicAuthCredentials(configuration.getSolrConnection().getSolrUrl().getLogin(),
-                configuration.getSolrConnection().getSolrUrl().getPassword());
+        request.setBasicAuthCredentials(configuration.getSolrDataset().getSolrUrl().getLogin(),
+                configuration.getSolrDataset().getSolrUrl().getPassword());
     }
 
     @BeforeGroup
@@ -61,7 +61,7 @@ public class SolrProcessorOutput implements Serializable {
     @ElementListener
     public void onNext(@Input final JsonObject record) {
         ActionEnum action = configuration.getAction();
-        if (ActionEnum.UPDATE == action) {
+        if (ActionEnum.UPSERT == action) {
             update(record);
         } else if (ActionEnum.DELETE == action) {
             deleteDocument(record);

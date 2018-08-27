@@ -55,14 +55,14 @@ public class SolrInputSource implements Serializable {
 
     @PostConstruct
     public void init() {
-        solr = new HttpSolrClient.Builder(configuration.getSolrConnection().getFullUrl()).build();
+        solr = new HttpSolrClient.Builder(configuration.getSolrDataset().getFullUrl()).build();
         SolrQuery query = new SolrQuery("*:*");
         configuration.getFilterQuery().forEach(e -> util.addFilterQuery(e, query));
         query.setRows(util.parseInt(configuration.getRows()));
         query.setStart(util.parseInt(configuration.getStart()));
         QueryRequest req = new QueryRequest(query);
-        req.setBasicAuthCredentials(configuration.getSolrConnection().getSolrUrl().getLogin(),
-                configuration.getSolrConnection().getSolrUrl().getPassword());
+        req.setBasicAuthCredentials(configuration.getSolrDataset().getSolrUrl().getLogin(),
+                configuration.getSolrDataset().getSolrUrl().getPassword());
         resultList = executeSolrQuery(solr, req);
         iter = resultList.iterator();
     }

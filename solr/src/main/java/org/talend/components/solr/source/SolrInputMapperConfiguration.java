@@ -5,18 +5,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.talend.components.solr.common.FilterCriteria;
-import org.talend.components.solr.common.SolrConnectionConfiguration;
+import org.talend.components.solr.common.SolrDataset;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.constraint.Pattern;
-import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Structure;
 import org.talend.sdk.component.api.meta.Documentation;
 import lombok.Data;
 
 @Data
-@DataSet("Solr Input")
-@GridLayout({ @GridLayout.Row({ "solrConnection" }), @GridLayout.Row({ "filterQuery" }), @GridLayout.Row({ "start" }),
+@GridLayout({ @GridLayout.Row({ "solrDataset" }), @GridLayout.Row({ "filterQuery" }), @GridLayout.Row({ "start" }),
         @GridLayout.Row({ "rows" }) })
 
 @GridLayout(value = { @GridLayout.Row({ "schema" }) }, names = { GridLayout.FormType.ADVANCED })
@@ -25,7 +23,7 @@ public class SolrInputMapperConfiguration implements Serializable {
 
     @Option
     @Documentation("Solr URL. Including core")
-    private SolrConnectionConfiguration solrConnection;
+    private SolrDataset solrDataset;
 
     @Option
     @Pattern("^[0-9]{0,9}$")

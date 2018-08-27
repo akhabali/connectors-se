@@ -11,9 +11,8 @@ import org.apache.solr.client.solrj.response.schema.SchemaRepresentation;
 import org.apache.solr.client.solrj.response.schema.SchemaResponse;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CoreAdminParams;
-import org.talend.components.solr.common.SolrConnectionConfiguration;
+import org.talend.components.solr.common.SolrDataset;
 import org.talend.components.solr.common.SolrDataStore;
-import org.talend.components.solr.source.SolrInputMapperConfiguration;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
@@ -32,11 +31,10 @@ import java.util.stream.Collectors;
 public class SolrConnectorService {
 
     @DiscoverSchema("discoverSchema")
-    public Schema guessTableSchema(SolrInputMapperConfiguration config, SolrConnectorUtils util) {
-        HttpSolrClient solrClient = new HttpSolrClient.Builder(config.getSolrConnection().getFullUrl()).build();
-        SolrConnectionConfiguration connection = config.getSolrConnection();
-        SchemaRepresentation representation = getSchemaRepresentation(solrClient, connection.getSolrUrl().getLogin(),
-                connection.getSolrUrl().getPassword(), util);
+    public Schema guessTableSchema(SolrDataset dataset, SolrConnectorUtils util) {
+        HttpSolrClient solrClient = new HttpSolrClient.Builder(dataset.getFullUrl()).build();
+        SchemaRepresentation representation = getSchemaRepresentation(solrClient, dataset.getSolrUrl().getLogin(),
+                dataset.getSolrUrl().getPassword(), util);
         return util.getSchemaFromRepresentation(representation);
     }
 

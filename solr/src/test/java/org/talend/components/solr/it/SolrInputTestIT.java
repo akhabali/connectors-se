@@ -9,7 +9,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.talend.components.solr.common.SolrConnectionConfiguration;
+import org.talend.components.solr.common.SolrDataset;
 import org.talend.components.solr.common.SolrDataStore;
 import org.talend.components.solr.output.ActionEnum;
 import org.talend.components.solr.output.SolrProcessorOutputConfiguration;
@@ -79,7 +79,7 @@ public class SolrInputTestIT {
 
     private SolrProcessorOutputConfiguration solrProcessorOutputConfiguration;
 
-    private SolrConnectionConfiguration solrConnection;
+    private SolrDataset solrConnection;
 
     @BeforeAll
     public static void beforeAll() {
@@ -96,13 +96,13 @@ public class SolrInputTestIT {
         dataStore.setUrl(SOLR_URL);
         dataStore.setLogin(LOGIN);
         dataStore.setPassword(PASSWORD);
-        solrConnection = new SolrConnectionConfiguration();
+        solrConnection = new SolrDataset();
         solrConnection.setCore(CORE);
         solrConnection.setSolrUrl(dataStore);
         inputMapperConfiguration = new SolrInputMapperConfiguration();
-        inputMapperConfiguration.setSolrConnection(solrConnection);
+        inputMapperConfiguration.setSolrDataset(solrConnection);
         solrProcessorOutputConfiguration = new SolrProcessorOutputConfiguration();
-        solrProcessorOutputConfiguration.setSolrConnection(solrConnection);
+        solrProcessorOutputConfiguration.setSolrDataset(solrConnection);
     }
 
     @Test
@@ -121,7 +121,7 @@ public class SolrInputTestIT {
     @Test
     @DisplayName("UpdateTest")
     void outputUpdateTest() throws IOException, SolrServerException {
-        solrProcessorOutputConfiguration.setAction(ActionEnum.UPDATE);
+        solrProcessorOutputConfiguration.setAction(ActionEnum.UPSERT);
         final String config = configurationByExample().forInstance(solrProcessorOutputConfiguration).configured().toQueryString();
 
         componentsHandler.setInputData(asList(factory.createObjectBuilder().add("address_s", "comp1").build(),
@@ -162,8 +162,8 @@ public class SolrInputTestIT {
         SolrConnectorService service = new SolrConnectorService();
         SolrInputMapperConfiguration config = new SolrInputMapperConfiguration();
         SolrConnectorUtils util = new SolrConnectorUtils();
-        config.setSolrConnection(solrConnection);
-        Schema schema = service.guessTableSchema(config, util);
+        config.setSolrDataset(solrConnection);
+        Schema schema = service.guessTableSchema(config.getSolrDataset(), util);
         Schema expectedSchema = new Schema(Arrays.asList(new Schema.Entry("id", Type.STRING)));
         assertEquals(expectedSchema, schema);
     }
@@ -174,15 +174,15 @@ public class SolrInputTestIT {
         SolrConnectorService service = new SolrConnectorService();
         SolrInputMapperConfiguration config = new SolrInputMapperConfiguration();
         SolrConnectorUtils util = new SolrConnectorUtils();
-        SolrConnectionConfiguration connection = new SolrConnectionConfiguration();
+        SolrDataset connection = new SolrDataset();
         connection.setCore(CORE);
         SolrDataStore dataStore = new SolrDataStore();
         dataStore.setUrl("https://localhost:8983/badsolrurl");
         dataStore.setLogin(LOGIN);
         dataStore.setPassword(PASSWORD);
         connection.setSolrUrl(dataStore);
-        config.setSolrConnection(connection);
-        Schema schema = service.guessTableSchema(config, util);
+        config.setSolrDataset(connection);
+        Schema schema = service.guessTableSchema(config.getSolrDataset(), util);
         assertEquals(new Schema(Collections.emptyList()), schema);
     }
 
@@ -218,7 +218,7 @@ public class SolrInputTestIT {
         SolrConnectorService service = new SolrConnectorService();
         SolrInputMapperConfiguration config = new SolrInputMapperConfiguration();
         SolrConnectorUtils util = new SolrConnectorUtils();
-        config.setSolrConnection(solrConnection);
+        config.setSolrDataset(solrConnection);
         SuggestionValues values = service.suggest(SOLR_URL, LOGIN, PASSWORD, util);
         assertEquals(Arrays.asList(new SuggestionValues.Item(CORE, CORE)), values.getItems());
     }

@@ -22,6 +22,8 @@
         <commons-logging.version>1.2</commons-logging.version>
         <docker-maven-plugin.version>0.26.0</docker-maven-plugin.version>
         <talend.component.studioHome/>
+        <!-- overrides parent pom property to fix dataset validation issue -->
+        <validation.model>false</validation.model>
     </properties>
 
     <dependencies>

@@ -4,12 +4,14 @@ import lombok.Data;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.constraint.Required;
+import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
 @Data
+@DataSet("Solr")
 @GridLayout({ @GridLayout.Row({ "solrUrl" }), @GridLayout.Row({ "core" }) })
-public class SolrConnectionConfiguration {
+public class SolrDataset {
 
     @Option
     @Documentation("Solr server URL DataStore")
