@@ -1,3 +1,15 @@
+// ============================================================================
+//
+// Copyright (C) 2006-2018 Talend Inc. - www.talend.com
+//
+// This source code is available under agreement available at
+// %InstallDIR%\features\org.talend.rcp.branding.%PRODUCTNAME%\%PRODUCTNAME%license.txt
+//
+// You should have received a copy of the agreement
+// along with this program; if not, write to Talend SA
+// 9 rue Pages 92150 Suresnes, France
+//
+// ============================================================================
 package org.talend.components.jms.source;
 
 import lombok.Data;
@@ -15,17 +27,10 @@ import java.io.Serializable;
 import java.util.List;
 
 @DataSet("JMSInputDataSet")
-@GridLayout(value = {
-        @GridLayout.Row({"connection"}),
-        @GridLayout.Row({"basicConfig"}),
-        @GridLayout.Row({"subscriptionConfig"}),
-        @GridLayout.Row({"timeout"}),
-        @GridLayout.Row({"maximumMessages"}),
-        @GridLayout.Row({"messageSelector"})},
-        names = GridLayout.FormType.MAIN)
-@GridLayout(value = {
-        @GridLayout.Row({"schema"})},
-        names = GridLayout.FormType.ADVANCED)
+@GridLayout(value = { @GridLayout.Row({ "connection" }), @GridLayout.Row({ "basicConfig" }),
+        @GridLayout.Row({ "subscriptionConfig" }), @GridLayout.Row({ "timeout" }), @GridLayout.Row({ "maximumMessages" }),
+        @GridLayout.Row({ "messageSelector" }) }, names = GridLayout.FormType.MAIN)
+@GridLayout(value = { @GridLayout.Row({ "schema" }) }, names = GridLayout.FormType.ADVANCED)
 @Documentation("TODO fill the documentation for this basicConfig")
 @Data
 public class InputMapperConfiguration implements Serializable {

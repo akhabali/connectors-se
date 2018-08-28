@@ -1,5 +1,15 @@
-// this tells the framework in which family (group of components) and categories (UI grouping)
-// the components in the nested packages belong to
+// ============================================================================
+//
+// Copyright (C) 2006-2018 Talend Inc. - www.talend.com
+//
+// This source code is available under agreement available at
+// %InstallDIR%\features\org.talend.rcp.branding.%PRODUCTNAME%\%PRODUCTNAME%license.txt
+//
+// You should have received a copy of the agreement
+// along with this program; if not, write to Talend SA
+// 9 rue Pages 92150 Suresnes, France
+//
+// ============================================================================
 @Components(family = "JMS", categories = "Internet")
 @Icon(value = Icon.IconType.CUSTOM, custom = "JMS")
 package org.talend.components.jms;
