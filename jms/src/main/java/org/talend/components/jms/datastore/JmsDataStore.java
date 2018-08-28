@@ -30,11 +30,8 @@ import static org.talend.components.jms.service.ActionService.ACTION_BASIC_HEALT
 import static org.talend.components.jms.service.ActionService.ACTION_LIST_SUPPORTED_BROKER;
 
 @Data
-@GridLayout({
-        @GridLayout.Row({"moduleList"}),
-        @GridLayout.Row("url"),
-        @GridLayout.Row("userIdentity"),
-        @GridLayout.Row({"userName", "password"})})
+@GridLayout({ @GridLayout.Row({ "moduleList" }), @GridLayout.Row("url"), @GridLayout.Row("userIdentity"),
+        @GridLayout.Row({ "userName", "password" }) })
 @DataStore("basic")
 @Checkable(ACTION_BASIC_HEALTH_CHECK)
 @Documentation("A connection to a data base")

@@ -21,10 +21,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 import java.io.Serializable;
 
 @Data
-@GridLayout(value = {
-        @GridLayout.Row({"messageType"}),
-        @GridLayout.Row({"destination"})},
-        names = GridLayout.FormType.MAIN)
+@GridLayout(value = { @GridLayout.Row({ "messageType" }), @GridLayout.Row({ "destination" }) }, names = GridLayout.FormType.MAIN)
 public class BasicConfiguration implements Serializable {
 
     @Option

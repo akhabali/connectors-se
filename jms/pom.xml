@@ -93,7 +93,7 @@
                     </includes>
                     <systemPropertyVariables>
                         <jms.port>${jms.port}</jms.port>
-                        <javax.net.ssl.trustStore>src\test\resources\client.ts</javax.net.ssl.trustStore>
+                        <javax.net.ssl.trustStore>src/test/resources/client.ts</javax.net.ssl.trustStore>
                         <javax.net.ssl.trustStorePassword>password</javax.net.ssl.trustStorePassword>
                     </systemPropertyVariables>
                 </configuration>
@@ -132,7 +132,7 @@
                             </build>
                             <run>
                                 <ports>
-                                    <port>61617:61617</port>
+                                    <port>jms.port:61617</port>
                                 </ports>
                             </run>
                         </image>
