@@ -13,6 +13,7 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CoreAdminParams;
 import org.talend.components.solr.common.SolrDataset;
 import org.talend.components.solr.common.SolrDataStore;
+import org.talend.components.solr.source.SolrInputMapperConfiguration;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
@@ -37,6 +38,14 @@ public class SolrConnectorService {
                 dataset.getSolrUrl().getPassword(), util);
         return util.getSchemaFromRepresentation(representation);
     }
+
+    // @DiscoverSchema("discoverSchema")
+    // public Schema guessTableSchema(SolrInputMapperConfiguration dataset, SolrConnectorUtils util) {
+    // HttpSolrClient solrClient = new HttpSolrClient.Builder(dataset.getSolrDataset().getFullUrl()).build();
+    // SchemaRepresentation representation = getSchemaRepresentation(solrClient,
+    // dataset.getSolrDataset().getSolrUrl().getLogin(), dataset.getSolrDataset().getSolrUrl().getPassword(), util);
+    // return util.getSchemaFromRepresentation(representation);
+    // }
 
     private SchemaRepresentation getSchemaRepresentation(SolrClient solrClient, String login, String pass,
             SolrConnectorUtils util) {

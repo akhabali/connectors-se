@@ -9,15 +9,12 @@ import org.talend.components.solr.common.SolrDataset;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.constraint.Pattern;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
-import org.talend.sdk.component.api.configuration.ui.widget.Structure;
 import org.talend.sdk.component.api.meta.Documentation;
 import lombok.Data;
 
 @Data
 @GridLayout({ @GridLayout.Row({ "solrDataset" }), @GridLayout.Row({ "filterQuery" }), @GridLayout.Row({ "start" }),
         @GridLayout.Row({ "rows" }) })
-
-@GridLayout(value = { @GridLayout.Row({ "schema" }) }, names = { GridLayout.FormType.ADVANCED })
 @Documentation("Solr Input Configuration")
 public class SolrInputMapperConfiguration implements Serializable {
 
@@ -38,10 +35,5 @@ public class SolrInputMapperConfiguration implements Serializable {
     @Option
     @Documentation("Filter query table. Every row sets a new condition")
     private List<FilterCriteria> filterQuery = new ArrayList<>();
-
-    @Option
-    @Structure(type = Structure.Type.OUT, discoverSchema = "discoverSchema")
-    @Documentation("Document schema")
-    private List<String> schema;
 
 }
