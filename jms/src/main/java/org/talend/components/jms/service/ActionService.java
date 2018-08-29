@@ -12,8 +12,8 @@
 // ============================================================================
 package org.talend.components.jms.service;
 
+import org.talend.components.jms.configuration.BasicConfiguration;
 import org.talend.components.jms.datastore.JmsDataStore;
-import org.talend.components.jms.source.InputMapperConfiguration;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.DynamicValues;
@@ -54,7 +54,7 @@ public class ActionService {
     }
 
     @DiscoverSchema("discoverSchema")
-    public Schema guessSchema(InputMapperConfiguration config) {
+    public Schema guessSchema(BasicConfiguration config) {
         return new Schema(Collections.singletonList(new Schema.Entry(MESSAGE_CONTENT, Type.STRING)));
     }
 

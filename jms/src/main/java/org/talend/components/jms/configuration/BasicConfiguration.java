@@ -13,16 +13,27 @@
 package org.talend.components.jms.configuration;
 
 import lombok.Data;
+import org.talend.components.jms.datastore.JmsDataStore;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.constraint.Required;
+import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
+import org.talend.sdk.component.api.configuration.ui.widget.Structure;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
+import java.util.List;
 
+@DataSet("JMSDataSet")
 @Data
-@GridLayout(value = { @GridLayout.Row({ "messageType" }), @GridLayout.Row({ "destination" }) }, names = GridLayout.FormType.MAIN)
+@GridLayout(value = { @GridLayout.Row({ "connection" }), @GridLayout.Row({ "messageType" }),
+        @GridLayout.Row({ "destination" }) }, names = GridLayout.FormType.MAIN)
+@GridLayout(value = { @GridLayout.Row({ "schema" }) }, names = GridLayout.FormType.ADVANCED)
 public class BasicConfiguration implements Serializable {
+
+    @Option
+    @Documentation("JMS connection information")
+    private JmsDataStore connection;
 
     @Option
     @Documentation("Drop down list for Message Type")
@@ -32,4 +43,9 @@ public class BasicConfiguration implements Serializable {
     @Required
     @Documentation("Input for TOPIC/QUEUE Name")
     private String destination;
+
+    @Option
+    @Structure(type = Structure.Type.OUT, discoverSchema = "discoverSchema")
+    @Documentation("Guess schema")
+    private List<String> schema;
 }

@@ -21,6 +21,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- overrides parent pom property to fix dataset validation issue -->
+        <validation.model>false</validation.model>
         <!--
         Set it to true if you want the documentation to be rendered as HTML and PDF
 

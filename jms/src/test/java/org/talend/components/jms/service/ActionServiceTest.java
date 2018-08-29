@@ -2,8 +2,8 @@ package org.talend.components.jms.service;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.talend.components.jms.configuration.BasicConfiguration;
 import org.talend.components.jms.datastore.JmsDataStore;
-import org.talend.components.jms.source.InputMapperConfiguration;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.Values;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
@@ -48,7 +48,7 @@ class ActionServiceTest {
 
     @Test
     public void testGuessSchema() {
-        assertTrue(actionService.guessSchema(new InputMapperConfiguration()).getEntries()
+        assertTrue(actionService.guessSchema(new BasicConfiguration()).getEntries()
                 .contains(new Schema.Entry(MESSAGE_CONTENT, Type.STRING)));
     }
 

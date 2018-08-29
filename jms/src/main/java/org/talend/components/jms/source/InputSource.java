@@ -76,14 +76,16 @@ public class InputSource implements Serializable {
     public void init() {
         try {
             // create JNDI context
-            jndiContext = service.getJNDIContext(configuration.getConnection().getUrl(),
-                    configuration.getConnection().getModuleList());
+            jndiContext = service.getJNDIContext(configuration.getBasicConfig().getConnection().getUrl(),
+                    configuration.getBasicConfig().getConnection().getModuleList());
             // create ConnectionFactory from JNDI
             ConnectionFactory connectionFactory = service.getConnectionFactory(jndiContext);
 
             try {
-                connection = service.getConnection(connectionFactory, configuration.getConnection().isUserIdentity(),
-                        configuration.getConnection().getUserName(), configuration.getConnection().getPassword());
+                connection = service.getConnection(connectionFactory,
+                        configuration.getBasicConfig().getConnection().isUserIdentity(),
+                        configuration.getBasicConfig().getConnection().getUserName(),
+                        configuration.getBasicConfig().getConnection().getPassword());
             } catch (JMSException e) {
                 throw new IllegalStateException(i18n.errorInvalidConnection());
             }
