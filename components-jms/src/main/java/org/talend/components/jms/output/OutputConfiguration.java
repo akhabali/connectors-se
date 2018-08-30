@@ -22,7 +22,7 @@ import java.io.Serializable;
 
 @GridLayout(value = { @GridLayout.Row({ "basicConfig" }) }, names = GridLayout.FormType.MAIN)
 @GridLayout(value = { @GridLayout.Row({ "deliveryMode" }) }, names = GridLayout.FormType.ADVANCED)
-@Documentation("TODO fill the documentation for this basicConfig")
+@Documentation("Main configuration class for JMSOutput component")
 @Data
 public class OutputConfiguration implements Serializable {
 

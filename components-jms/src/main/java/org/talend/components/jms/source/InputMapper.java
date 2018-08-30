@@ -33,13 +33,10 @@ import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.components.jms.service.JmsService;
 import org.talend.sdk.component.api.service.Service;
 
-//
-// this class role is to enable the work to be distributed in environments supporting it.
-//
 @Version(1)
 @Icon(value = Icon.IconType.CUSTOM, custom = "JMSInput")
 @PartitionMapper(name = "Input")
-@Documentation("TODO fill the documentation for this mapper")
+@Documentation("Purpose of this class is to create an actual worker")
 public class InputMapper implements Serializable {
 
     private final InputMapperConfiguration configuration;
@@ -49,7 +46,7 @@ public class InputMapper implements Serializable {
     private final JsonBuilderFactory jsonBuilderFactory;
 
     @Service
-    private I18nMessage i18nMessage;
+    private final I18nMessage i18nMessage;
 
     public InputMapper(@Option("configuration") final InputMapperConfiguration configuration, final JmsService service,
             final JsonBuilderFactory jsonBuilderFactory, final I18nMessage i18nMessage) {

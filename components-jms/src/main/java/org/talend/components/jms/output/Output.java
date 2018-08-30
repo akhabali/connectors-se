@@ -45,7 +45,7 @@ import static org.talend.components.jms.MessageConst.MESSAGE_CONTENT;
 @Version(1)
 @Icon(value = Icon.IconType.CUSTOM, custom = "JMSOutput")
 @Processor(name = "Output")
-@Documentation("TODO fill the documentation for this processor")
+@Documentation("Main class for JMSOutput records processing")
 public class Output implements Serializable {
 
     private final OutputConfiguration configuration;

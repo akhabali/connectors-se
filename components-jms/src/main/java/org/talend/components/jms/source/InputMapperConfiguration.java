@@ -16,6 +16,7 @@ import lombok.Data;
 import org.talend.components.jms.configuration.BasicConfiguration;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
+import org.talend.sdk.component.api.configuration.constraint.Min;
 import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
@@ -26,7 +27,7 @@ import java.util.List;
 @GridLayout(value = { @GridLayout.Row({ "basicConfig" }), @GridLayout.Row({ "subscriptionConfig" }),
         @GridLayout.Row({ "timeout" }), @GridLayout.Row({ "maximumMessages" }),
         @GridLayout.Row({ "messageSelector" }) }, names = GridLayout.FormType.MAIN)
-@Documentation("TODO fill the documentation for this basicConfig")
+@Documentation("Main configuration class for JMSInput component")
 @Data
 public class InputMapperConfiguration implements Serializable {
 
@@ -41,11 +42,13 @@ public class InputMapperConfiguration implements Serializable {
 
     @Option
     @Required
+    @Min(0)
     @Documentation("JMS receive message timeout. A timeout of zero never expires, and the call blocks indefinitely.")
     private Integer timeout;
 
     @Option
     @Required
+    @Min(0)
     @Documentation("Maximum messages defines a number of messages this component will listen to. "
             + "After reaching the maximum component will stop receiving messages")
     private Integer maximumMessages;

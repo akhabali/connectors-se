@@ -101,30 +101,17 @@ public class JmsService {
 
     private Map<String, ProviderInfo> loadProvidersFromConfigurationFile() {
         final Map<String, ProviderInfo> availableProviders = new HashMap<>();
-        InputStream is = null;
-        try {
-            final String configFile = localConfiguration.get(CONFIG_FILE_LOCATION_KEY);
-            if (configFile != null) {// priority to the system property
-                try {
-                    is = new FileInputStream(configFile);
-                } catch (FileNotFoundException e) {
-                    throw new IllegalArgumentException(e);
-                }
-            } else {// then look in the classpath
-                is = this.getClass().getClassLoader().getResourceAsStream("jms_config.json");
-            }
+        final String configFile = localConfiguration.get(CONFIG_FILE_LOCATION_KEY);
+
+        try (InputStream is = configFile != null ? new FileInputStream(configFile)
+                : this.getClass().getClassLoader().getResourceAsStream("jms_config.json")) {
             final List<ProviderInfo> info = jsonb.fromJson(is, providersType);
             availableProviders.putAll(info.stream().collect(toMap(ProviderInfo::getId, identity())));
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    // no-op too bad but who care
-                }
-            }
+        } catch (FileNotFoundException e) {
+            throw new IllegalArgumentException(e);
+        } catch (IOException e) {
+            log.error(e.getMessage());
         }
-
         return availableProviders;
     }
 

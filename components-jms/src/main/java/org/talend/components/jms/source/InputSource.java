@@ -41,7 +41,7 @@ import org.talend.components.jms.service.JmsService;
 import static org.talend.components.jms.MessageConst.MESSAGE_CONTENT;
 
 @Slf4j
-@Documentation("TODO fill the documentation for this source")
+@Documentation("Main class for JMSInput records processing")
 public class InputSource implements Serializable {
 
     private final InputMapperConfiguration configuration;
@@ -50,7 +50,7 @@ public class InputSource implements Serializable {
 
     private final JsonBuilderFactory jsonBuilderFactory;
 
-    private int counter;
+    private int counter = 0;
 
     private Connection connection;
 
@@ -133,11 +133,11 @@ public class InputSource implements Serializable {
                 if (message != null) {
                     textMessage = ((TextMessage) message).getText();
                     message.acknowledge();
+                    counter++;
                 }
             } catch (JMSException e) {
-                throw new IllegalStateException(i18n.errorCantReceiveMessage());
+                log.error(i18n.errorCantReceiveMessage(), e);
             }
-            counter++;
             return message != null ? buildJSON(textMessage) : null;
 
         }
