@@ -39,8 +39,8 @@ import static org.talend.components.jms.MessageConst.MESSAGE_CONTENT;
 public class ActionService {
 
     public static final String ACTION_LIST_SUPPORTED_BROKER = "ACTION_LIST_SUPPORTED_BROKER";
-
     public static final String ACTION_BASIC_HEALTH_CHECK = "ACTION_BASIC_HEALTH_CHECK";
+    public static final String DISCOVER_SCHEMA = "discoverSchema";
 
     @Service
     private JmsService jmsService;
@@ -53,7 +53,7 @@ public class ActionService {
         return new Values(jmsService.getProviders().keySet().stream().map(id -> new Values.Item(id, id)).collect(toList()));
     }
 
-    @DiscoverSchema("discoverSchema")
+    @DiscoverSchema(DISCOVER_SCHEMA)
     public Schema guessSchema(BasicConfiguration config) {
         return new Schema(Collections.singletonList(new Schema.Entry(MESSAGE_CONTENT, Type.STRING)));
     }

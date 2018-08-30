@@ -24,6 +24,8 @@ import org.talend.sdk.component.api.meta.Documentation;
 import java.io.Serializable;
 import java.util.List;
 
+import static org.talend.components.jms.service.ActionService.DISCOVER_SCHEMA;
+
 @DataSet("JMSDataSet")
 @Data
 @GridLayout(value = { @GridLayout.Row({ "connection" }), @GridLayout.Row({ "messageType" }),
@@ -45,7 +47,7 @@ public class BasicConfiguration implements Serializable {
     private String destination;
 
     @Option
-    @Structure(type = Structure.Type.OUT, discoverSchema = "discoverSchema")
+    @Structure(type = Structure.Type.OUT, discoverSchema = DISCOVER_SCHEMA)
     @Documentation("Guess schema")
     private List<String> schema;
 }
