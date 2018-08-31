@@ -18,6 +18,7 @@ import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.DefaultValue;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Code;
+import org.talend.sdk.component.api.configuration.ui.widget.Structure;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import lombok.Data;
@@ -25,7 +26,7 @@ import lombok.Data;
 @Data
 @DataSet("query")
 @GridLayout(value = { @GridLayout.Row("dataStore"), @GridLayout.Row("sourceType"), @GridLayout.Row("query"),
-        @GridLayout.Row("moduleName"), @GridLayout.Row("selectColumnIds"), @GridLayout.Row("condition"), })
+        @GridLayout.Row("moduleName"), @GridLayout.Row({ "selectColumnIds" }), @GridLayout.Row("condition"), })
 @Documentation("")
 public class QueryDataSet implements Serializable {
 
@@ -54,6 +55,7 @@ public class QueryDataSet implements Serializable {
     @Option
     @ActiveIfs({ @ActiveIf(target = "sourceType", value = { "MODULE_SELECTION" }),
             @ActiveIf(target = "moduleName", value = { "" }, negate = true) })
+    @Structure(discoverSchema = "retrieveColumns", type = Structure.Type.OUT)
     @Documentation("")
     public List<String> selectColumnIds;
 
