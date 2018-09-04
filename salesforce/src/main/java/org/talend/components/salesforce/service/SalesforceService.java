@@ -11,6 +11,10 @@ import java.util.Properties;
 
 import javax.xml.namespace.QName;
 
+import org.talend.components.salesforce.datastore.BasicDataStore;
+import org.talend.sdk.component.api.service.Service;
+import org.talend.sdk.component.api.service.configuration.LocalConfiguration;
+
 import com.sforce.async.AsyncApiException;
 import com.sforce.async.BulkConnection;
 import com.sforce.soap.partner.PartnerConnection;
@@ -19,31 +23,38 @@ import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
 import com.sforce.ws.SessionRenewer;
 
-import org.talend.components.salesforce.datastore.BasicDataStore;
-import org.talend.sdk.component.api.service.Service;
-import org.talend.sdk.component.api.service.configuration.LocalConfiguration;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
 public class SalesforceService {
 
-    private static final int DEFAULT_TIMEOUT = 60000;
+    public static final String CONFIG_FILE_lOCATION_KEY = "org.talend.component.salesforce.config.file";
 
-    private static final String CONFIG_FILE_lOCATION_KEY = "org.talend.component.salesforce.config.file";
+    public static final String RETIRED_ENDPOINT = "www.salesforce.com";
 
-    private static final String RETIRED_ENDPOINT = "www.salesforce.com";
+    public static final String ACTIVE_ENDPOINT = "login.salesforce.com";
 
-    private static final String ACTIVE_ENDPOINT = "login.salesforce.com";
-
-    private static final String DEFAULT_API_VERSION = "42.0";
+    public static final String DEFAULT_API_VERSION = "42.0";
 
     public static final String URL = "https://" + ACTIVE_ENDPOINT + "/services/Soap/u/" + DEFAULT_API_VERSION;
 
+    /** Properties file key for endpoint storage. */
+    public static final String ENDPOINT_PROPERTY_KEY = "endpoint";
+
+    public static final String TIMEOUT_PROPERTY_KEY = "timeout";
+
+    private static final int DEFAULT_TIMEOUT = 60000;
+
+    /**
+     * Load Dataprep user Salesforce properties file for endpoint & timeout default values.
+     *
+     * @return a {@link Properties} objet (maybe empty) but never null.
+     */
     private Properties loadCustomConfiguration(final LocalConfiguration configuration) {
         final String configFile = configuration.get(CONFIG_FILE_lOCATION_KEY);
-        try (final InputStream is = configFile != null && !configFile.isEmpty() ? (new FileInputStream(configFile)) : null) {
+        try (final InputStream is =
+                configFile != null && !configFile.isEmpty() ? (new FileInputStream(configFile)) : null) {
             if (is != null) {
                 return new Properties() {
 
@@ -51,6 +62,8 @@ public class SalesforceService {
                         load(is);
                     }
                 };
+            } else {
+                log.warn("not found the property file, will use the default value for endpoint and timeout");
             }
         } catch (final IOException e) {
             log.warn("not found the property file, will use the default value for endpoint and timeout", e);
@@ -62,9 +75,10 @@ public class SalesforceService {
     public PartnerConnection connect(final BasicDataStore datastore, final LocalConfiguration localConfiguration)
             throws ConnectionException {
         final Properties props = loadCustomConfiguration(localConfiguration);
-        final Integer timeout = (props != null) ? Integer.parseInt(props.getProperty("timeout", String.valueOf(DEFAULT_TIMEOUT)))
+        final Integer timeout = (props != null)
+                ? Integer.parseInt(props.getProperty(TIMEOUT_PROPERTY_KEY, String.valueOf(DEFAULT_TIMEOUT)))
                 : DEFAULT_TIMEOUT;
-        final String endpoint = getEndpoint(props);
+        final String endpoint = getEndpoint(datastore, props);
         ConnectorConfig config = newConnectorConfig(endpoint);
         config.setAuthEndpoint(endpoint);
         config.setUsername(datastore.getUserId());
@@ -95,12 +109,26 @@ public class SalesforceService {
         return new PartnerConnection(config);
     }
 
-    private String getEndpoint(final Properties props) {
-        final String endpoint = props != null ? props.getProperty("endpoint", URL) : URL;
-        if (endpoint.contains(RETIRED_ENDPOINT)) {
-            return endpoint.replaceFirst(RETIRED_ENDPOINT, ACTIVE_ENDPOINT);
+    /**
+     * Return the datastore endpoint, loading a default value if no value is present.
+     *
+     * @return the datastore endpoint value.
+     */
+    protected String getEndpoint(final BasicDataStore datastore, final Properties props) {
+
+        if (datastore == null || datastore.getEndpoint() == null) {
+            if (props != null) {
+                String endpointProp = props.getProperty(ENDPOINT_PROPERTY_KEY);
+                if (endpointProp != null && !endpointProp.isEmpty()) {
+                    if (endpointProp.contains(RETIRED_ENDPOINT)) {
+                        endpointProp = endpointProp.replaceFirst(RETIRED_ENDPOINT, ACTIVE_ENDPOINT);
+                    }
+                    return endpointProp;
+                }
+            }
+            return URL;
         }
-        return endpoint;
+        return datastore.getEndpoint();
     }
 
     private ConnectorConfig newConnectorConfig(final String ep) {
@@ -120,7 +148,7 @@ public class SalesforceService {
         final Properties props = loadCustomConfiguration(configuration);
         final PartnerConnection partnerConnection = connect(datastore, configuration);
         final ConnectorConfig partnerConfig = partnerConnection.getConfig();
-        ConnectorConfig bulkConfig = newConnectorConfig(getEndpoint(props));
+        ConnectorConfig bulkConfig = newConnectorConfig(getEndpoint(datastore, props));
         bulkConfig.setSessionId(partnerConfig.getSessionId());
         // For session renew
         bulkConfig.setSessionRenewer(partnerConfig.getSessionRenewer());

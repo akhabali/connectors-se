@@ -4,6 +4,7 @@ import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.talend.components.salesforce.service.SalesforceService.URL;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 import java.util.List;
@@ -55,6 +56,7 @@ class SalesforceInputEmitterTest {
     @DisplayName("Bad credentials case")
     void inputWithBadCredential() {
         final BasicDataStore datasore = new BasicDataStore();
+        datasore.setEndpoint(URL);
         datasore.setUserId("badUser");
         datasore.setPassword("badPasswd");
         datasore.setSecurityKey("badSecurityKey");
@@ -74,6 +76,7 @@ class SalesforceInputEmitterTest {
     @DisplayName("Module selection case [valid]")
     void inputWithModuleNameValid() {
         final BasicDataStore datasore = new BasicDataStore();
+        datasore.setEndpoint(URL);
         datasore.setUserId(serverWithPassword.getUsername());
         datasore.setPassword(serverWithPassword.getPassword());
         datasore.setSecurityKey(serverWithSecuritykey.getPassword());
@@ -96,6 +99,7 @@ class SalesforceInputEmitterTest {
     @DisplayName("Module selection case [invalid]")
     void inputWithModuleNameInvalid() {
         final BasicDataStore datasore = new BasicDataStore();
+        datasore.setEndpoint(URL);
         datasore.setUserId(serverWithPassword.getUsername());
         datasore.setPassword(serverWithPassword.getPassword());
         datasore.setSecurityKey(serverWithSecuritykey.getPassword());
@@ -115,6 +119,7 @@ class SalesforceInputEmitterTest {
     @DisplayName("Module selection with fields case [invalid]")
     void inputWithModuleNameValidAndInvalidField() {
         final BasicDataStore datasore = new BasicDataStore();
+        datasore.setEndpoint(URL);
         datasore.setUserId(serverWithPassword.getUsername());
         datasore.setPassword(serverWithPassword.getPassword());
         datasore.setSecurityKey(serverWithSecuritykey.getPassword());
@@ -135,6 +140,7 @@ class SalesforceInputEmitterTest {
     @DisplayName("Soql query selection [valid]")
     void inputWithSoqlQueryValid() {
         final BasicDataStore datasore = new BasicDataStore();
+        datasore.setEndpoint(URL);
         datasore.setUserId(serverWithPassword.getUsername());
         datasore.setPassword(serverWithPassword.getPassword());
         datasore.setSecurityKey(serverWithSecuritykey.getPassword());
@@ -156,6 +162,7 @@ class SalesforceInputEmitterTest {
     @DisplayName("Soql query selection [invalid]")
     void inputWithSoqlQueryInvalid() {
         final BasicDataStore datasore = new BasicDataStore();
+        datasore.setEndpoint(URL);
         datasore.setUserId(serverWithPassword.getUsername());
         datasore.setPassword(serverWithPassword.getPassword());
         datasore.setSecurityKey(serverWithSecuritykey.getPassword());
@@ -175,6 +182,7 @@ class SalesforceInputEmitterTest {
     @DisplayName("Soql query selection [empty result]")
     void inputWithSoqlQueryEmptyResult() {
         final BasicDataStore datasore = new BasicDataStore();
+        datasore.setEndpoint(URL);
         datasore.setUserId(serverWithPassword.getUsername());
         datasore.setPassword(serverWithPassword.getPassword());
         datasore.setSecurityKey(serverWithSecuritykey.getPassword());
