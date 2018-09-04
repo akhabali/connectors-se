@@ -11,9 +11,9 @@ import org.apache.solr.client.solrj.response.schema.SchemaRepresentation;
 import org.apache.solr.client.solrj.response.schema.SchemaResponse;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CoreAdminParams;
+import org.talend.components.solr.common.FilterCriteria;
 import org.talend.components.solr.common.SolrDataset;
 import org.talend.components.solr.common.SolrDataStore;
-import org.talend.components.solr.source.SolrInputMapperConfiguration;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
@@ -34,18 +34,10 @@ public class SolrConnectorService {
     @DiscoverSchema("discoverSchema")
     public Schema guessTableSchema(SolrDataset dataset, SolrConnectorUtils util) {
         HttpSolrClient solrClient = new HttpSolrClient.Builder(dataset.getFullUrl()).build();
-        SchemaRepresentation representation = getSchemaRepresentation(solrClient, dataset.getSolrUrl().getLogin(),
-                dataset.getSolrUrl().getPassword(), util);
+        SchemaRepresentation representation = getSchemaRepresentation(solrClient, dataset.getDataStore().getLogin(),
+                dataset.getDataStore().getPassword(), util);
         return util.getSchemaFromRepresentation(representation);
     }
-
-    // @DiscoverSchema("discoverSchema")
-    // public Schema guessTableSchema(SolrInputMapperConfiguration dataset, SolrConnectorUtils util) {
-    // HttpSolrClient solrClient = new HttpSolrClient.Builder(dataset.getSolrDataset().getFullUrl()).build();
-    // SchemaRepresentation representation = getSchemaRepresentation(solrClient,
-    // dataset.getSolrDataset().getSolrUrl().getLogin(), dataset.getSolrDataset().getSolrUrl().getPassword(), util);
-    // return util.getSchemaFromRepresentation(representation);
-    // }
 
     private SchemaRepresentation getSchemaRepresentation(SolrClient solrClient, String login, String pass,
             SolrConnectorUtils util) {
@@ -66,6 +58,13 @@ public class SolrConnectorService {
             @Option("c") final String password, SolrConnectorUtils util) {
         return new SuggestionValues(false, getCores(solrUrl, login, password, util).stream()
                 .map(e -> new SuggestionValues.Item(e, e)).collect(Collectors.toList()));
+    }
+
+    @Suggestions("raw")
+    public SuggestionValues suggestRawQuery(@Option("a") final List<FilterCriteria> criterias, @Option("b") final String start,
+            @Option("c") final String rows, SolrConnectorUtils util) {
+        String query = util.generateQuery(criterias, start, rows).toString();
+        return new SuggestionValues(false, Arrays.asList(new SuggestionValues.Item(query, query)));
     }
 
     private Collection<String> getCores(String solrUrl, String login, String password, SolrConnectorUtils util) {

@@ -5,7 +5,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.response.CoreAdminResponse;
 import org.apache.solr.client.solrj.response.schema.SchemaRepresentation;
+import org.apache.solr.common.params.CommonParams;
 import org.talend.components.solr.common.FilterCriteria;
+import org.talend.components.solr.source.SolrInputMapperConfiguration;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.schema.Schema;
 import org.talend.sdk.component.api.service.schema.Type;
@@ -27,6 +29,14 @@ public class SolrConnectorUtils {
     private static final String SOLR_FIELD_PROPERTY_NAME = "name";
 
     private static final String SOLR_FIELD_PROPERTY_TYPE = "type";
+
+    private static final String SOLR_PARAM_QUERY = "q";
+
+    private static final String SOLR_PARAM_FILTER_QUERY = "fq";
+
+    private static final String SOLR_PARAM_START = "start";
+
+    private static final String SOLR_PARAM_ROWS = "rows";
 
     private static final Set SOLR_FIELD_PROPERTY_TYPES_DOUBLE = Stream.of("pdouble", "pfloat").collect(Collectors.toSet());
 
@@ -57,6 +67,34 @@ public class SolrConnectorUtils {
         }
 
         return query.toString();
+    }
+
+    public SolrQuery generateQuery(List<FilterCriteria> filterQuery, String start, String rows) {
+        SolrInputMapperConfiguration configuration = new SolrInputMapperConfiguration();
+        configuration.setFilterQuery(filterQuery);
+        configuration.setStart(start);
+        configuration.setRows(rows);
+        return generateQuery(configuration);
+    }
+
+    public SolrQuery generateQuery(SolrInputMapperConfiguration configuration) {
+        if (StringUtils.isNotBlank(configuration.getRaw())) {
+            return generateQuery(configuration.getRaw());
+        }
+        SolrQuery query = new SolrQuery("*:*");
+        configuration.getFilterQuery().forEach(e -> addFilterQuery(e, query));
+        query.setRows(parseInt(configuration.getRows()));
+        query.setStart(parseInt(configuration.getStart()));
+        return query;
+    }
+
+    public SolrQuery generateQuery(String rawQuery) {
+        SolrQuery solrQuery = new SolrQuery("*:*");
+        if (StringUtils.isBlank(rawQuery)) {
+            return null;
+        }
+        Arrays.stream(rawQuery.split("&")).forEach(e -> setParameter(solrQuery, e));
+        return solrQuery;
     }
 
     private String getStringValue(String key, JsonObject record) {
@@ -171,6 +209,26 @@ public class SolrConnectorUtils {
             return i18n.badCredentials();
         }
         return message;
+    }
+
+    private void setParameter(SolrQuery solrQuery, String param) {
+        int idx = param.indexOf("=");
+        String key = idx > 0 ? param.substring(0, idx) : param;
+        String value = idx > 0 && param.length() > idx + 1 ? param.substring(idx + 1) : null;
+        switch (key) {
+        case SOLR_PARAM_QUERY:
+            solrQuery.set(CommonParams.Q, value);
+            break;
+        case SOLR_PARAM_FILTER_QUERY:
+            solrQuery.addFilterQuery(value);
+            break;
+        case SOLR_PARAM_ROWS:
+            solrQuery.setRows(parseInt(value));
+            break;
+        case SOLR_PARAM_START:
+            solrQuery.setStart(parseInt(value));
+            break;
+        }
     }
 
 }

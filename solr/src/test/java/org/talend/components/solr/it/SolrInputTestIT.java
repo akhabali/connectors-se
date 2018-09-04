@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.talend.components.solr.common.FilterCriteria;
 import org.talend.components.solr.common.SolrDataset;
 import org.talend.components.solr.common.SolrDataStore;
 import org.talend.components.solr.output.ActionEnum;
@@ -98,11 +99,11 @@ public class SolrInputTestIT {
         dataStore.setPassword(PASSWORD);
         solrConnection = new SolrDataset();
         solrConnection.setCore(CORE);
-        solrConnection.setSolrUrl(dataStore);
+        solrConnection.setDataStore(dataStore);
         inputMapperConfiguration = new SolrInputMapperConfiguration();
-        inputMapperConfiguration.setSolrDataset(solrConnection);
+        inputMapperConfiguration.setDataset(solrConnection);
         solrProcessorOutputConfiguration = new SolrProcessorOutputConfiguration();
-        solrProcessorOutputConfiguration.setSolrDataset(solrConnection);
+        solrProcessorOutputConfiguration.setDataset(solrConnection);
     }
 
     @Test
@@ -116,6 +117,21 @@ public class SolrInputTestIT {
         final List<JsonObject> res = componentsHandler.getCollectedData(JsonObject.class);
         assertTrue(res.stream().map(e -> e.getString("id")).collect(Collectors.toSet()).containsAll(Arrays.asList("apple",
                 "corsair", "samsung", "viewsonic", "ati", "belkin", "maxtor", "asus", "adata", "canon", "dell")));
+    }
+
+    @Test
+    @DisplayName("Solr")
+    void inputRawTest() {
+        inputMapperConfiguration.setRows("100");
+        inputMapperConfiguration.setRaw("q=id:adata");
+        final String config = configurationByExample().forInstance(inputMapperConfiguration).configured().toQueryString();
+        Job.ExecutorBuilder executorBuilder = Job.components().component("SolrInput", "Solr://Input?" + config)
+                .component("collector", "test://collector").connections().from("SolrInput").to("collector").build();
+        executorBuilder.run();
+
+        final List<JsonObject> res = componentsHandler.getCollectedData(JsonObject.class);
+        assertFalse(res.stream().map(e -> e.getString("id")).collect(Collectors.toSet()).contains("dell"));
+        assertTrue(res.stream().map(e -> e.getString("id")).collect(Collectors.toSet()).contains("adata"));
     }
 
     @Test
@@ -162,8 +178,8 @@ public class SolrInputTestIT {
         SolrConnectorService service = new SolrConnectorService();
         SolrInputMapperConfiguration config = new SolrInputMapperConfiguration();
         SolrConnectorUtils util = new SolrConnectorUtils();
-        config.setSolrDataset(solrConnection);
-        Schema schema = service.guessTableSchema(config.getSolrDataset(), util);
+        config.setDataset(solrConnection);
+        Schema schema = service.guessTableSchema(config.getDataset(), util);
         Schema expectedSchema = new Schema(Arrays.asList(new Schema.Entry("id", Type.STRING)));
         assertEquals(expectedSchema, schema);
     }
@@ -180,9 +196,9 @@ public class SolrInputTestIT {
         dataStore.setUrl("https://localhost:8983/badsolrurl");
         dataStore.setLogin(LOGIN);
         dataStore.setPassword(PASSWORD);
-        connection.setSolrUrl(dataStore);
-        config.setSolrDataset(connection);
-        Schema schema = service.guessTableSchema(config.getSolrDataset(), util);
+        connection.setDataStore(dataStore);
+        config.setDataset(connection);
+        Schema schema = service.guessTableSchema(config.getDataset(), util);
         assertEquals(new Schema(Collections.emptyList()), schema);
     }
 
@@ -218,9 +234,31 @@ public class SolrInputTestIT {
         SolrConnectorService service = new SolrConnectorService();
         SolrInputMapperConfiguration config = new SolrInputMapperConfiguration();
         SolrConnectorUtils util = new SolrConnectorUtils();
-        config.setSolrDataset(solrConnection);
+        config.setDataset(solrConnection);
         SuggestionValues values = service.suggest(SOLR_URL, LOGIN, PASSWORD, util);
         assertEquals(Arrays.asList(new SuggestionValues.Item(CORE, CORE)), values.getItems());
+    }
+
+    @Test
+    @DisplayName("Check suggest")
+    void testSuggestRawQuery() {
+        SolrConnectorService service = new SolrConnectorService();
+        SolrInputMapperConfiguration config = new SolrInputMapperConfiguration();
+        config.setDataset(solrConnection);
+        FilterCriteria criteriaId = new FilterCriteria();
+        criteriaId.setField("id");
+        criteriaId.setValue("apple");
+        FilterCriteria criteriaComp = new FilterCriteria();
+        criteriaComp.setField("compName_s");
+        criteriaComp.setValue("Apple");
+        SuggestionValues values = service.suggestRawQuery(Arrays.asList(criteriaId, criteriaComp), "1", "1",
+                new SolrConnectorUtils());
+        SuggestionValues expected = new SuggestionValues();
+        SuggestionValues.Item item = new SuggestionValues.Item();
+        item.setId("q=*:*&fq=id:apple&fq=compName_s:Apple&rows=1&start=1");
+        item.setLabel("q=*:*&fq=id:apple&fq=compName_s:Apple&rows=1&start=1");
+        expected.setItems(Arrays.asList(item));
+        assertEquals(expected, values);
     }
 
     private List<SolrDocument> getFirs100Documents() throws IOException, SolrServerException {

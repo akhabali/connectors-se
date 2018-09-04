@@ -2,6 +2,8 @@ package org.talend.components.solr.source;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -26,6 +28,7 @@ import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import org.talend.components.solr.service.SolrConnectorService;
+import org.talend.sdk.component.api.service.http.Url;
 
 @Slf4j
 @Documentation("Solr input source")
@@ -55,14 +58,11 @@ public class SolrInputSource implements Serializable {
 
     @PostConstruct
     public void init() {
-        solr = new HttpSolrClient.Builder(configuration.getSolrDataset().getFullUrl()).build();
-        SolrQuery query = new SolrQuery("*:*");
-        configuration.getFilterQuery().forEach(e -> util.addFilterQuery(e, query));
-        query.setRows(util.parseInt(configuration.getRows()));
-        query.setStart(util.parseInt(configuration.getStart()));
+        solr = new HttpSolrClient.Builder(configuration.getDataset().getFullUrl()).build();
+        SolrQuery query = util.generateQuery(configuration);
         QueryRequest req = new QueryRequest(query);
-        req.setBasicAuthCredentials(configuration.getSolrDataset().getSolrUrl().getLogin(),
-                configuration.getSolrDataset().getSolrUrl().getPassword());
+        req.setBasicAuthCredentials(configuration.getDataset().getDataStore().getLogin(),
+                configuration.getDataset().getDataStore().getPassword());
         resultList = executeSolrQuery(solr, req);
         iter = resultList.iterator();
     }

@@ -8,6 +8,7 @@ import org.apache.solr.client.solrj.response.schema.SchemaRepresentation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.talend.components.solr.common.FilterCriteria;
+import org.talend.components.solr.source.SolrInputMapperConfiguration;
 import org.talend.sdk.component.api.service.schema.Schema;
 import org.talend.sdk.component.api.service.schema.Type;
 
@@ -15,16 +16,34 @@ import javax.json.Json;
 import javax.json.JsonObject;
 
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 public class SolrConnectorUtilsTest {
 
     private SolrConnectorUtils util;
+
+    private final static Messages messages = new Messages() {
+
+        @Override
+        public String healthCheckOk() {
+            return "OK";
+        }
+
+        @Override
+        public String healthCheckFailed(String cause) {
+            return "FAIL";
+        }
+
+        @Override
+        public String badCredentials() {
+            return "Bad credentials message";
+        }
+    };
 
     @BeforeEach
     public void init() {
@@ -172,4 +191,48 @@ public class SolrConnectorUtilsTest {
         assertEquals(new Integer(0), util.parseInt("1234f567"));
     }
 
+    @Test
+    public void testGenerateQuery() {
+        String expected = "q=*:*&fq=id:apple&fq=title:Apple&rows=100&start=4";
+        FilterCriteria idCriteria = new FilterCriteria();
+        idCriteria.setField("id");
+        idCriteria.setValue("apple");
+        FilterCriteria titleCriteria = new FilterCriteria();
+        titleCriteria.setField("title");
+        titleCriteria.setValue("Apple");
+        String actual = util.generateQuery(Arrays.asList(idCriteria, titleCriteria), "4", "100").toString();
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testCustomLocalizedMessage() {
+        assertEquals("Bad credentials message",
+                util.getCustomLocalizedMessage("Some text with Bad credentials message", messages));
+    }
+
+    @Test
+    public void testGenerateQueryFromRawQuery() {
+        SolrInputMapperConfiguration config = new SolrInputMapperConfiguration();
+        String query = "q=*:*&fq=id:apple&fq=title:Apple&rows=100&start=4";
+        config.setRaw(query);
+        SolrQuery actual = util.generateQuery(query);
+        SolrQuery expected = new SolrQuery("*:*");
+        expected.addFilterQuery("id:apple", "title:Apple");
+        expected.setRows(100);
+        expected.setStart(4);
+        assertEquals(expected.toString(), actual.toString());
+    }
+
+    @Test
+    public void testGenerateQueryFromRawQueryNegative() {
+        SolrInputMapperConfiguration config = new SolrInputMapperConfiguration();
+        String query = "q=*:*&fq=id:apple&fq=title:Apple&rows=100&start=4";
+        config.setRaw(query);
+        SolrQuery actual = util.generateQuery(query);
+        SolrQuery expected = new SolrQuery("*:*");
+        expected.addFilterQuery("id:aple", "title:Aple");
+        expected.setRows(100);
+        expected.setStart(4);
+        assertNotEquals(expected.toString(), actual.toString());
+    }
 }

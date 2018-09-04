@@ -28,7 +28,7 @@ public class SolrDatasetTest {
         SolrDataset solrDataset = new SolrDataset();
         SolrDataStore solrDataStore = new SolrDataStore();
         solrDataStore.setUrl(url);
-        solrDataset.setSolrUrl(solrDataStore);
+        solrDataset.setDataStore(solrDataStore);
         solrDataset.setCore(core);
         return solrDataset;
     }

@@ -13,7 +13,7 @@ import java.util.List;
 
 @Data
 @DataSet("Solr")
-@GridLayout({ @GridLayout.Row({ "solrUrl" }), @GridLayout.Row({ "core" }) })
+@GridLayout({ @GridLayout.Row({ "dataStore" }), @GridLayout.Row({ "core" }) })
 
 @GridLayout(value = { @GridLayout.Row({ "schema" }) }, names = { GridLayout.FormType.ADVANCED })
 
@@ -21,16 +21,16 @@ public class SolrDataset {
 
     @Option
     @Documentation("Solr server URL DataStore")
-    private SolrDataStore solrUrl;
+    private SolrDataStore dataStore;
 
     @Option
     @Required
     @Documentation("the name of Solr Core")
-    @Suggestable(value = "coreList", parameters = { "solrUrl/url", "solrUrl/login", "solrUrl/password" })
+    @Suggestable(value = "coreList", parameters = { "dataStore/url", "dataStore/login", "dataStore/password" })
     private String core;
 
     public String getFullUrl() {
-        String solr = solrUrl.getUrl();
+        String solr = dataStore.getUrl();
         boolean addSlash = !solr.endsWith("/") && !solr.endsWith("\\");
         return (addSlash ? solr + "/" : solr) + core;
     }

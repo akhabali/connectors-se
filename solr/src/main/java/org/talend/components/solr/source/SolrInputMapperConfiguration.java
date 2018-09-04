@@ -7,20 +7,22 @@ import java.util.List;
 import org.talend.components.solr.common.FilterCriteria;
 import org.talend.components.solr.common.SolrDataset;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.constraint.Pattern;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 import lombok.Data;
 
 @Data
-@GridLayout({ @GridLayout.Row({ "solrDataset" }), @GridLayout.Row({ "filterQuery" }), @GridLayout.Row({ "start" }),
+@GridLayout({ @GridLayout.Row({ "dataset" }), @GridLayout.Row({ "filterQuery" }), @GridLayout.Row({ "start" }),
         @GridLayout.Row({ "rows" }) })
+@GridLayout(value = { @GridLayout.Row({ "raw" }) }, names = { GridLayout.FormType.ADVANCED })
 @Documentation("Solr Input Configuration")
 public class SolrInputMapperConfiguration implements Serializable {
 
     @Option
     @Documentation("Solr URL. Including core")
-    private SolrDataset solrDataset;
+    private SolrDataset dataset;
 
     @Option
     @Pattern("^[0-9]{0,9}$")
@@ -35,5 +37,10 @@ public class SolrInputMapperConfiguration implements Serializable {
     @Option
     @Documentation("Filter query table. Every row sets a new condition")
     private List<FilterCriteria> filterQuery = new ArrayList<>();
+
+    @Option
+    @Documentation("raw query")
+    @Suggestable(value = "raw", parameters = { "filterQuery", "start", "rows" })
+    private String raw = "";
 
 }

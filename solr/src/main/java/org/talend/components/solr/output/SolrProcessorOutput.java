@@ -47,10 +47,10 @@ public class SolrProcessorOutput implements Serializable {
 
     @PostConstruct
     public void init() {
-        solr = new HttpSolrClient.Builder(configuration.getSolrDataset().getFullUrl()).build();
+        solr = new HttpSolrClient.Builder(configuration.getDataset().getFullUrl()).build();
         request = new UpdateRequest();
-        request.setBasicAuthCredentials(configuration.getSolrDataset().getSolrUrl().getLogin(),
-                configuration.getSolrDataset().getSolrUrl().getPassword());
+        request.setBasicAuthCredentials(configuration.getDataset().getDataStore().getLogin(),
+                configuration.getDataset().getDataStore().getPassword());
     }
 
     @BeforeGroup

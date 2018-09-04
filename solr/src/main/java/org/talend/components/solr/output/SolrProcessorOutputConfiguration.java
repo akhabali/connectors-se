@@ -9,13 +9,14 @@ import org.talend.sdk.component.api.meta.Documentation;
 import java.io.Serializable;
 
 @Data
-@GridLayout({ @GridLayout.Row({ "solrDataset" }), @GridLayout.Row({ "action" }) })
+@GridLayout({ @GridLayout.Row({ "dataset" }), @GridLayout.Row({ "action" }) })
+
 @Documentation("Solr Processor output")
 public class SolrProcessorOutputConfiguration implements Serializable {
 
     @Option
     @Documentation("Solr URL. Including core")
-    private SolrDataset solrDataset;
+    private SolrDataset dataset;
 
     @Option
     @Documentation("Combobox field. Update and Delete values are available")
