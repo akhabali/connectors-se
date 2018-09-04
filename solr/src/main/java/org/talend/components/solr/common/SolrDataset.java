@@ -26,13 +26,13 @@ public class SolrDataset {
     @Option
     @Required
     @Documentation("the name of Solr Core")
-    @Suggestable(value = "coreList", parameters = { "dataStore/url", "dataStore/login", "dataStore/password" })
+    @Suggestable(value = "coreList", parameters = { "dataStore" })
     private String core;
 
     public String getFullUrl() {
-        String solr = dataStore.getUrl();
-        boolean addSlash = !solr.endsWith("/") && !solr.endsWith("\\");
-        return (addSlash ? solr + "/" : solr) + core;
+        String solrUrl = dataStore.getUrl();
+        boolean addSlash = !solrUrl.endsWith("/") && !solrUrl.endsWith("\\");
+        return (addSlash ? solrUrl + "/" : solrUrl) + core;
     }
 
     @Option

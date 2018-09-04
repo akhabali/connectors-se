@@ -20,6 +20,6 @@ public class SolrProcessorOutputConfiguration implements Serializable {
 
     @Option
     @Documentation("Combobox field. Update and Delete values are available")
-    private ActionEnum action = ActionEnum.UPSERT;
+    private Action action = Action.UPSERT;
 
 }

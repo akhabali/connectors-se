@@ -60,10 +60,10 @@ public class SolrProcessorOutput implements Serializable {
 
     @ElementListener
     public void onNext(@Input final JsonObject record) {
-        ActionEnum action = configuration.getAction();
-        if (ActionEnum.UPSERT == action) {
+        Action action = configuration.getAction();
+        if (Action.UPSERT == action) {
             update(record);
-        } else if (ActionEnum.DELETE == action) {
+        } else if (Action.DELETE == action) {
             deleteDocument(record);
         }
     }

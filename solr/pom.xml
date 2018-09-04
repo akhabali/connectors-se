@@ -25,7 +25,7 @@
         <!-- overrides parent pom property to fix dataset validation issue -->
         <validation.model>false</validation.model>
         <solr-ssl.trust-key-store.path>
-            src\test\resources\solr-ssl-dockerfile\solr-ssl.keystore.jks
+            ${project.basedir}/src/test/resources/solr-ssl-dockerfile/solr-ssl.keystore.jks
         </solr-ssl.trust-key-store.path>
         <dockerFile.directory>
             ${project.basedir}/src/test/resources/solr-ssl-dockerfile

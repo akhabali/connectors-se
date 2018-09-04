@@ -16,8 +16,6 @@ import javax.json.Json;
 import javax.json.JsonObject;
 
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -170,18 +168,6 @@ public class SolrConnectorUtilsTest {
     }
 
     @Test
-    public void testWrapFqValue() {
-        String inputString = "TestString";
-        assertEquals("TestString", util.wrapFqValue(inputString));
-    }
-
-    @Test
-    public void testWrapFqValueQuotes() {
-        String inputString = "Test String";
-        assertEquals("\"Test String\"", util.wrapFqValue(inputString));
-    }
-
-    @Test
     public void testParseInt() {
         assertEquals(new Integer(1234567), util.parseInt("1234567"));
     }
@@ -214,7 +200,7 @@ public class SolrConnectorUtilsTest {
     public void testGenerateQueryFromRawQuery() {
         SolrInputMapperConfiguration config = new SolrInputMapperConfiguration();
         String query = "q=*:*&fq=id:apple&fq=title:Apple&rows=100&start=4";
-        config.setRaw(query);
+        config.setRawQuery(query);
         SolrQuery actual = util.generateQuery(query);
         SolrQuery expected = new SolrQuery("*:*");
         expected.addFilterQuery("id:apple", "title:Apple");
@@ -227,7 +213,7 @@ public class SolrConnectorUtilsTest {
     public void testGenerateQueryFromRawQueryNegative() {
         SolrInputMapperConfiguration config = new SolrInputMapperConfiguration();
         String query = "q=*:*&fq=id:apple&fq=title:Apple&rows=100&start=4";
-        config.setRaw(query);
+        config.setRawQuery(query);
         SolrQuery actual = util.generateQuery(query);
         SolrQuery expected = new SolrQuery("*:*");
         expected.addFilterQuery("id:aple", "title:Aple");

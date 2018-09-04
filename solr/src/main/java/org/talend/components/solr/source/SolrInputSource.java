@@ -2,8 +2,6 @@ package org.talend.components.solr.source;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -28,15 +26,12 @@ import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import org.talend.components.solr.service.SolrConnectorService;
-import org.talend.sdk.component.api.service.http.Url;
 
 @Slf4j
 @Documentation("Solr input source")
 public class SolrInputSource implements Serializable {
 
     private final SolrInputMapperConfiguration configuration;
-
-    private final SolrConnectorService service;
 
     private final SolrConnectorUtils util;
 
@@ -49,9 +44,8 @@ public class SolrInputSource implements Serializable {
     private Iterator<SolrDocument> iter;
 
     public SolrInputSource(@Option("configuration") final SolrInputMapperConfiguration configuration,
-            final SolrConnectorService service, final JsonBuilderFactory jsonBuilderFactory, final SolrConnectorUtils util) {
+            final JsonBuilderFactory jsonBuilderFactory, final SolrConnectorUtils util) {
         this.configuration = configuration;
-        this.service = service;
         this.util = util;
         this.jsonBuilderFactory = jsonBuilderFactory;
     }

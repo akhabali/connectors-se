@@ -18,8 +18,6 @@ import org.talend.sdk.component.api.input.PartitionSize;
 import org.talend.sdk.component.api.input.Split;
 import org.talend.sdk.component.api.meta.Documentation;
 
-import org.talend.components.solr.service.SolrConnectorService;
-
 @Version(1)
 @Icon(Icon.IconType.STAR)
 
@@ -29,16 +27,13 @@ public class SolrInputMapper implements Serializable {
 
     private final SolrInputMapperConfiguration configuration;
 
-    private final SolrConnectorService service;
-
     private final SolrConnectorUtils util;
 
     private final JsonBuilderFactory jsonBuilderFactory;
 
     public SolrInputMapper(@Option("configuration") final SolrInputMapperConfiguration configuration,
-            final SolrConnectorService service, final JsonBuilderFactory jsonBuilderFactory, final SolrConnectorUtils util) {
+            final JsonBuilderFactory jsonBuilderFactory, final SolrConnectorUtils util) {
         this.configuration = configuration;
-        this.service = service;
         this.util = util;
         this.jsonBuilderFactory = jsonBuilderFactory;
     }
@@ -55,6 +50,6 @@ public class SolrInputMapper implements Serializable {
 
     @Emitter
     public SolrInputSource createWorker() {
-        return new SolrInputSource(configuration, service, jsonBuilderFactory, util);
+        return new SolrInputSource(configuration, jsonBuilderFactory, util);
     }
 }

@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.talend.components.solr.common.FilterCriteria;
 import org.talend.components.solr.common.SolrDataset;
 import org.talend.components.solr.common.SolrDataStore;
-import org.talend.components.solr.output.ActionEnum;
+import org.talend.components.solr.output.Action;
 import org.talend.components.solr.output.SolrProcessorOutputConfiguration;
 import org.talend.components.solr.service.Messages;
 import org.talend.components.solr.service.SolrConnectorService;
@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 @WithComponents("org.talend.components.solr")
-public class SolrInputTestIT {
+public class SolrComponentTestIT {
 
     private final static String SOLR_URL = "https://localhost:8983/solr/";
 
@@ -123,7 +123,7 @@ public class SolrInputTestIT {
     @DisplayName("Solr")
     void inputRawTest() {
         inputMapperConfiguration.setRows("100");
-        inputMapperConfiguration.setRaw("q=id:adata");
+        inputMapperConfiguration.setRawQuery("q=id:adata");
         final String config = configurationByExample().forInstance(inputMapperConfiguration).configured().toQueryString();
         Job.ExecutorBuilder executorBuilder = Job.components().component("SolrInput", "Solr://Input?" + config)
                 .component("collector", "test://collector").connections().from("SolrInput").to("collector").build();
@@ -137,7 +137,7 @@ public class SolrInputTestIT {
     @Test
     @DisplayName("UpdateTest")
     void outputUpdateTest() throws IOException, SolrServerException {
-        solrProcessorOutputConfiguration.setAction(ActionEnum.UPSERT);
+        solrProcessorOutputConfiguration.setAction(Action.UPSERT);
         final String config = configurationByExample().forInstance(solrProcessorOutputConfiguration).configured().toQueryString();
 
         componentsHandler.setInputData(asList(factory.createObjectBuilder().add("address_s", "comp1").build(),
@@ -156,7 +156,7 @@ public class SolrInputTestIT {
     @Test
     @DisplayName("Solr")
     void outputDeleteTest() throws IOException, SolrServerException {
-        solrProcessorOutputConfiguration.setAction(ActionEnum.DELETE);
+        solrProcessorOutputConfiguration.setAction(Action.DELETE);
         final String config = configurationByExample().forInstance(solrProcessorOutputConfiguration).configured().toQueryString();
         componentsHandler.setInputData(asList(factory.createObjectBuilder().add("id", "apple").build(),
                 factory.createObjectBuilder().add("id", "corsair").build(),
@@ -229,18 +229,22 @@ public class SolrInputTestIT {
     }
 
     @Test
-    @DisplayName("Check suggest")
+    @DisplayName("Check suggestCore")
     void suggestTest() {
         SolrConnectorService service = new SolrConnectorService();
         SolrInputMapperConfiguration config = new SolrInputMapperConfiguration();
         SolrConnectorUtils util = new SolrConnectorUtils();
         config.setDataset(solrConnection);
-        SuggestionValues values = service.suggest(SOLR_URL, LOGIN, PASSWORD, util);
+        SolrDataStore dataStore = new SolrDataStore();
+        dataStore.setUrl(SOLR_URL);
+        dataStore.setPassword(PASSWORD);
+        dataStore.setLogin(LOGIN);
+        SuggestionValues values = service.suggestCore(dataStore, util);
         assertEquals(Arrays.asList(new SuggestionValues.Item(CORE, CORE)), values.getItems());
     }
 
     @Test
-    @DisplayName("Check suggest")
+    @DisplayName("Check suggestCore")
     void testSuggestRawQuery() {
         SolrConnectorService service = new SolrConnectorService();
         SolrInputMapperConfiguration config = new SolrInputMapperConfiguration();
@@ -251,8 +255,10 @@ public class SolrInputTestIT {
         FilterCriteria criteriaComp = new FilterCriteria();
         criteriaComp.setField("compName_s");
         criteriaComp.setValue("Apple");
-        SuggestionValues values = service.suggestRawQuery(Arrays.asList(criteriaId, criteriaComp), "1", "1",
-                new SolrConnectorUtils());
+        config.setFilterQuery(Arrays.asList(criteriaId, criteriaComp));
+        config.setRows("1");
+        config.setStart("1");
+        SuggestionValues values = service.suggestRawQuery(config, new SolrConnectorUtils());
         SuggestionValues expected = new SuggestionValues();
         SuggestionValues.Item item = new SuggestionValues.Item();
         item.setId("q=*:*&fq=id:apple&fq=compName_s:Apple&rows=1&start=1");

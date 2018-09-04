@@ -16,7 +16,7 @@ import lombok.Data;
 @Data
 @GridLayout({ @GridLayout.Row({ "dataset" }), @GridLayout.Row({ "filterQuery" }), @GridLayout.Row({ "start" }),
         @GridLayout.Row({ "rows" }) })
-@GridLayout(value = { @GridLayout.Row({ "raw" }) }, names = { GridLayout.FormType.ADVANCED })
+@GridLayout(value = { @GridLayout.Row({ "rawQuery" }) }, names = { GridLayout.FormType.ADVANCED })
 @Documentation("Solr Input Configuration")
 public class SolrInputMapperConfiguration implements Serializable {
 
@@ -40,7 +40,7 @@ public class SolrInputMapperConfiguration implements Serializable {
 
     @Option
     @Documentation("raw query")
-    @Suggestable(value = "raw", parameters = { "filterQuery", "start", "rows" })
-    private String raw = "";
+    @Suggestable(value = "rawQuery", parameters = { ".." })
+    private String rawQuery = "";
 
 }

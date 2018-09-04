@@ -78,8 +78,8 @@ public class SolrConnectorUtils {
     }
 
     public SolrQuery generateQuery(SolrInputMapperConfiguration configuration) {
-        if (StringUtils.isNotBlank(configuration.getRaw())) {
-            return generateQuery(configuration.getRaw());
+        if (StringUtils.isNotBlank(configuration.getRawQuery())) {
+            return generateQuery(configuration.getRawQuery());
         }
         SolrQuery query = new SolrQuery("*:*");
         configuration.getFilterQuery().forEach(e -> addFilterQuery(e, query));
@@ -175,13 +175,13 @@ public class SolrConnectorUtils {
             query.addFilterQuery(field + ":" + value);
         }
     }
-
-    public String wrapFqValue(String fqValue) {
-        if (fqValue.contains(" ")) {
-            return "\"" + fqValue + "\"";
-        }
-        return fqValue;
-    }
+    //
+    // public String wrapFqValue(String fqValue) {
+    // if (fqValue.contains(" ")) {
+    // return "\"" + fqValue + "\"";
+    // }
+    // return fqValue;
+    // }
 
     public Integer parseInt(String value) {
         Integer result = 0;

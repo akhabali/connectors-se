@@ -14,6 +14,7 @@ import org.apache.solr.common.params.CoreAdminParams;
 import org.talend.components.solr.common.FilterCriteria;
 import org.talend.components.solr.common.SolrDataset;
 import org.talend.components.solr.common.SolrDataStore;
+import org.talend.components.solr.source.SolrInputMapperConfiguration;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
@@ -54,16 +55,15 @@ public class SolrConnectorService {
     }
 
     @Suggestions("coreList")
-    public SuggestionValues suggest(@Option("a") final String solrUrl, @Option("b") final String login,
-            @Option("c") final String password, SolrConnectorUtils util) {
-        return new SuggestionValues(false, getCores(solrUrl, login, password, util).stream()
-                .map(e -> new SuggestionValues.Item(e, e)).collect(Collectors.toList()));
+    public SuggestionValues suggestCore(@Option("dataStore") final SolrDataStore dataStore, SolrConnectorUtils util) {
+        return new SuggestionValues(false, getCores(dataStore.getUrl(), dataStore.getLogin(), dataStore.getPassword(), util)
+                .stream().map(e -> new SuggestionValues.Item(e, e)).collect(Collectors.toList()));
     }
 
-    @Suggestions("raw")
-    public SuggestionValues suggestRawQuery(@Option("a") final List<FilterCriteria> criterias, @Option("b") final String start,
-            @Option("c") final String rows, SolrConnectorUtils util) {
-        String query = util.generateQuery(criterias, start, rows).toString();
+    @Suggestions("rawQuery")
+    public SuggestionValues suggestRawQuery(@Option("config") final SolrInputMapperConfiguration config,
+            SolrConnectorUtils util) {
+        String query = util.generateQuery(config).toString();
         return new SuggestionValues(false, Arrays.asList(new SuggestionValues.Item(query, query)));
     }
 
