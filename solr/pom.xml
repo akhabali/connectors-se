@@ -24,6 +24,13 @@
         <talend.component.studioHome/>
         <!-- overrides parent pom property to fix dataset validation issue -->
         <validation.model>false</validation.model>
+        <solr-ssl.trust-key-store.path>
+            src\test\resources\solr-ssl-dockerfile\solr-ssl.keystore.jks
+        </solr-ssl.trust-key-store.path>
+        <dockerFile.directory>
+            ${project.basedir}/src/test/resources/solr-ssl-dockerfile
+        </dockerFile.directory>
+        <docker-image.name>skhylko/solr:1.0.0</docker-image.name>
     </properties>
 
     <dependencies>
@@ -94,7 +101,7 @@
                     </includes>
                     <systemPropertyVariables>
                         <javax.net.ssl.trustStore>
-                            src\test\resources\solr-ssl-dockerfile\solr-ssl.keystore.jks
+                            ${solr-ssl.trust-key-store.path}
                         </javax.net.ssl.trustStore>
                         <javax.net.ssl.trustStorePassword>secret</javax.net.ssl.trustStorePassword>
                     </systemPropertyVariables>
@@ -129,12 +136,18 @@
                         <id>start</id>
                         <phase>pre-integration-test</phase>
                         <goals>
+                            <goal>build</goal>
                             <goal>start</goal>
                         </goals>
                         <configuration>
                             <images>
                                 <image>
-                                    <name>skhylko/solr:1.0.0</name>
+                                    <name>${docker-image.name}</name>
+                                    <build>
+                                        <dockerFileDir>
+                                            ${dockerFile.directory}
+                                        </dockerFileDir>
+                                    </build>
                                     <run>
                                         <ports>
                                             <port>8983:8983</port>
