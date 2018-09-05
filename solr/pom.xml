@@ -148,12 +148,12 @@
                                     <port>solr.port:8983</port>
                                 </ports>
                                 <wait>
-                                    <http>
-                                        <url>https://${docker.host.address}:${solr.port}/solr</url>
-                                        <method>GET</method>
-                                        <allowAllHosts>true</allowAllHosts>
-                                    </http>
-                                    <time>20000</time>
+                                    <!--<http>-->
+                                        <!--<url>https://${docker.host.address}:${solr.port}/solr</url>-->
+                                        <!--<method>GET</method>-->
+                                        <!--<allowAllHosts>true</allowAllHosts>-->
+                                    <!--</http>-->
+                                    <time>30000</time>
                                 </wait>
                             </run>
                         </image>
