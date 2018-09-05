@@ -25,7 +25,7 @@
         <!-- overrides parent pom property to fix dataset validation issue -->
         <validation.model>false</validation.model>
         <solr-ssl.trust-key-store.path>
-            ${project.basedir}/src/test/resources/solr-ssl-dockerfile/solr-ssl.keystore.jks
+            src/test/resources/solr-ssl-dockerfile/solr-ssl.keystore.jks
         </solr-ssl.trust-key-store.path>
         <dockerFile.directory>
             ${project.basedir}/src/test/resources/solr-ssl-dockerfile
@@ -60,11 +60,11 @@
 
     <build>
         <!--<extensions>-->
-            <!--<extension>-->
-                <!--<groupId>org.talend.sdk.component</groupId>-->
-                <!--<artifactId>talend-component-maven-plugin</artifactId>-->
-                <!--<version>1.0.1</version>-->
-            <!--</extension>-->
+        <!--<extension>-->
+        <!--<groupId>org.talend.sdk.component</groupId>-->
+        <!--<artifactId>talend-component-maven-plugin</artifactId>-->
+        <!--<version>1.0.1</version>-->
+        <!--</extension>-->
         <!--</extensions>-->
 
         <plugins>
@@ -104,6 +104,7 @@
                             ${solr-ssl.trust-key-store.path}
                         </javax.net.ssl.trustStore>
                         <javax.net.ssl.trustStorePassword>secret</javax.net.ssl.trustStorePassword>
+                        <dockerHostAddress>${docker.host.address}</dockerHostAddress>
                     </systemPropertyVariables>
                 </configuration>
                 <executions>
@@ -131,6 +132,35 @@
                 <groupId>io.fabric8</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
                 <version>${docker-maven-plugin.version}</version>
+                <configuration>
+                    <images>
+                        <image>
+                            <name>${docker-image.name}</name>
+                            <build>
+                                <dockerFileDir>
+                                    ${dockerFile.directory}
+                                </dockerFileDir>
+                            </build>
+                            <run>
+                                <ports>
+                                    <port>8983:8983</port>
+                                </ports>
+                                <wait>
+                                    <!--<tcp>-->
+                                    <!--<host>http://${docker.host.address}</host>-->
+                                    <!--<ports>-->
+                                    <!--<port>8983</port>-->
+                                    <!--</ports>-->
+                                    <!--</tcp>-->
+                                    <http>
+                                        <url>https://${docker.host.address}:8983</url>
+                                    </http>
+                                    <time>10000</time>
+                                </wait>
+                            </run>
+                        </image>
+                    </images>
+                </configuration>
                 <executions>
                     <execution>
                         <id>start</id>
@@ -139,32 +169,6 @@
                             <goal>build</goal>
                             <goal>start</goal>
                         </goals>
-                        <configuration>
-                            <images>
-                                <image>
-                                    <name>${docker-image.name}</name>
-                                    <build>
-                                        <dockerFileDir>
-                                            ${dockerFile.directory}
-                                        </dockerFileDir>
-                                    </build>
-                                    <run>
-                                        <ports>
-                                            <port>8983:8983</port>
-                                        </ports>
-                                        <wait>
-                                            <tcp>
-                                                <host>localhost</host>
-                                                <ports>
-                                                    <port>8983</port>
-                                                </ports>
-                                            </tcp>
-                                            <time>60000</time>
-                                        </wait>
-                                    </run>
-                                </image>
-                            </images>
-                        </configuration>
                     </execution>
                     <execution>
                         <id>stop</id>

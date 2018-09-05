@@ -44,7 +44,10 @@ import static org.talend.sdk.component.junit.SimpleFactory.configurationByExampl
 @WithComponents("org.talend.components.solr")
 public class SolrComponentTestIT {
 
-    private final static String SOLR_URL = "https://localhost:8983/solr/";
+    private final static String DOCKER_HOST_ADDRESS = System.getProperty("dockerHostAddress") == null ? "localhost"
+            : System.getProperty("dockerHostAddress");
+
+    private final static String SOLR_URL = "https://" + DOCKER_HOST_ADDRESS + ":8983/solr/";
 
     private final static String CORE = "testcore";
 

@@ -139,10 +139,12 @@ public class SolrConnectorUtilsTest {
         SchemaRepresentation representation = gson.fromJson(reader, SchemaRepresentation.class);
 
         List<Schema.Entry> entries = new ArrayList<>();
+        entries.add(new Schema.Entry("_src_", Type.STRING));
         entries.add(new Schema.Entry("author", Type.STRING));
         entries.add(new Schema.Entry("cat", Type.STRING));
         entries.add(new Schema.Entry("category", Type.STRING));
         entries.add(new Schema.Entry("comments", Type.STRING));
+        entries.add(new Schema.Entry("content", Type.STRING));
         entries.add(new Schema.Entry("inStock", Type.BOOLEAN));
         entries.add(new Schema.Entry("popularity", Type.INT));
         entries.add(new Schema.Entry("price", Type.DOUBLE));

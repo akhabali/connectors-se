@@ -22,8 +22,6 @@ import java.util.stream.Stream;
 @Service
 public class SolrConnectorUtils {
 
-    private static final String SOLR_FIELD_PROPERTY_INDEXED = "indexed";
-
     private static final String SOLR_FIELD_PROPERTY_STORED = "stored";
 
     private static final String SOLR_FIELD_PROPERTY_NAME = "name";
@@ -123,16 +121,11 @@ public class SolrConnectorUtils {
         List<Schema.Entry> entries = new ArrayList<>();
         for (Map<String, Object> field : fields) {
             String fieldName = getFieldName(field);
-            if (fieldName != null && checkIndexed(field) && checkStored(field)) {
+            if (fieldName != null && checkStored(field)) {
                 entries.add(new Schema.Entry(fieldName, getFieldType(field)));
             }
         }
         return new Schema(entries);
-    }
-
-    private boolean checkIndexed(Map<String, Object> field) {
-        Object indexed = field.get(SOLR_FIELD_PROPERTY_INDEXED);
-        return (indexed == null || indexed.equals(true));
     }
 
     private boolean checkStored(Map<String, Object> field) {
