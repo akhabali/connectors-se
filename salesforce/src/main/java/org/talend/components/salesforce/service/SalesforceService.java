@@ -78,9 +78,8 @@ public class SalesforceService {
         final Integer timeout = (props != null)
                 ? Integer.parseInt(props.getProperty(TIMEOUT_PROPERTY_KEY, String.valueOf(DEFAULT_TIMEOUT)))
                 : DEFAULT_TIMEOUT;
-        final String endpoint = getEndpoint(datastore, props);
-        ConnectorConfig config = newConnectorConfig(endpoint);
-        config.setAuthEndpoint(endpoint);
+        ConnectorConfig config = newConnectorConfig(datastore.getEndpoint());
+        config.setAuthEndpoint(datastore.getEndpoint());
         config.setUsername(datastore.getUserId());
         String password = datastore.getPassword();
         String securityKey = datastore.getSecurityKey();
@@ -114,21 +113,19 @@ public class SalesforceService {
      *
      * @return the datastore endpoint value.
      */
-    protected String getEndpoint(final BasicDataStore datastore, final Properties props) {
+    protected String getEndpoint(final LocalConfiguration localConfiguration) {
 
-        if (datastore == null || datastore.getEndpoint() == null) {
-            if (props != null) {
-                String endpointProp = props.getProperty(ENDPOINT_PROPERTY_KEY);
-                if (endpointProp != null && !endpointProp.isEmpty()) {
-                    if (endpointProp.contains(RETIRED_ENDPOINT)) {
-                        endpointProp = endpointProp.replaceFirst(RETIRED_ENDPOINT, ACTIVE_ENDPOINT);
-                    }
-                    return endpointProp;
+        final Properties props = loadCustomConfiguration(localConfiguration);
+        if (props != null) {
+            String endpointProp = props.getProperty(ENDPOINT_PROPERTY_KEY);
+            if (endpointProp != null && !endpointProp.isEmpty()) {
+                if (endpointProp.contains(RETIRED_ENDPOINT)) {
+                    endpointProp = endpointProp.replaceFirst(RETIRED_ENDPOINT, ACTIVE_ENDPOINT);
                 }
+                return endpointProp;
             }
-            return URL;
         }
-        return datastore.getEndpoint();
+        return URL;
     }
 
     private ConnectorConfig newConnectorConfig(final String ep) {
@@ -148,7 +145,7 @@ public class SalesforceService {
         final Properties props = loadCustomConfiguration(configuration);
         final PartnerConnection partnerConnection = connect(datastore, configuration);
         final ConnectorConfig partnerConfig = partnerConnection.getConfig();
-        ConnectorConfig bulkConfig = newConnectorConfig(getEndpoint(datastore, props));
+        ConnectorConfig bulkConfig = newConnectorConfig(datastore.getEndpoint());
         bulkConfig.setSessionId(partnerConfig.getSessionId());
         // For session renew
         bulkConfig.setSessionRenewer(partnerConfig.getSessionRenewer());

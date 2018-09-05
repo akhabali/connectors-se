@@ -26,7 +26,7 @@ import lombok.Data;
 @Data
 @DataSet("query")
 @GridLayout(value = { @GridLayout.Row("dataStore"), @GridLayout.Row("sourceType"), @GridLayout.Row("query"),
-        @GridLayout.Row("moduleName"), @GridLayout.Row({ "selectColumnIds" }), @GridLayout.Row("condition"), })
+        @GridLayout.Row("moduleName"), @GridLayout.Row("selectColumnIds"), @GridLayout.Row("condition"), })
 @Documentation("")
 public class QueryDataSet implements Serializable {
 

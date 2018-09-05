@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.talend.components.salesforce.service.SalesforceService.URL;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import org.talend.components.salesforce.datastore.BasicDataStore;
 import org.talend.sdk.component.api.DecryptedServer;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
+import org.talend.sdk.component.api.service.completion.Values;
 import org.talend.sdk.component.api.service.configuration.LocalConfiguration;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.junit.BaseComponentsHandler;
@@ -60,6 +62,7 @@ class UiActionServiceTest {
     @DisplayName("Validate connection")
     void validateBasicConnectionOK() {
         final BasicDataStore datasore = new BasicDataStore();
+        datasore.setEndpoint(URL);
         datasore.setUserId(serverWithPassword.getUsername());
         datasore.setPassword(serverWithPassword.getPassword());
         datasore.setSecurityKey(serverWithSecuritykey.getPassword());
@@ -73,7 +76,9 @@ class UiActionServiceTest {
     @HttpApiName("${class}_${method}")
     @DisplayName("Validate connection with bad credentials")
     void validateBasicConnectionFailed() {
-        final HealthCheckStatus status = service.validateBasicConnection(new BasicDataStore(), i18n, configuration);
+        final BasicDataStore datasore = new BasicDataStore();
+        datasore.setEndpoint(URL);
+        final HealthCheckStatus status = service.validateBasicConnection(datasore, i18n, configuration);
         assertNotNull(status);
         assertEquals(HealthCheckStatus.Status.KO, status.getStatus());
         assertFalse(status.getComment().isEmpty());
@@ -84,6 +89,7 @@ class UiActionServiceTest {
     @DisplayName("Load modules")
     void loadModules() {
         final BasicDataStore datasore = new BasicDataStore();
+        datasore.setEndpoint(URL);
         datasore.setUserId(serverWithPassword.getUsername());
         datasore.setPassword(serverWithPassword.getPassword());
         datasore.setSecurityKey(serverWithSecuritykey.getPassword());
@@ -99,10 +105,25 @@ class UiActionServiceTest {
     void loadModulesWithBadCredentials() {
         assertThrows(IllegalStateException.class, () -> {
             final BasicDataStore datasore = new BasicDataStore();
+            datasore.setEndpoint(URL);
             datasore.setUserId("basUserName");
             datasore.setPassword("NoPass");
             service.loadSalesforceModules(datasore);
         });
+    }
+
+    @Test
+    @DisplayName("Get default endpoint")
+    void getDefaultEndpoint() {
+        final BasicDataStore datasore = new BasicDataStore();
+        datasore.setUserId("basUserName");
+        datasore.setPassword("NoPass");
+        final Values endpoint = service.getEndpoint();
+
+        assertEquals(1,endpoint.getItems().size());
+        for (Values.Item item : endpoint.getItems()) {
+            assertEquals(URL,item.getLabel());
+        }
     }
 
 }
