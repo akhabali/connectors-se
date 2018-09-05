@@ -38,11 +38,12 @@ public class SolrConnectorUtils {
 
     private static final String SOLR_PARAM_ROWS = "rows";
 
-    private static final Set<String> SOLR_FIELD_PROPERTY_TYPES_DOUBLE = Stream.of("pdouble", "pfloat").collect(Collectors.toSet());
+    private static final Set<String> SOLR_FIELD_PROPERTY_TYPES_DOUBLE = Stream.of("pdouble", "pfloat")
+            .collect(Collectors.toSet());
 
-    private static final Set<String>  SOLR_FIELD_PROPERTY_TYPES_INT = Stream.of("plong", "pint").collect(Collectors.toSet());
+    private static final Set<String> SOLR_FIELD_PROPERTY_TYPES_INT = Stream.of("plong", "pint").collect(Collectors.toSet());
 
-    private static final Set<String>  SOLR_FIELD_PROPERTY_TYPES_BOOL = Stream.of("boolean").collect(Collectors.toSet());
+    private static final Set<String> SOLR_FIELD_PROPERTY_TYPES_BOOL = Stream.of("boolean").collect(Collectors.toSet());
 
     public String trimQuotes(String value) {
         int length = value.length();
@@ -175,13 +176,6 @@ public class SolrConnectorUtils {
             query.addFilterQuery(field + ":" + value);
         }
     }
-    //
-    // public String wrapFqValue(String fqValue) {
-    // if (fqValue.contains(" ")) {
-    // return "\"" + fqValue + "\"";
-    // }
-    // return fqValue;
-    // }
 
     public Integer parseInt(String value) {
         Integer result = 0;
