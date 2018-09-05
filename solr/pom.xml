@@ -149,11 +149,11 @@
                                 </ports>
                                 <wait>
                                     <http>
-                                        <url>https://${docker.host.address}:${solr.port}</url>
+                                        <url>https://${docker.host.address}:${solr.port}/solr</url>
                                         <method>GET</method>
                                         <allowAllHosts>true</allowAllHosts>
                                     </http>
-                                    <time>60000</time>
+                                    <time>20000</time>
                                 </wait>
                             </run>
                         </image>
