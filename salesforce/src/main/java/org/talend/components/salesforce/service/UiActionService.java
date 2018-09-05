@@ -12,10 +12,8 @@ import org.talend.components.salesforce.dataset.QueryDataSet;
 import org.talend.components.salesforce.datastore.BasicDataStore;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.service.Service;
-import org.talend.sdk.component.api.service.completion.DynamicValues;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.completion.Suggestions;
-import org.talend.sdk.component.api.service.completion.Values;
 import org.talend.sdk.component.api.service.configuration.LocalConfiguration;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
@@ -91,10 +89,10 @@ public class UiActionService {
         }
     }
 
-    @DynamicValues(GET_ENDPOINT)
-    public Values getEndpoint() {
+    @Suggestions(GET_ENDPOINT)
+    public SuggestionValues getEndpoint() {
         final String endpoint = this.service.getEndpoint(configuration);
-        return new Values(Arrays.asList(new Values.Item(endpoint, endpoint)));
+        return new SuggestionValues(false, Arrays.asList(new SuggestionValues.Item(endpoint, endpoint)));
     }
 
 }

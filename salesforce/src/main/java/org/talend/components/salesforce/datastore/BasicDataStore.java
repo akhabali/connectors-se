@@ -6,7 +6,7 @@ import java.io.Serializable;
 
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Checkable;
-import org.talend.sdk.component.api.configuration.action.Proposable;
+import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.type.DataStore;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
@@ -25,7 +25,7 @@ public class BasicDataStore implements Serializable {
     @Option
     @Required
     @Documentation("")
-    @Proposable(value = GET_ENDPOINT)
+    @Suggestable(value = GET_ENDPOINT)
     public String endpoint;
 
     @Option

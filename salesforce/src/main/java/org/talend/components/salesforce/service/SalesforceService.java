@@ -53,8 +53,7 @@ public class SalesforceService {
      */
     private Properties loadCustomConfiguration(final LocalConfiguration configuration) {
         final String configFile = configuration.get(CONFIG_FILE_lOCATION_KEY);
-        try (final InputStream is =
-                configFile != null && !configFile.isEmpty() ? (new FileInputStream(configFile)) : null) {
+        try (final InputStream is = configFile != null && !configFile.isEmpty() ? (new FileInputStream(configFile)) : null) {
             if (is != null) {
                 return new Properties() {
 

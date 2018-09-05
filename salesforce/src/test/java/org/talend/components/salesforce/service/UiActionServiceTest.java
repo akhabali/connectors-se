@@ -118,11 +118,11 @@ class UiActionServiceTest {
         final BasicDataStore datasore = new BasicDataStore();
         datasore.setUserId("basUserName");
         datasore.setPassword("NoPass");
-        final Values endpoint = service.getEndpoint();
+        final SuggestionValues endpoint = service.getEndpoint();
 
-        assertEquals(1,endpoint.getItems().size());
-        for (Values.Item item : endpoint.getItems()) {
-            assertEquals(URL,item.getLabel());
+        assertEquals(1, endpoint.getItems().size());
+        for (SuggestionValues.Item item : endpoint.getItems()) {
+            assertEquals(URL, item.getLabel());
         }
     }
 
