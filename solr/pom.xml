@@ -103,6 +103,7 @@
                         <javax.net.ssl.trustStore>
                             ${solr-ssl.trust-key-store.path}
                         </javax.net.ssl.trustStore>
+                        <solr.test.port>${solr.port}</solr.test.port>
                         <javax.net.ssl.trustStorePassword>secret</javax.net.ssl.trustStorePassword>
                         <dockerHostAddress>${docker.host.address}</dockerHostAddress>
                     </systemPropertyVariables>
@@ -143,15 +144,15 @@
                             </build>
                             <run>
                                 <ports>
-                                    <port>8983:8983</port>
+                                    <port>solr.port:8983</port>
                                 </ports>
                                 <wait>
                                     <http>
-                                        <url>https://${docker.host.address}:8983</url>
+                                        <url>https://${docker.host.address}:${solr.port}</url>
                                         <method>GET</method>
                                         <allowAllHosts>true</allowAllHosts>
                                     </http>
-                                    <time>10000</time>
+                                    <time>60000</time>
                                 </wait>
                             </run>
                         </image>
