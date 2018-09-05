@@ -153,7 +153,7 @@ public class SolrConnectorUtilsTest {
 
     @Test
     public void testGetCoresEmpty() {
-        Collection cores = util.getCoreListFromResponse(null);
+        Collection<String> cores = util.getCoreListFromResponse(null);
         assertTrue(cores.isEmpty());
     }
 
