@@ -134,6 +134,7 @@
                 <artifactId>docker-maven-plugin</artifactId>
                 <version>${docker-maven-plugin.version}</version>
                 <configuration>
+                    <showLogs>true</showLogs>
                     <images>
                         <image>
                             <name>${docker-image.name}</name>
