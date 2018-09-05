@@ -146,15 +146,11 @@
                                     <port>8983:8983</port>
                                 </ports>
                                 <wait>
-                                    <!--<tcp>-->
-                                    <!--<host>http://${docker.host.address}</host>-->
-                                    <!--<ports>-->
-                                    <!--<port>8983</port>-->
-                                    <!--</ports>-->
-                                    <!--</tcp>-->
-                                    <!--<http>-->
-                                        <!--<url>https://${docker.host.address}:8983</url>-->
-                                    <!--</http>-->
+                                    <http>
+                                        <url>https://${docker.host.address}:8983</url>
+                                        <method>GET</method>
+                                        <allowAllHosts>true</allowAllHosts>
+                                    </http>
                                     <time>10000</time>
                                 </wait>
                             </run>
