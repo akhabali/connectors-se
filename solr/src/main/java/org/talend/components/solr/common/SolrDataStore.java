@@ -13,22 +13,23 @@ import org.talend.sdk.component.api.meta.Documentation;
 @Data
 @DataStore("SolrDataStore")
 @Checkable("checkSolrConnection")
+@Documentation("A connection to Solr server")
 @GridLayout({ @GridLayout.Row({ "url" }), @GridLayout.Row({ "login" }), @GridLayout.Row({ "password" }) })
 public class SolrDataStore {
 
     @Option
     @Required
     @Pattern("^(http://|https://).*")
-    @Documentation("Solr server URL")
+    @Documentation("Solr server connection URL")
     private String url;
 
     @Option
-    @Documentation("Login field")
+    @Documentation("Solr server user")
     private String login;
 
     @Option
     @Credential
-    @Documentation("Password field")
+    @Documentation("Solr server password")
     private String password;
 
 }

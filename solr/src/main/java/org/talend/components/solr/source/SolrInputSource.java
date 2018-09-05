@@ -25,10 +25,8 @@ import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.meta.Documentation;
 
-import org.talend.components.solr.service.SolrConnectorService;
-
 @Slf4j
-@Documentation("Solr input source")
+@Documentation("Solr input source. Provides to receive data from Solr data collections")
 public class SolrInputSource implements Serializable {
 
     private final SolrInputMapperConfiguration configuration;

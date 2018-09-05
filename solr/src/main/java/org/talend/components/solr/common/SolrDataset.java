@@ -12,20 +12,20 @@ import org.talend.sdk.component.api.meta.Documentation;
 import java.util.List;
 
 @Data
-@DataSet("Solr")
+@DataSet("SolrDataSet")
 @GridLayout({ @GridLayout.Row({ "dataStore" }), @GridLayout.Row({ "core" }) })
-
+@Documentation("Solr dataSet. Provide connection to Solr Data Collection")
 @GridLayout(value = { @GridLayout.Row({ "schema" }) }, names = { GridLayout.FormType.ADVANCED })
 
 public class SolrDataset {
 
     @Option
-    @Documentation("Solr server URL DataStore")
+    @Documentation("Solr dataStore. Solr server connection")
     private SolrDataStore dataStore;
 
     @Option
     @Required
-    @Documentation("the name of Solr Core")
+    @Documentation("List of Solr data collection")
     @Suggestable(value = "coreList", parameters = { "dataStore" })
     private String core;
 
@@ -37,6 +37,6 @@ public class SolrDataset {
 
     @Option
     @Structure(type = Structure.Type.OUT, discoverSchema = "discoverSchema")
-    @Documentation("Document schema")
+    @Documentation("Schema of a Solr Document")
     private List<String> schema;
 }

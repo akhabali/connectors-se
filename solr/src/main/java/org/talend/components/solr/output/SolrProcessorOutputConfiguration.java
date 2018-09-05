@@ -10,16 +10,15 @@ import java.io.Serializable;
 
 @Data
 @GridLayout({ @GridLayout.Row({ "dataset" }), @GridLayout.Row({ "action" }) })
-
 @Documentation("Solr Processor output")
 public class SolrProcessorOutputConfiguration implements Serializable {
 
     @Option
-    @Documentation("Solr URL. Including core")
+    @Documentation("Connection to Solr Data Collection")
     private SolrDataset dataset;
 
     @Option
-    @Documentation("Combobox field. Update and Delete values are available")
+    @Documentation("Action type. Allows to choose an action to add or to delete a document from Solr collection")
     private Action action = Action.UPSERT;
 
 }

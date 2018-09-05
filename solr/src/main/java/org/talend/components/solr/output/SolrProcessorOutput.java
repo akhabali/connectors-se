@@ -25,7 +25,9 @@ import java.io.Serializable;
 @Version(1)
 @Icon(Icon.IconType.STAR)
 @Processor(name = "Output")
-@Documentation("Solr processor. Delete and Update methods are available")
+@Documentation("Solr processor. " +
+        "The component provides deletion or creation of documents from Solr. " +
+        "Parameters are taken from input components")
 public class SolrProcessorOutput implements Serializable {
 
     private final SolrProcessorOutputConfiguration configuration;
