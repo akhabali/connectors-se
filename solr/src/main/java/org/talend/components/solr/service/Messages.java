@@ -10,4 +10,6 @@ public interface Messages {
     String healthCheckFailed(final String cause);
 
     String badCredentials();
+
+    String unsupportedSolrAction();
 }

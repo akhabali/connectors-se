@@ -5,18 +5,18 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.request.QueryRequest;
 import org.apache.solr.common.SolrDocument;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.talend.components.solr.common.FilterCriteria;
 import org.talend.components.solr.common.SolrDataset;
 import org.talend.components.solr.common.SolrDataStore;
-import org.talend.components.solr.output.Action;
+import org.talend.components.solr.output.SolrAction;
 import org.talend.components.solr.output.SolrProcessorOutputConfiguration;
 import org.talend.components.solr.service.Messages;
 import org.talend.components.solr.service.SolrConnectorService;
 import org.talend.components.solr.service.SolrConnectorUtils;
+import org.talend.components.solr.service.TestMessages;
 import org.talend.components.solr.source.SolrInputMapperConfiguration;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
@@ -56,23 +56,7 @@ public class SolrComponentTestIT {
 
     private final static String PASSWORD = "SolrRocks";
 
-    private final static Messages messages = new Messages() {
-
-        @Override
-        public String healthCheckOk() {
-            return "OK";
-        }
-
-        @Override
-        public String healthCheckFailed(String cause) {
-            return "FAIL";
-        }
-
-        @Override
-        public String badCredentials() {
-            return "";
-        }
-    };
+    private final static Messages messages = new TestMessages();
 
     @Injected
     private BaseComponentsHandler componentsHandler;
@@ -85,15 +69,6 @@ public class SolrComponentTestIT {
     private SolrProcessorOutputConfiguration solrProcessorOutputConfiguration;
 
     private SolrDataset solrConnection;
-
-    @BeforeAll
-    public static void beforeAll() {
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
 
     @BeforeEach
     public void init() {
@@ -141,7 +116,7 @@ public class SolrComponentTestIT {
     @Test
     @DisplayName("UpdateTest")
     void outputUpdateTest() throws IOException, SolrServerException {
-        solrProcessorOutputConfiguration.setAction(Action.UPSERT);
+        solrProcessorOutputConfiguration.setAction(SolrAction.UPSERT);
         final String config = configurationByExample().forInstance(solrProcessorOutputConfiguration).configured().toQueryString();
 
         componentsHandler.setInputData(asList(factory.createObjectBuilder().add("address_s", "comp1").build(),
@@ -160,7 +135,7 @@ public class SolrComponentTestIT {
     @Test
     @DisplayName("Solr")
     void outputDeleteTest() throws IOException, SolrServerException {
-        solrProcessorOutputConfiguration.setAction(Action.DELETE);
+        solrProcessorOutputConfiguration.setAction(SolrAction.DELETE);
         final String config = configurationByExample().forInstance(solrProcessorOutputConfiguration).configured().toQueryString();
         componentsHandler.setInputData(asList(factory.createObjectBuilder().add("id", "apple").build(),
                 factory.createObjectBuilder().add("id", "corsair").build(),

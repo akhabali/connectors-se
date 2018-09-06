@@ -20,7 +20,7 @@ import java.util.List;
 public class SolrDataset {
 
     @Option
-    @Documentation("Solr dataStore. Solr server connection")
+    @Documentation("Solr dataStore. Connection for Solr server")
     private SolrDataStore dataStore;
 
     @Option

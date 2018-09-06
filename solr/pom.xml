@@ -59,14 +59,6 @@
     </dependencies>
 
     <build>
-        <!--<extensions>-->
-        <!--<extension>-->
-        <!--<groupId>org.talend.sdk.component</groupId>-->
-        <!--<artifactId>talend-component-maven-plugin</artifactId>-->
-        <!--<version>1.0.1</version>-->
-        <!--</extension>-->
-        <!--</extensions>-->
-
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -148,11 +140,11 @@
                                     <port>solr.port:8983</port>
                                 </ports>
                                 <wait>
-                                    <!--<http>-->
-                                        <!--<url>https://${docker.host.address}:${solr.port}/solr</url>-->
-                                        <!--<method>GET</method>-->
-                                        <!--<allowAllHosts>true</allowAllHosts>-->
-                                    <!--</http>-->
+                                    <http>
+                                        <url>https://${docker.host.address}:${solr.port}/solr</url>
+                                        <method>GET</method>
+                                        <allowAllHosts>true</allowAllHosts>
+                                    </http>
                                     <time>30000</time>
                                 </wait>
                             </run>

@@ -1,6 +1,6 @@
 package org.talend.components.solr.output;
 
-public enum Action {
+public enum SolrAction {
     DELETE,
     UPSERT
 }

@@ -8,6 +8,8 @@ import org.apache.solr.client.solrj.response.schema.SchemaRepresentation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.talend.components.solr.common.FilterCriteria;
+import org.talend.components.solr.output.SolrActionExecutorFactory;
+import org.talend.components.solr.output.UnsupportedSolrActionException;
 import org.talend.components.solr.source.SolrInputMapperConfiguration;
 import org.talend.sdk.component.api.service.schema.Schema;
 import org.talend.sdk.component.api.service.schema.Type;
@@ -25,23 +27,7 @@ public class SolrConnectorUtilsTest {
 
     private SolrConnectorUtils util;
 
-    private final static Messages messages = new Messages() {
-
-        @Override
-        public String healthCheckOk() {
-            return "OK";
-        }
-
-        @Override
-        public String healthCheckFailed(String cause) {
-            return "FAIL";
-        }
-
-        @Override
-        public String badCredentials() {
-            return "Bad credentials message";
-        }
-    };
+    private final static Messages messages = new TestMessages();
 
     @BeforeEach
     public void init() {
@@ -222,5 +208,11 @@ public class SolrConnectorUtilsTest {
         expected.setRows(100);
         expected.setStart(4);
         assertNotEquals(expected.toString(), actual.toString());
+    }
+
+    @Test
+    public void testSolrActionExecutorFactoryNull() {
+        SolrActionExecutorFactory factory = new SolrActionExecutorFactory(null, null, null, messages);
+        assertThrows(UnsupportedSolrActionException.class, factory::getSolrActionExecutor);
     }
 }

@@ -18,7 +18,7 @@ public class SolrProcessorOutputConfiguration implements Serializable {
     private SolrDataset dataset;
 
     @Option
-    @Documentation("Action type. Allows to choose an action to add or to delete a document from Solr collection")
-    private Action action = Action.UPSERT;
+    @Documentation("Solr Action. Allows to choose an action to add or to delete a document from Solr collection")
+    private SolrAction action = SolrAction.UPSERT;
 
 }

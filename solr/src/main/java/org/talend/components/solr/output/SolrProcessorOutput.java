@@ -6,7 +6,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.common.SolrException;
-import org.apache.solr.common.SolrInputDocument;
+import org.talend.components.solr.service.Messages;
 import org.talend.components.solr.service.SolrConnectorService;
 import org.talend.components.solr.service.SolrConnectorUtils;
 import org.talend.sdk.component.api.component.Icon;
@@ -25,9 +25,8 @@ import java.io.Serializable;
 @Version(1)
 @Icon(Icon.IconType.STAR)
 @Processor(name = "Output")
-@Documentation("Solr processor. " +
-        "The component provides deletion or creation of documents from Solr. " +
-        "Parameters are taken from input components")
+@Documentation("Solr processor. " + "The component provides deletion or creation of documents from Solr. "
+        + "Parameters are taken from input components")
 public class SolrProcessorOutput implements Serializable {
 
     private final SolrProcessorOutputConfiguration configuration;
@@ -40,11 +39,16 @@ public class SolrProcessorOutput implements Serializable {
 
     private UpdateRequest request;
 
+    private SolrActionExecutorFactory solrActionExecutorFactory;
+
+    private Messages i18n;
+
     public SolrProcessorOutput(@Option("configuration") final SolrProcessorOutputConfiguration configuration,
-            final SolrConnectorService service, final SolrConnectorUtils utils) {
+            final SolrConnectorService service, final SolrConnectorUtils utils, final Messages i18n) {
         this.configuration = configuration;
         this.service = service;
         this.utils = utils;
+        this.i18n = i18n;
     }
 
     @PostConstruct
@@ -53,6 +57,7 @@ public class SolrProcessorOutput implements Serializable {
         request = new UpdateRequest();
         request.setBasicAuthCredentials(configuration.getDataset().getDataStore().getLogin(),
                 configuration.getDataset().getDataStore().getPassword());
+        solrActionExecutorFactory = new SolrActionExecutorFactory(request, utils, configuration.getAction(), i18n);
     }
 
     @BeforeGroup
@@ -62,30 +67,11 @@ public class SolrProcessorOutput implements Serializable {
 
     @ElementListener
     public void onNext(@Input final JsonObject record) {
-        Action action = configuration.getAction();
-        if (Action.UPSERT == action) {
-            update(record);
-        } else if (Action.DELETE == action) {
-            deleteDocument(record);
+        try {
+            solrActionExecutorFactory.getSolrActionExecutor().execute(record);
+        } catch (UnsupportedSolrActionException e) {
+            log.error(e.getMessage());
         }
-    }
-
-    private void update(JsonObject record) {
-        SolrInputDocument doc = new SolrInputDocument();
-        record.keySet().forEach(e -> doc.addField(e, utils.trimQuotes(getStringValue(record, e))));
-        request.add(doc);
-    }
-
-    private String getStringValue(JsonObject record, String key) {
-        if (record != null && record.get(key) != null) {
-            return record.get(key).toString();
-        }
-        return "";
-    }
-
-    private void deleteDocument(JsonObject record) {
-        String query = utils.createQueryFromRecord(record);
-        request.deleteByQuery(query);
     }
 
     @AfterGroup
