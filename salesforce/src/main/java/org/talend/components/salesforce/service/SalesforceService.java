@@ -29,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class SalesforceService {
 
+    //TODO maybe no need for this
     public static final String CONFIG_FILE_lOCATION_KEY = "org.talend.component.salesforce.config.file";
 
     public static final String RETIRED_ENDPOINT = "www.salesforce.com";
