@@ -62,7 +62,7 @@ public class SolrConnectorService {
     @Suggestions("rawQuery")
     public SuggestionValues suggestRawQuery(@Option("config") final SolrInputMapperConfiguration config,
             SolrConnectorUtils util) {
-        String query = util.generateQuery(config).toString();
+        String query = util.generateConfigQuery(config).toString();
         return new SuggestionValues(false, Arrays.asList(new SuggestionValues.Item(query, query)));
     }
 

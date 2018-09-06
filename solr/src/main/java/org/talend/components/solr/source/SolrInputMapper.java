@@ -19,8 +19,7 @@ import org.talend.sdk.component.api.input.Split;
 import org.talend.sdk.component.api.meta.Documentation;
 
 @Version(1)
-@Icon(Icon.IconType.STAR)
-
+@Icon(value = Icon.IconType.CUSTOM, custom = "SolrInput")
 @PartitionMapper(name = "Input")
 @Documentation("Solr Input Mapper")
 public class SolrInputMapper implements Serializable {

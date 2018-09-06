@@ -23,7 +23,7 @@ import java.io.Serializable;
 
 @Slf4j
 @Version(1)
-@Icon(Icon.IconType.STAR)
+@Icon(value = Icon.IconType.CUSTOM, custom = "SolrOutput")
 @Processor(name = "Output")
 @Documentation("Solr processor. " + "The component provides deletion or creation of documents from Solr. "
         + "Parameters are taken from input components")

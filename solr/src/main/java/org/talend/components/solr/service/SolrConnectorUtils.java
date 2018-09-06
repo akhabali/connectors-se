@@ -80,6 +80,10 @@ public class SolrConnectorUtils {
         if (StringUtils.isNotBlank(configuration.getRawQuery())) {
             return generateQuery(configuration.getRawQuery());
         }
+        return generateConfigQuery(configuration);
+    }
+
+    public SolrQuery generateConfigQuery(SolrInputMapperConfiguration configuration) {
         SolrQuery query = new SolrQuery("*:*");
         configuration.getFilterQuery().forEach(e -> addFilterQuery(e, query));
         query.setRows(parseInt(configuration.getRows()));
