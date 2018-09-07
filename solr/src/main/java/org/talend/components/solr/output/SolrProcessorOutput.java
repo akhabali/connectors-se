@@ -39,7 +39,7 @@ public class SolrProcessorOutput implements Serializable {
 
     private UpdateRequest request;
 
-    private SolrActionExecutorFactory solrActionExecutorFactory;
+    private SolrActionExecutor solrActionExecutor;
 
     private Messages i18n;
 
@@ -57,7 +57,8 @@ public class SolrProcessorOutput implements Serializable {
         request = new UpdateRequest();
         request.setBasicAuthCredentials(configuration.getDataset().getDataStore().getLogin(),
                 configuration.getDataset().getDataStore().getPassword());
-        solrActionExecutorFactory = new SolrActionExecutorFactory(request, utils, configuration.getAction(), i18n);
+        solrActionExecutor = new SolrActionExecutorFactory(request, utils, configuration.getAction(), i18n)
+                .getSolrActionExecutor();
     }
 
     @BeforeGroup
@@ -67,11 +68,7 @@ public class SolrProcessorOutput implements Serializable {
 
     @ElementListener
     public void onNext(@Input final JsonObject record) {
-        try {
-            solrActionExecutorFactory.getSolrActionExecutor().execute(record);
-        } catch (UnsupportedSolrActionException e) {
-            log.error(e.getMessage());
-        }
+        solrActionExecutor.execute(record);
     }
 
     @AfterGroup

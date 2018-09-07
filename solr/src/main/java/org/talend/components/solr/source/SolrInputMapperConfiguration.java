@@ -17,7 +17,7 @@ import lombok.Data;
 @GridLayout({ @GridLayout.Row({ "dataset" }), @GridLayout.Row({ "filterQuery" }), @GridLayout.Row({ "start" }),
         @GridLayout.Row({ "rows" }) })
 @GridLayout(value = { @GridLayout.Row({ "rawQuery" }) }, names = { GridLayout.FormType.ADVANCED })
-@Documentation("Solr Input Configuration")
+@Documentation("Configuration for Solr Input component")
 public class SolrInputMapperConfiguration implements Serializable {
 
     @Option

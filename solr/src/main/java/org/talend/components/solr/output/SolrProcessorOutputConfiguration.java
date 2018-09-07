@@ -10,7 +10,7 @@ import java.io.Serializable;
 
 @Data
 @GridLayout({ @GridLayout.Row({ "dataset" }), @GridLayout.Row({ "action" }) })
-@Documentation("Solr Processor output")
+@Documentation("Configuration for Solr Output component")
 public class SolrProcessorOutputConfiguration implements Serializable {
 
     @Option
