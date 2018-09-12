@@ -79,7 +79,8 @@ public class InputSource implements Serializable {
             jndiContext = service.getJNDIContext(configuration.getBasicConfig().getConnection().getUrl(),
                     configuration.getBasicConfig().getConnection().getModuleList());
             // create ConnectionFactory from JNDI
-            ConnectionFactory connectionFactory = service.getConnectionFactory(jndiContext);
+            ConnectionFactory connectionFactory = service.getConnectionFactory(jndiContext,
+                    configuration.getBasicConfig().getConnection().getFactoryJndiName());
 
             try {
                 connection = service.getConnection(connectionFactory,

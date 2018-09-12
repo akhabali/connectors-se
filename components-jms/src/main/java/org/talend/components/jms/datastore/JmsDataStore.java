@@ -30,8 +30,8 @@ import static org.talend.components.jms.service.ActionService.ACTION_BASIC_HEALT
 import static org.talend.components.jms.service.ActionService.ACTION_LIST_SUPPORTED_BROKER;
 
 @Data
-@GridLayout({ @GridLayout.Row({ "moduleList" }), @GridLayout.Row("url"), @GridLayout.Row("userIdentity"),
-        @GridLayout.Row({ "userName", "password" }) })
+@GridLayout({ @GridLayout.Row({ "moduleList" }), @GridLayout.Row({ "contextProviderClass" }), @GridLayout.Row("url"),
+        @GridLayout.Row("factoryJndiName"), @GridLayout.Row("userIdentity"), @GridLayout.Row({ "userName", "password" }) })
 @DataStore("basic")
 @Checkable(ACTION_BASIC_HEALTH_CHECK)
 @Documentation("A connection to a data base")
@@ -44,9 +44,19 @@ public class JmsDataStore implements Serializable {
     private String moduleList;
 
     @Option
-    @Pattern("^(tcp|ssl)://")
+    @Required
+    @Documentation("Fully qualified InitialContextProvider class name")
+    private String contextProviderClass;
+
+    @Option
+    // @Pattern("^(tcp|ssl)://")
     @Documentation("Input for JMS server URL")
     private String url;
+
+    @Option
+    @Required
+    @Documentation("ConnectionFactory JNDI name")
+    private String factoryJndiName;
 
     @Option
     @Documentation("Checkbox for User login/password checking")

@@ -23,6 +23,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.IllegalStateException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
@@ -44,6 +45,7 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.json.bind.Jsonb;
 import javax.naming.Context;
+import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.naming.spi.InitialContextFactory;
 
@@ -146,9 +148,26 @@ public class JmsService {
         Hashtable<String, String> properties = new Hashtable<>();
         properties.put(Context.PROVIDER_URL, url);
 
-        InitialContextFactory contextFactory = (InitialContextFactory) (getProviderClassLoader(moduleList)
-                .loadClass(getProviders().get(moduleList).getClazz()).newInstance());
-        return contextFactory.getInitialContext(properties);
+        // TODO
+        properties.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.fscontext.RefFSContextFactory");
+        // Context context = new InitialContext(properties);
+        // return context;
+        // InitialContextFactory contextFactory = (InitialContextFactory) (getProviderClassLoader(moduleList)
+        // .loadClass(getProviders().get(moduleList).getClazz()).newInstance());
+        ClassLoader cl = getProviderClassLoader("IBMMQ");
+        final Thread thread = Thread.currentThread();
+        final ClassLoader oldLoader = thread.getContextClassLoader();
+        thread.setContextClassLoader(cl);
+        try {
+            Class<?> clazz = cl.loadClass("com.sun.jndi.fscontext.RefFSContextFactory");
+            InitialContextFactory contextFactory = (InitialContextFactory) clazz.newInstance();
+            return contextFactory.getInitialContext(properties);
+        } catch (final IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        } finally {
+            thread.setContextClassLoader(oldLoader);
+        }
+
     }
 
     public Destination getDestination(Session session, String destination, MessageType messageType) throws JMSException {
@@ -159,8 +178,16 @@ public class JmsService {
         return connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
     }
 
-    public ConnectionFactory getConnectionFactory(Context context) throws NamingException {
-        return (ConnectionFactory) context.lookup(CONNECTION_FACTORY);
+    public ConnectionFactory getConnectionFactory(Context context, final String jndiName) throws NamingException {
+        ClassLoader cl = getProviderClassLoader("IBMMQ");
+        final Thread thread = Thread.currentThread();
+        final ClassLoader oldLoader = thread.getContextClassLoader();
+        thread.setContextClassLoader(cl);
+        try {
+            return (ConnectionFactory) context.lookup(jndiName);
+        } finally {
+            thread.setContextClassLoader(oldLoader);
+        }
     }
 
     public Connection getConnection(ConnectionFactory connectionFactory, boolean isUserIdentity, String userName, String password)

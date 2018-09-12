@@ -77,7 +77,7 @@ public class ActionService {
             // create JNDI context
             jndiContext = jmsService.getJNDIContext(datastore.getUrl(), datastore.getModuleList());
             // create ConnectionFactory from JNDI
-            ConnectionFactory connectionFactory = jmsService.getConnectionFactory(jndiContext);
+            ConnectionFactory connectionFactory = jmsService.getConnectionFactory(jndiContext, datastore.getFactoryJndiName());
 
             try {
                 connection = jmsService.getConnection(connectionFactory, datastore.isUserIdentity(), datastore.getUserName(),

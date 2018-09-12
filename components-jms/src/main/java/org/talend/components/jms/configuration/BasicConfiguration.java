@@ -42,6 +42,7 @@ public class BasicConfiguration implements Serializable {
     private MessageType messageType = MessageType.TOPIC;
 
     @Option
+    @Required
     @Documentation("Input for TOPIC/QUEUE Name")
     private String destination;
 

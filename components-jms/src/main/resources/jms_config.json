@@ -7,5 +7,20 @@
         "path": "org.apache.activemq:activemq-all:5.15.5"
       }
     ]
+  },
+  {
+    "id": "IBMMQ",
+    "class": "com.sun.jndi.fscontext.RefFSContextFactory",
+    "paths": [
+      {
+        "path": "org.talend.libraries:com.ibm.mq.allclient:6.0.0-SNAPSHOT"
+      },
+      {
+        "path": "org.talend.libraries:fscontext:6.0.0-SNAPSHOT"
+      },
+      {
+        "path": "org.talend.libraries:providerutil:6.0.0-SNAPSHOT"
+      }
+    ]
   }
 ]
