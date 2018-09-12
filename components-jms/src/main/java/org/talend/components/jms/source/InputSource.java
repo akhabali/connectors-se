@@ -76,11 +76,10 @@ public class InputSource implements Serializable {
     public void init() {
         try {
             // create JNDI context
-            jndiContext = service.getJNDIContext(configuration.getBasicConfig().getConnection().getUrl(),
-                    configuration.getBasicConfig().getConnection().getModuleList());
+            jndiContext = service.getJNDIContext(configuration.getBasicConfig().getConnection());
             // create ConnectionFactory from JNDI
             ConnectionFactory connectionFactory = service.getConnectionFactory(jndiContext,
-                    configuration.getBasicConfig().getConnection().getFactoryJndiName());
+                    configuration.getBasicConfig().getConnection());
 
             try {
                 connection = service.getConnection(connectionFactory,

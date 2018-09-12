@@ -51,6 +51,7 @@ import javax.naming.spi.InitialContextFactory;
 
 import org.talend.components.jms.ProviderInfo;
 import org.talend.components.jms.configuration.MessageType;
+import org.talend.components.jms.datastore.JmsDataStore;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.configuration.LocalConfiguration;
 import org.talend.sdk.component.api.service.dependency.Resolver;
@@ -143,30 +144,16 @@ public class JmsService {
         });
     }
 
-    public Context getJNDIContext(String url, String moduleList)
+    public Context getJNDIContext(final JmsDataStore dataStore)
             throws InstantiationException, IllegalAccessException, ClassNotFoundException, NamingException {
         Hashtable<String, String> properties = new Hashtable<>();
-        properties.put(Context.PROVIDER_URL, url);
+        properties.put(Context.PROVIDER_URL, dataStore.getUrl());
+        properties.put(Context.INITIAL_CONTEXT_FACTORY, dataStore.getContextProviderClass());
 
-        // TODO
-        properties.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.fscontext.RefFSContextFactory");
-        // Context context = new InitialContext(properties);
-        // return context;
-        // InitialContextFactory contextFactory = (InitialContextFactory) (getProviderClassLoader(moduleList)
-        // .loadClass(getProviders().get(moduleList).getClazz()).newInstance());
-        ClassLoader cl = getProviderClassLoader("IBMMQ");
-        final Thread thread = Thread.currentThread();
-        final ClassLoader oldLoader = thread.getContextClassLoader();
-        thread.setContextClassLoader(cl);
-        try {
-            Class<?> clazz = cl.loadClass("com.sun.jndi.fscontext.RefFSContextFactory");
-            InitialContextFactory contextFactory = (InitialContextFactory) clazz.newInstance();
-            return contextFactory.getInitialContext(properties);
-        } catch (final IllegalAccessException e) {
-            throw new IllegalStateException(e);
-        } finally {
-            thread.setContextClassLoader(oldLoader);
-        }
+        ClassLoader cl = getProviderClassLoader(dataStore.getModuleList());
+        Class<?> clazz = cl.loadClass(dataStore.getContextProviderClass());
+        InitialContextFactory contextFactory = (InitialContextFactory) clazz.newInstance();
+        return contextFactory.getInitialContext(properties);
 
     }
 
@@ -178,13 +165,13 @@ public class JmsService {
         return connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
     }
 
-    public ConnectionFactory getConnectionFactory(Context context, final String jndiName) throws NamingException {
-        ClassLoader cl = getProviderClassLoader("IBMMQ");
+    public ConnectionFactory getConnectionFactory(Context context, final JmsDataStore dataStore) throws NamingException {
+        ClassLoader cl = getProviderClassLoader(dataStore.getModuleList());
         final Thread thread = Thread.currentThread();
         final ClassLoader oldLoader = thread.getContextClassLoader();
         thread.setContextClassLoader(cl);
         try {
-            return (ConnectionFactory) context.lookup(jndiName);
+            return (ConnectionFactory) context.lookup(dataStore.getFactoryJndiName());
         } finally {
             thread.setContextClassLoader(oldLoader);
         }
