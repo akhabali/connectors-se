@@ -22,7 +22,7 @@ public class BasicDataStore implements Serializable {
 
     @Option
     @Required
-    @DefaultValue("local_configuration:salesforce.endpoint.key")
+    @DefaultValue("local_configuration:salesforce.endpoint")
     @Documentation("")
     public String endpoint;
 
