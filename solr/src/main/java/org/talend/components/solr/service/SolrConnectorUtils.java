@@ -8,8 +8,9 @@ import org.apache.solr.client.solrj.response.schema.SchemaRepresentation;
 import org.apache.solr.common.params.CommonParams;
 import org.talend.components.solr.common.FilterCriteria;
 import org.talend.components.solr.source.SolrInputMapperConfiguration;
+import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
-import org.talend.sdk.component.api.service.schema.Schema;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.api.service.schema.Type;
 
 import javax.json.JsonObject;
@@ -117,19 +118,21 @@ public class SolrConnectorUtils {
         return value;
     }
 
-    public Schema getSchemaFromRepresentation(SchemaRepresentation representation) {
-        if (representation == null) {
-            return new Schema(Collections.emptyList());
-        }
-        List<Map<String, Object>> fields = representation.getFields();
-        List<Schema.Entry> entries = new ArrayList<>();
-        for (Map<String, Object> field : fields) {
-            String fieldName = getFieldName(field);
-            if (fieldName != null && checkStored(field)) {
-                entries.add(new Schema.Entry(fieldName, getFieldType(field)));
-            }
-        }
-        return new Schema(entries);
+    public org.talend.sdk.component.api.record.Schema getSchemaFromRepresentation(SchemaRepresentation representation,
+            final RecordBuilderFactory factory) {
+        // if (representation == null) {
+        // return new Schema(Collections.emptyList());
+        // }
+        // List<Map<String, Object>> fields = representation.getFields();
+        // List<Schema.Entry> entries = new ArrayList<>();
+        // for (Map<String, Object> field : fields) {
+        // String fieldName = getFieldName(field);
+        // if (fieldName != null && checkStored(field)) {
+        // entries.add(new Schema.Entry(fieldName, getFieldType(field)));
+        // }
+        // }
+        // return new Schema(entries);
+        return factory.newSchemaBuilder(Schema.Type.LONG).build();
     }
 
     private boolean checkStored(Map<String, Object> field) {

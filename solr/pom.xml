@@ -16,7 +16,9 @@
     <name>Components :: Solr</name>
 
     <properties>
-        <talend.component.studioHome/>
+        <component-api.version>1.1.0</component-api.version>
+        <component-runtime.version>1.1.0-SNAPSHOT</component-runtime.version>
+        <talend.component.studioHome>/home/ihonchar/workspace/studio/TOS_DI-20181001_1932-V7.1.1SNAPSHOT</talend.component.studioHome>
         <!-- overrides parent pom property to fix dataset validation issue -->
         <validation.model>false</validation.model>
         <solr-ssl.trust-key-store.path>
