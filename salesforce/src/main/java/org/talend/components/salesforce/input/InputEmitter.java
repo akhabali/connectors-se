@@ -13,21 +13,11 @@ import javax.annotation.PostConstruct;
 import javax.json.JsonBuilderFactory;
 import javax.json.JsonObject;
 
-import com.sforce.async.AsyncApiException;
-import com.sforce.async.BulkConnection;
-import com.sforce.soap.partner.DescribeSObjectResult;
-import com.sforce.soap.partner.Field;
-import com.sforce.soap.partner.FieldType;
-import com.sforce.soap.partner.PartnerConnection;
-import com.sforce.soap.partner.fault.ApiFault;
-import com.sforce.ws.ConnectionException;
-
 import org.talend.components.salesforce.BulkResultSet;
 import org.talend.components.salesforce.dataset.QueryDataSet;
-import org.talend.components.salesforce.service.SalesforceService;
-import org.talend.components.salesforce.service.UiActionService;
 import org.talend.components.salesforce.service.BulkQueryService;
 import org.talend.components.salesforce.service.Messages;
+import org.talend.components.salesforce.service.SalesforceService;
 import org.talend.components.salesforce.soql.SoqlQuery;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
@@ -36,6 +26,15 @@ import org.talend.sdk.component.api.input.Emitter;
 import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.service.configuration.LocalConfiguration;
+
+import com.sforce.async.AsyncApiException;
+import com.sforce.async.BulkConnection;
+import com.sforce.soap.partner.DescribeSObjectResult;
+import com.sforce.soap.partner.Field;
+import com.sforce.soap.partner.FieldType;
+import com.sforce.soap.partner.PartnerConnection;
+import com.sforce.soap.partner.fault.ApiFault;
+import com.sforce.ws.ConnectionException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -142,14 +141,15 @@ public class InputEmitter implements Serializable {
         }
 
         List<String> queryFields;
-        if (dataset.getSelectColumnIds() == null || dataset.getSelectColumnIds().isEmpty()) {
+        List<String> selectedColumns = dataset.getSelectedColumnsConfig().getSelectColumnIds();
+        if (selectedColumns == null || selectedColumns.isEmpty()) {
             queryFields = allModuleFields;
-        } else if (!allModuleFields.containsAll(dataset.getSelectColumnIds())) { // ensure requested fields exist
-            throw new IllegalStateException("columns { "
-                    + dataset.getSelectColumnIds().stream().filter(c -> !allModuleFields.contains(c)).collect(joining(","))
-                    + " } " + "doesn't exist in module '" + dataset.getModuleName() + "'");
+        } else if (!allModuleFields.containsAll(selectedColumns)) { // ensure requested fields exist
+            throw new IllegalStateException(
+                    "columns { " + selectedColumns.stream().filter(c -> !allModuleFields.contains(c)).collect(joining(","))
+                            + " } " + "doesn't exist in module '" + dataset.getModuleName() + "'");
         } else {
-            queryFields = dataset.getSelectColumnIds();
+            queryFields = selectedColumns;
         }
 
         StringBuilder sb = new StringBuilder();

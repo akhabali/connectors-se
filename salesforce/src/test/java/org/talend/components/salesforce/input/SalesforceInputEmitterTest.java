@@ -25,7 +25,6 @@ import org.talend.sdk.component.junit.http.junit5.HttpApiName;
 import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.junit5.WithMavenServers;
-import org.talend.sdk.component.maven.MavenDecrypter;
 import org.talend.sdk.component.maven.Server;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
@@ -83,7 +82,9 @@ class SalesforceInputEmitterTest {
         final QueryDataSet queryDataSet = new QueryDataSet();
         queryDataSet.setModuleName("account");
         queryDataSet.setSourceType(QueryDataSet.SourceType.MODULE_SELECTION);
-        queryDataSet.setSelectColumnIds(singletonList("Name"));
+        final QueryDataSet.SelectedColumnsConfig selectedColumnsConfig = new QueryDataSet.SelectedColumnsConfig();
+        selectedColumnsConfig.setSelectColumnIds(singletonList("Name"));
+        queryDataSet.setSelectedColumnsConfig(selectedColumnsConfig);
         queryDataSet.setDataStore(datasore);
         queryDataSet.setCondition("Name Like '%Oil%'");
         final String config = configurationByExample().forInstance(queryDataSet).configured().toQueryString();
@@ -125,7 +126,9 @@ class SalesforceInputEmitterTest {
         datasore.setSecurityKey(serverWithSecuritykey.getPassword());
         final QueryDataSet queryDataSet = new QueryDataSet();
         queryDataSet.setModuleName("account");
-        queryDataSet.setSelectColumnIds(singletonList("InvalidField10x"));
+        final QueryDataSet.SelectedColumnsConfig selectedColumnsConfig = new QueryDataSet.SelectedColumnsConfig();
+        selectedColumnsConfig.setSelectColumnIds(singletonList("InvalidField10x"));
+        queryDataSet.setSelectedColumnsConfig(selectedColumnsConfig);
         queryDataSet.setSourceType(QueryDataSet.SourceType.MODULE_SELECTION);
         queryDataSet.setDataStore(datasore);
         final String config = configurationByExample().forInstance(queryDataSet).configured().toQueryString();

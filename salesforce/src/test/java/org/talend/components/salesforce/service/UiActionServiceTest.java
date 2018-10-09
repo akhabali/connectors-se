@@ -10,11 +10,11 @@ import static org.talend.components.salesforce.service.SalesforceService.URL;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.talend.components.salesforce.SfHeaderFilter;
+import org.talend.components.salesforce.dataset.QueryDataSet;
 import org.talend.components.salesforce.datastore.BasicDataStore;
 import org.talend.sdk.component.api.DecryptedServer;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
-import org.talend.sdk.component.api.service.completion.Values;
 import org.talend.sdk.component.api.service.configuration.LocalConfiguration;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.junit.BaseComponentsHandler;
@@ -26,6 +26,8 @@ import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.junit5.WithMavenServers;
 import org.talend.sdk.component.maven.Server;
+
+import java.util.List;
 
 @WithComponents("org.talend.components.salesforce")
 @HttpApi(useSsl = true, headerFilter = SfHeaderFilter.class)
@@ -110,6 +112,22 @@ class UiActionServiceTest {
             datasore.setPassword("NoPass");
             service.loadSalesforceModules(datasore);
         });
+    }
+
+    @Test
+    @HttpApiName("${class}_${method}")
+    @DisplayName("Retrive module column names")
+    void retriveColumnsName() {
+        final BasicDataStore datasore = new BasicDataStore();
+        datasore.setEndpoint(URL);
+        datasore.setUserId(serverWithPassword.getUsername());
+        datasore.setPassword(serverWithPassword.getPassword());
+        datasore.setSecurityKey(serverWithSecuritykey.getPassword());
+        final QueryDataSet.SelectedColumnsConfig selectedColumnsConfig = service.guessSchema(datasore, "Account", null, null);
+        assertNotNull(selectedColumnsConfig);
+        List<String> columns = selectedColumnsConfig.getSelectColumnIds();
+        assertNotNull(columns);
+        assertEquals(58, columns.size());
     }
 
     @Test
