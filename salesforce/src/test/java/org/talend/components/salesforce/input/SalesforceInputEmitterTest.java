@@ -82,9 +82,7 @@ class SalesforceInputEmitterTest {
         final QueryDataSet queryDataSet = new QueryDataSet();
         queryDataSet.setModuleName("account");
         queryDataSet.setSourceType(QueryDataSet.SourceType.MODULE_SELECTION);
-        final QueryDataSet.SelectedColumnsConfig selectedColumnsConfig = new QueryDataSet.SelectedColumnsConfig();
-        selectedColumnsConfig.setSelectColumnIds(singletonList("Name"));
-        queryDataSet.setSelectedColumnsConfig(selectedColumnsConfig);
+        queryDataSet.setSelectColumnIds(singletonList("Name"));
         queryDataSet.setDataStore(datasore);
         queryDataSet.setCondition("Name Like '%Oil%'");
         final String config = configurationByExample().forInstance(queryDataSet).configured().toQueryString();
@@ -126,9 +124,7 @@ class SalesforceInputEmitterTest {
         datasore.setSecurityKey(serverWithSecuritykey.getPassword());
         final QueryDataSet queryDataSet = new QueryDataSet();
         queryDataSet.setModuleName("account");
-        final QueryDataSet.SelectedColumnsConfig selectedColumnsConfig = new QueryDataSet.SelectedColumnsConfig();
-        selectedColumnsConfig.setSelectColumnIds(singletonList("InvalidField10x"));
-        queryDataSet.setSelectedColumnsConfig(selectedColumnsConfig);
+        queryDataSet.setSelectColumnIds(singletonList("InvalidField10x"));
         queryDataSet.setSourceType(QueryDataSet.SourceType.MODULE_SELECTION);
         queryDataSet.setDataStore(datasore);
         final String config = configurationByExample().forInstance(queryDataSet).configured().toQueryString();

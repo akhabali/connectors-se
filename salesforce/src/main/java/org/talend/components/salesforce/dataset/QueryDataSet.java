@@ -19,6 +19,7 @@ import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.DefaultValue;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Code;
+import org.talend.sdk.component.api.configuration.ui.widget.Structure;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import lombok.Data;
@@ -26,7 +27,7 @@ import lombok.Data;
 @Data
 @DataSet("query")
 @GridLayout(value = { @GridLayout.Row("dataStore"), @GridLayout.Row("sourceType"), @GridLayout.Row("query"),
-        @GridLayout.Row("moduleName"), @GridLayout.Row({ "columns", "selectedColumnsConfig" }), @GridLayout.Row("condition"), })
+        @GridLayout.Row("moduleName"), @GridLayout.Row({ "columns", "selectColumnIds" }), @GridLayout.Row("condition"), })
 @Documentation("")
 public class QueryDataSet implements Serializable {
 
@@ -60,12 +61,11 @@ public class QueryDataSet implements Serializable {
     private String columns;
 
     @Option
-    @Documentation("retrieveColumns")
+    @Documentation("addColumns")
     @ActiveIfs({ @ActiveIf(target = "sourceType", value = { "MODULE_SELECTION" }),
             @ActiveIf(target = "moduleName", value = { "" }, negate = true) })
-    @Updatable(value = "guessSchema", parameters = { "dataStore", "moduleName", "columns",
-            "selectedColumnsConfig" }, after = "columns")
-    private SelectedColumnsConfig selectedColumnsConfig;
+    @Structure(type = Structure.Type.OUT, discoverSchema = "addColumns")
+    private List<String> selectColumnIds;
 
     @Option
     @ActiveIfs({ @ActiveIf(target = "sourceType", value = { "MODULE_SELECTION" }),
@@ -89,14 +89,4 @@ public class QueryDataSet implements Serializable {
         return moduleNames;
     }
 
-    @Data
-    @GridLayout({ @GridLayout.Row({ "selectColumnIds" }) })
-
-    public static class SelectedColumnsConfig {
-
-        @Option
-        @Documentation("")
-        private List<String> selectColumnIds;
-
-    }
 }

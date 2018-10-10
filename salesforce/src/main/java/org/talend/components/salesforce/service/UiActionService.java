@@ -6,18 +6,20 @@ import static org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.talend.components.salesforce.dataset.QueryDataSet;
 import org.talend.components.salesforce.datastore.BasicDataStore;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.record.Schema;
+import org.talend.sdk.component.api.record.Schema.Type;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.completion.Suggestions;
 import org.talend.sdk.component.api.service.configuration.LocalConfiguration;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
-import org.talend.sdk.component.api.service.update.Update;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
+import org.talend.sdk.component.api.service.schema.DiscoverSchema;
 
 import com.sforce.soap.partner.DescribeGlobalSObjectResult;
 import com.sforce.soap.partner.DescribeSObjectResult;
@@ -73,34 +75,35 @@ public class UiActionService {
         }
     }
 
-    @Update("guessSchema")
-    public QueryDataSet.SelectedColumnsConfig guessSchema(@Option("dataStore") final BasicDataStore dataStore,
-            @Option("moduleName") final String moduleName, @Option("columns") final String columns,
-            @Option("selectedColumnsConfig") QueryDataSet.SelectedColumnsConfig selectedColumnsConfig) {
-        final QueryDataSet.SelectedColumnsConfig newConfig = new QueryDataSet.SelectedColumnsConfig();
+    @DiscoverSchema("addColumns")
+    public Schema guessSchema(@Option("dataSet") final QueryDataSet dataSet, final RecordBuilderFactory factory) {
+        final Schema.Entry.Builder entryBuilder = factory.newEntryBuilder();
+        final Schema.Builder schemaBuilder = factory.newSchemaBuilder(Type.RECORD);
+        final String selectedColumn = dataSet.getColumns();
+        final String moduleName = dataSet.getModuleName();
         try {
-            if ((columns == null || columns.isEmpty())) {
-                final PartnerConnection connection = this.service.connect(dataStore, configuration);
+            if ((selectedColumn == null || selectedColumn.isEmpty())) {
+                log.debug("create connection...");
+                final PartnerConnection connection = this.service.connect(dataSet.getDataStore(), configuration);
                 if (moduleName == null || moduleName.isEmpty()) {
-                    return newConfig;
+                    return schemaBuilder.build();
                 }
                 log.debug("retrieve columns from module: " + moduleName);
-                DescribeSObjectResult modules = connection.describeSObject(moduleName);
-                final List<String> columnNames = Arrays.stream(modules.getFields()).map(field -> field.getName())
-                        .collect(Collectors.toList());
-                newConfig.setSelectColumnIds(columnNames);
-                return newConfig;
+                DescribeSObjectResult module = connection.describeSObject(moduleName);
+                for (Field field : module.getFields()) {
+                    schemaBuilder.withEntry(entryBuilder.withName(field.getName()).withType(Type.STRING).build());
+                }
+                return schemaBuilder.build();
             } else {
-                List<String> selectedColumns = selectedColumnsConfig.getSelectColumnIds();
+                List<String> selectedColumns = dataSet.getSelectColumnIds();
                 List<String> newSelectedColumns = new ArrayList<>();
                 if (selectedColumns != null && !selectedColumns.isEmpty()) {
-                    newSelectedColumns.addAll(selectedColumns);
-                    newSelectedColumns.add(columns);
-                } else {
-                    newSelectedColumns.add(columns);
+                    for (String column : selectedColumns) {
+                        schemaBuilder.withEntry(entryBuilder.withName(column).withType(Type.STRING).build());
+                    }
                 }
-                newConfig.setSelectColumnIds(newSelectedColumns);
-                return newConfig;
+                schemaBuilder.withEntry(entryBuilder.withName(selectedColumn).withType(Type.STRING).build());
+                return schemaBuilder.build();
             }
         } catch (ConnectionException e) {
             throw service.handleConnectionException(e);

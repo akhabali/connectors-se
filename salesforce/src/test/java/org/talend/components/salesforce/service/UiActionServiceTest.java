@@ -13,10 +13,12 @@ import org.talend.components.salesforce.SfHeaderFilter;
 import org.talend.components.salesforce.dataset.QueryDataSet;
 import org.talend.components.salesforce.datastore.BasicDataStore;
 import org.talend.sdk.component.api.DecryptedServer;
+import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.configuration.LocalConfiguration;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.junit.BaseComponentsHandler;
 import org.talend.sdk.component.junit.http.api.HttpApiHandler;
 import org.talend.sdk.component.junit.http.junit5.HttpApi;
@@ -46,6 +48,9 @@ class UiActionServiceTest {
 
     @Service
     private LocalConfiguration configuration;
+
+    @Service
+    RecordBuilderFactory factory;
 
     @Injected
     private BaseComponentsHandler componentsHandler;
@@ -118,16 +123,39 @@ class UiActionServiceTest {
     @HttpApiName("${class}_${method}")
     @DisplayName("Retrive module column names")
     void retriveColumnsName() {
+        final QueryDataSet dataSet = new QueryDataSet();
         final BasicDataStore datasore = new BasicDataStore();
         datasore.setEndpoint(URL);
         datasore.setUserId(serverWithPassword.getUsername());
         datasore.setPassword(serverWithPassword.getPassword());
         datasore.setSecurityKey(serverWithSecuritykey.getPassword());
-        final QueryDataSet.SelectedColumnsConfig selectedColumnsConfig = service.guessSchema(datasore, "Account", null, null);
-        assertNotNull(selectedColumnsConfig);
-        List<String> columns = selectedColumnsConfig.getSelectColumnIds();
+        dataSet.setDataStore(datasore);
+        dataSet.setModuleName("Account");
+        Schema schema = service.guessSchema(dataSet, factory);
+        assertNotNull(schema);
+        List<Schema.Entry> columns = schema.getEntries();
         assertNotNull(columns);
         assertEquals(58, columns.size());
+    }
+
+    @Test
+    @HttpApiName("${class}_${method}")
+    @DisplayName("add selected column")
+    void addColumnsName() {
+        final QueryDataSet dataSet = new QueryDataSet();
+        final BasicDataStore datasore = new BasicDataStore();
+        datasore.setEndpoint(URL);
+        datasore.setUserId(serverWithPassword.getUsername());
+        datasore.setPassword(serverWithPassword.getPassword());
+        datasore.setSecurityKey(serverWithSecuritykey.getPassword());
+        dataSet.setDataStore(datasore);
+        dataSet.setModuleName("Account");
+        dataSet.setColumns("Id");
+        Schema schema = service.guessSchema(dataSet, factory);
+        assertNotNull(schema);
+        List<Schema.Entry> columns = schema.getEntries();
+        assertNotNull(columns);
+        assertEquals(1, columns.size());
     }
 
     @Test

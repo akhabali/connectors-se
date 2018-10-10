@@ -141,7 +141,7 @@ public class InputEmitter implements Serializable {
         }
 
         List<String> queryFields;
-        List<String> selectedColumns = dataset.getSelectedColumnsConfig().getSelectColumnIds();
+        List<String> selectedColumns = dataset.getSelectColumnIds();
         if (selectedColumns == null || selectedColumns.isEmpty()) {
             queryFields = allModuleFields;
         } else if (!allModuleFields.containsAll(selectedColumns)) { // ensure requested fields exist
