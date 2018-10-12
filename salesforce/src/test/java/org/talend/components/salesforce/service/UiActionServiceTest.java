@@ -7,6 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.talend.components.salesforce.service.SalesforceService.URL;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.talend.components.salesforce.SfHeaderFilter;
@@ -29,8 +32,6 @@ import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.junit5.WithMavenServers;
 import org.talend.sdk.component.maven.Server;
 
-import java.util.List;
-
 @WithComponents("org.talend.components.salesforce")
 @HttpApi(useSsl = true, headerFilter = SfHeaderFilter.class)
 @WithMavenServers //
@@ -41,6 +42,9 @@ class UiActionServiceTest {
     }
 
     @Service
+    RecordBuilderFactory factory;
+
+    @Service
     private UiActionService service;
 
     @Service
@@ -48,9 +52,6 @@ class UiActionServiceTest {
 
     @Service
     private LocalConfiguration configuration;
-
-    @Service
-    RecordBuilderFactory factory;
 
     @Injected
     private BaseComponentsHandler componentsHandler;
@@ -123,6 +124,7 @@ class UiActionServiceTest {
     @HttpApiName("${class}_${method}")
     @DisplayName("Retrive module column names")
     void retriveColumnsName() {
+        final String moduleName = "Account";
         final QueryDataSet dataSet = new QueryDataSet();
         final BasicDataStore datasore = new BasicDataStore();
         datasore.setEndpoint(URL);
@@ -130,12 +132,18 @@ class UiActionServiceTest {
         datasore.setPassword(serverWithPassword.getPassword());
         datasore.setSecurityKey(serverWithSecuritykey.getPassword());
         dataSet.setDataStore(datasore);
-        dataSet.setModuleName("Account");
-        Schema schema = service.guessSchema(dataSet, factory);
+        dataSet.setModuleName(moduleName);
+        Schema schema = service.addColumns(dataSet, factory);
         assertNotNull(schema);
         List<Schema.Entry> columns = schema.getEntries();
         assertNotNull(columns);
         assertEquals(58, columns.size());
+
+        List<String> selectedColumns = new ArrayList<>();
+        selectedColumns.add("Id");
+        selectedColumns.add("Name");
+        SuggestionValues values = service.retrieveColumns(datasore, moduleName, selectedColumns);
+        assertEquals(56, values.getItems().size());
     }
 
     @Test
@@ -150,12 +158,23 @@ class UiActionServiceTest {
         datasore.setSecurityKey(serverWithSecuritykey.getPassword());
         dataSet.setDataStore(datasore);
         dataSet.setModuleName("Account");
-        dataSet.setColumns("Id");
-        Schema schema = service.guessSchema(dataSet, factory);
-        assertNotNull(schema);
-        List<Schema.Entry> columns = schema.getEntries();
-        assertNotNull(columns);
-        assertEquals(1, columns.size());
+        // 1. add selected column "Id" to "selectColumnIds"
+        dataSet.setSelectedColumn("Id");
+        dataSet.setAddAllColumns(false);
+        Schema schema = service.addColumns(dataSet, factory);
+        assertEquals(1, schema.getEntries().size());
+        // 2. can't add duplicate column to "selectColumnIds"
+        List<String> selectedColumns = new ArrayList<>();
+        selectedColumns.add("Id");
+        selectedColumns.add("Name");
+        dataSet.setSelectColumnIds(selectedColumns);
+        dataSet.setSelectedColumn("Name");
+        schema = service.addColumns(dataSet, factory);
+        assertEquals(2, schema.getEntries().size());
+        // 3. add new columns to "selectColumnIds"
+        dataSet.setSelectedColumn("IsDeleted");
+        schema = service.addColumns(dataSet, factory);
+        assertEquals(3, schema.getEntries().size());
     }
 
     @Test

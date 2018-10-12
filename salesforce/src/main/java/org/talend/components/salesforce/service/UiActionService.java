@@ -76,13 +76,14 @@ public class UiActionService {
     }
 
     @DiscoverSchema("addColumns")
-    public Schema guessSchema(@Option("dataSet") final QueryDataSet dataSet, final RecordBuilderFactory factory) {
+    public Schema addColumns(@Option("dataSet") final QueryDataSet dataSet, final RecordBuilderFactory factory) {
         final Schema.Entry.Builder entryBuilder = factory.newEntryBuilder();
         final Schema.Builder schemaBuilder = factory.newSchemaBuilder(Type.RECORD);
-        final String selectedColumn = dataSet.getColumns();
+        final String selectedColumn = dataSet.getSelectedColumn();
         final String moduleName = dataSet.getModuleName();
+        final boolean isAddAllColumns = dataSet.isAddAllColumns();
         try {
-            if ((selectedColumn == null || selectedColumn.isEmpty())) {
+            if (isAddAllColumns) {
                 log.debug("create connection...");
                 final PartnerConnection connection = this.service.connect(dataSet.getDataStore(), configuration);
                 if (moduleName == null || moduleName.isEmpty()) {
@@ -95,15 +96,18 @@ public class UiActionService {
                 }
                 return schemaBuilder.build();
             } else {
-                List<String> selectedColumns = dataSet.getSelectColumnIds();
-                List<String> newSelectedColumns = new ArrayList<>();
-                if (selectedColumns != null && !selectedColumns.isEmpty()) {
-                    for (String column : selectedColumns) {
-                        schemaBuilder.withEntry(entryBuilder.withName(column).withType(Type.STRING).build());
-                    }
+                List<String> selectedColumnsSet = dataSet.getSelectColumnIds();
+                if (selectedColumnsSet == null) {
+                    selectedColumnsSet = new ArrayList<>();
                 }
-                schemaBuilder.withEntry(entryBuilder.withName(selectedColumn).withType(Type.STRING).build());
+                if (selectedColumn != null && !selectedColumn.isEmpty() && !selectedColumnsSet.contains(selectedColumn)) {
+                    selectedColumnsSet.add(selectedColumn);
+                }
+                for (String column : selectedColumnsSet) {
+                    schemaBuilder.withEntry(entryBuilder.withName(column).withType(Type.STRING).build());
+                }
                 return schemaBuilder.build();
+
             }
         } catch (ConnectionException e) {
             throw service.handleConnectionException(e);
@@ -112,15 +116,17 @@ public class UiActionService {
 
     @Suggestions("retrieveColumns")
     public SuggestionValues retrieveColumns(@Option("dataStore") final BasicDataStore dataStore,
-            @Option("moduleName") final String moduleName) {
+            @Option("moduleName") final String moduleName, @Option("selectColumnIds") final List<String> selectColumnIds) {
         try {
             List<SuggestionValues.Item> items = new ArrayList<>();
             final PartnerConnection connection = this.service.connect(dataStore, configuration);
             DescribeSObjectResult module = connection.describeSObject(moduleName);
             for (Field field : module.getFields()) {
-                items.add(new SuggestionValues.Item(field.getName(), field.getName()));
+                if (selectColumnIds == null || !selectColumnIds.contains(field.getName())) {
+                    items.add(new SuggestionValues.Item(field.getName(), field.getName()));
+                }
             }
-            return new SuggestionValues(true, items);
+            return new SuggestionValues(false, items);
         } catch (ConnectionException e) {
             throw service.handleConnectionException(e);
         }

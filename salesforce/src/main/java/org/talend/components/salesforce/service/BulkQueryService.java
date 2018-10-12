@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -27,6 +26,8 @@ import java.util.List;
 import java.util.Set;
 
 import javax.json.JsonBuilderFactory;
+
+import org.talend.components.salesforce.BulkResultSet;
 
 import com.sforce.async.AsyncApiException;
 import com.sforce.async.AsyncExceptionCode;
@@ -40,8 +41,6 @@ import com.sforce.async.JobInfo;
 import com.sforce.async.OperationEnum;
 import com.sforce.async.QueryResultList;
 import com.sforce.ws.ConnectionException;
-
-import org.talend.components.salesforce.BulkResultSet;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -325,7 +324,8 @@ public class BulkQueryService {
     /**
      * Checks if job batch infos were processed correctly. Only if all batches were {@link BatchStateEnum#Completed} are
      * acceptable.<br/>
-     * If any of batches returns {@link BatchStateEnum#Failed} or {@link BatchStateEnum#NotProcessed} - throws an exception.
+     * If any of batches returns {@link BatchStateEnum#Failed} or {@link BatchStateEnum#NotProcessed} - throws an
+     * exception.
      *
      * @param batchInfoList - batch infos related to the specific job.
      * @param info - batch info for query batch.
@@ -339,7 +339,8 @@ public class BulkQueryService {
 
             /*
              * More details about every batch state can be found here:
-             * https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/asynch_api_batches_interpret_status.
+             * https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/
+             * asynch_api_batches_interpret_status.
              * htm
              */
             switch (batch.getState()) {

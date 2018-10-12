@@ -11,10 +11,10 @@ import java.util.Set;
 import org.talend.components.salesforce.datastore.BasicDataStore;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Suggestable;
-import org.talend.sdk.component.api.configuration.action.Updatable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.condition.ActiveIfs;
 import org.talend.sdk.component.api.configuration.constraint.Required;
+import org.talend.sdk.component.api.configuration.constraint.Uniques;
 import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.DefaultValue;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
@@ -27,7 +27,8 @@ import lombok.Data;
 @Data
 @DataSet("query")
 @GridLayout(value = { @GridLayout.Row("dataStore"), @GridLayout.Row("sourceType"), @GridLayout.Row("query"),
-        @GridLayout.Row("moduleName"), @GridLayout.Row({ "columns", "selectColumnIds" }), @GridLayout.Row("condition"), })
+        @GridLayout.Row("moduleName"), @GridLayout.Row("condition"), @GridLayout.Row("selectColumnIds"),
+        @GridLayout.Row({ "addAllColumns", "selectedColumn" }), })
 @Documentation("")
 public class QueryDataSet implements Serializable {
 
@@ -54,24 +55,31 @@ public class QueryDataSet implements Serializable {
     public String moduleName;
 
     @Option
-    @Documentation("retrieveColumns")
-    @ActiveIfs({ @ActiveIf(target = "sourceType", value = { "MODULE_SELECTION" }),
-            @ActiveIf(target = "moduleName", value = { "" }, negate = true) })
-    @Suggestable(value = "retrieveColumns", parameters = { "dataStore", "moduleName" })
-    private String columns;
-
-    @Option
-    @Documentation("addColumns")
-    @ActiveIfs({ @ActiveIf(target = "sourceType", value = { "MODULE_SELECTION" }),
-            @ActiveIf(target = "moduleName", value = { "" }, negate = true) })
-    @Structure(type = Structure.Type.OUT, discoverSchema = "addColumns")
-    private List<String> selectColumnIds;
-
-    @Option
     @ActiveIfs({ @ActiveIf(target = "sourceType", value = { "MODULE_SELECTION" }),
             @ActiveIf(target = "moduleName", value = { "" }, negate = true) })
     @Documentation("")
     public String condition;
+
+    @Option
+    @Documentation("")
+    @ActiveIfs({ @ActiveIf(target = "sourceType", value = { "MODULE_SELECTION" }),
+            @ActiveIf(target = "moduleName", value = { "" }, negate = true) })
+    @Structure(type = Structure.Type.OUT, discoverSchema = "addColumns")
+    @Uniques
+    private List<String> selectColumnIds;
+
+    @Option
+    @Documentation("")
+    @ActiveIfs({ @ActiveIf(target = "sourceType", value = { "MODULE_SELECTION" }),
+            @ActiveIf(target = "moduleName", value = { "" }, negate = true) })
+    // @DefaultValue("true")
+    private boolean addAllColumns = true;
+
+    @Option
+    @Documentation("")
+    @ActiveIfs(@ActiveIf(target = "addAllColumns", value = { "false" }))
+    @Suggestable(value = "retrieveColumns", parameters = { "dataStore", "moduleName", "selectColumnIds" })
+    private String selectedColumn;
 
     @Option
     @ActiveIf(target = "sourceType", value = { "SOQL_QUERY" })
