@@ -41,6 +41,11 @@ public class KafkaInput extends PTransform<PBegin, PCollection<Record>> {
 
     private final KafkaInputConfiguration configuration;
 
+    public KafkaInput(@Option("configuration") final KafkaDatasetConfiguration datasetConfiguration) {
+        this.configuration = new KafkaInputConfiguration();
+        this.configuration.setDataset(datasetConfiguration);
+    }
+
     public KafkaInput(@Option("configuration") final KafkaInputConfiguration configuration) {
         this.configuration = configuration;
     }
