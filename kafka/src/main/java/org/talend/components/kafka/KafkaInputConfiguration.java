@@ -28,6 +28,7 @@ public class KafkaInputConfiguration implements Serializable {
     @Documentation("TODO fill the documentation for this parameter")
     private KafkaDatasetConfiguration dataset;
 
+    // TODO change to hidden, how?
     @Option
     @Required
     @Documentation("Hidden property used to specify that this component generates unbounded input. ")

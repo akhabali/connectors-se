@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.condition.ActiveIfs;
 import org.talend.sdk.component.api.configuration.constraint.Max;
@@ -40,6 +41,7 @@ public class KafkaDatasetConfiguration implements Serializable {
     @Documentation("The Kafka topic to read/write records from.")
     @Max(249) // See https://github.com/apache/kafka/blob/0.10.1/core/src/main/scala/kafka/common/Topic.scala#L29
     @Pattern("^[a-zA-Z0-9\\._\\-]+$")
+    @Suggestable(value = "KafkaTopics", parameters = {})
     private String topic;
 
     @Option
@@ -62,7 +64,7 @@ public class KafkaDatasetConfiguration implements Serializable {
     @Option
     @ActiveIf(target = "valueFormat", value = "AVRO")
     @Documentation("TODO fill the documentation for this parameter")
-    // TODO: Rename to useAvroSchema.
+    // TODO: Rename to useAvroSchema. (we may do not need this parameter anymore as there is no schema supported, have to define it in avroSchema)
     private boolean isHierarchy = true;
 
     @Option

@@ -35,6 +35,7 @@ import lombok.Data;
 @Documentation("Information necessary to communicate with Kafka.")
 public class KafkaConnectionConfiguration implements Serializable {
 
+    //TODO do we still need this parameter? as the runtime can handle all version
     @Option
     @Required
     @Documentation("The version of the Kafka cluster.")
