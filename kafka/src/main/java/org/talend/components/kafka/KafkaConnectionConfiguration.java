@@ -20,8 +20,7 @@ import lombok.Data;
 @Version(1)
 @Data
 @DataStore("KafkaConnection")
-@GridLayout({ @GridLayout.Row("version"), //
-        @GridLayout.Row("brokers"), //
+@GridLayout({ @GridLayout.Row("brokers"), //
         @GridLayout.Row("useSsl"), //
         @GridLayout.Row("trustStoreType"), //
         @GridLayout.Row("trustStorePath"), //
@@ -34,12 +33,6 @@ import lombok.Data;
 @Checkable("healthCheck")
 @Documentation("Information necessary to communicate with Kafka.")
 public class KafkaConnectionConfiguration implements Serializable {
-
-    //TODO do we still need this parameter? as the runtime can handle all version
-    @Option
-    @Required
-    @Documentation("The version of the Kafka cluster.")
-    private KafkaVersion version = KafkaVersion.V_0_10_1_0;
 
     @Option
     @Required
@@ -101,11 +94,6 @@ public class KafkaConnectionConfiguration implements Serializable {
     @ActiveIf(target = "useSsl", value = "true")
     @Documentation("Verify the client hostname with the hostname in the certificate.")
     private boolean verifyHost = true;
-
-    public enum KafkaVersion {
-        V_0_10_1_0,
-        V_0_9_0_1
-    }
 
     public enum StoreType {
         JKS,

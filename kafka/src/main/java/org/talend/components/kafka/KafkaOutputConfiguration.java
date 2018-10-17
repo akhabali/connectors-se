@@ -14,11 +14,8 @@ import lombok.Data;
 @Version(1)
 @Data
 @GridLayout({ @GridLayout.Row("dataset"), //
-        @GridLayout.Row("isStreaming"), //
-        @GridLayout.Row("groupId"), //
-        @GridLayout.Row("autoOffsetReset"), //
-        @GridLayout.Row({ "useMaxReadTime", "maxReadTime" }), //
-        @GridLayout.Row({ "useMaxNumRecords", "maxNumRecords" })})
+        @GridLayout.Row({ "partitionType", "keyColumn" }), //
+        @GridLayout.Row({ "useCompress", "compressType" }) })
 @Documentation("TODO fill the documentation for this configuration")
 public class KafkaOutputConfiguration implements Serializable {
 

@@ -20,9 +20,11 @@ import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PDone;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
+import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.meta.Documentation;
+import org.talend.sdk.component.api.processor.Processor;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.runtime.beam.spi.record.AvroRecord;
 
@@ -31,61 +33,57 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 
+import static org.talend.sdk.component.api.component.Icon.IconType.FLOW_TARGET_O;
+import static org.talend.sdk.component.api.component.Icon.IconType.KAFKA;
+
 @Version(1)
 @Documentation("Write records to Kafka.")
+@Icon(KAFKA)
+@Processor(name = "KafkaOutput")
 public class KafkaOutput extends PTransform<PCollection<Record>, PDone> {
 
     private final KafkaOutputConfiguration configuration;
 
-    private final KafkaService service;
-
-    public KafkaOutput(@Option("configuration") final KafkaOutputConfiguration configuration, final KafkaService service) {
+    public KafkaOutput(@Option("configuration") final KafkaOutputConfiguration configuration) {
         this.configuration = configuration;
-        this.service = service;
     }
 
     @Override
     public PDone expand(PCollection<Record> input) {
-        final boolean useAvro =
-                configuration.getDataset().getValueFormat() == KafkaDatasetConfiguration.ValueFormat.AVRO;
+        final boolean useAvro = configuration.getDataset().getValueFormat() == KafkaDatasetConfiguration.ValueFormat.AVRO;
         final String kafkaDatasetStringSchema = configuration.getDataset().getAvroSchema();
-        final IndexedRecordHelper indexedRecordHelper =
-                new IndexedRecordHelper(kafkaDatasetStringSchema);
+        final IndexedRecordHelper indexedRecordHelper = new IndexedRecordHelper(kafkaDatasetStringSchema);
 
-        KafkaIO.Write<byte[], byte[]> kafkaWrite = KafkaIO
-                .<byte[], byte[]>write()
+        KafkaIO.Write<byte[], byte[]> kafkaWrite = KafkaIO.<byte[], byte[]> write()
                 .withBootstrapServers(configuration.getDataset().getConnection().getBrokers())
-                .withTopic(configuration.getDataset().getTopic())
-                .withKeySerializer(ByteArraySerializer.class)
+                .withTopic(configuration.getDataset().getTopic()).withKeySerializer(ByteArraySerializer.class)
                 .withValueSerializer(ByteArraySerializer.class)
                 .updateProducerProperties(KafkaService.createOutputMaps(configuration));
 
         switch (configuration.getPartitionType()) {
-            case COLUMN: {
-                PCollection pc1 = input.apply(WithKeys.of(new ProduceKey(configuration.getKeyColumn())));
-                if (useAvro) {
-                    // TODO for now use incoming avro schema directly, do not check configured schema, improvement it.
-                    return ((PCollection<KV<byte[], byte[]>>) pc1
-                            .apply(ParDo.of(new AvroKVToByteArrayDoFn(indexedRecordHelper)))).apply(kafkaWrite);
-                } else { // csv
-                    return ((PCollection<KV<byte[], byte[]>>) pc1
-                            .apply(MapElements.via(new FormatCsvKV(configuration.getDataset().getFieldDelimiter()))))
-                            .apply(kafkaWrite);
-                }
+        case COLUMN: {
+            PCollection pc1 = input.apply(WithKeys.of(new ProduceKey(configuration.getKeyColumn())));
+            if (useAvro) {
+                // TODO for now use incoming avro schema directly, do not check configured schema, improvement it.
+                return ((PCollection<KV<byte[], byte[]>>) pc1.apply(ParDo.of(new AvroKVToByteArrayDoFn(indexedRecordHelper))))
+                        .apply(kafkaWrite);
+            } else { // csv
+                return ((PCollection<KV<byte[], byte[]>>) pc1
+                        .apply(MapElements.via(new FormatCsvKV(configuration.getDataset().getFieldDelimiter()))))
+                                .apply(kafkaWrite);
             }
-            case ROUND_ROBIN: {
-                if (useAvro) {
-                    // TODO for now use incoming avro schema directly, do not check configured schema, improvement it.
-                    return (PDone) input.apply(ParDo.of(new AvroToByteArrayDoFn(indexedRecordHelper))).apply(
-                            kafkaWrite.values());
-                } else { // csv
-                    return (PDone) input
-                            .apply(MapElements.via(new FormatCsv(configuration.getDataset().getFieldDelimiter())))
-                            .apply(kafkaWrite.values());
-                }
+        }
+        case ROUND_ROBIN: {
+            if (useAvro) {
+                // TODO for now use incoming avro schema directly, do not check configured schema, improvement it.
+                return (PDone) input.apply(ParDo.of(new AvroToByteArrayDoFn(indexedRecordHelper))).apply(kafkaWrite.values());
+            } else { // csv
+                return (PDone) input.apply(MapElements.via(new FormatCsv(configuration.getDataset().getFieldDelimiter())))
+                        .apply(kafkaWrite.values());
             }
-            default:
-                throw new RuntimeException("To be implemented: " + configuration.getPartitionType());
+        }
+        default:
+            throw new RuntimeException("To be implemented: " + configuration.getPartitionType());
         }
 
     }
@@ -142,6 +140,7 @@ public class KafkaOutput extends PTransform<PCollection<Record>, PDone> {
             return bytes;
         }
     }
+
     public static class ProduceKey implements SerializableFunction<Record, byte[]> {
 
         private final String keyName;
@@ -155,7 +154,6 @@ public class KafkaOutput extends PTransform<PCollection<Record>, PDone> {
             return input.getString(keyName).getBytes(Charset.forName("UTF-8"));
         }
     }
-
 
     /**
      * An {@link IndexedRecord} wrapper to wrap {@link IndexedRecord} with a custom
@@ -218,8 +216,8 @@ public class KafkaOutput extends PTransform<PCollection<Record>, PDone> {
             try {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 BinaryEncoder encoder = EncoderFactory.get().binaryEncoder(out, null);
-                    helper.getKafkaIndexedRecordWrapper().setIndexedRecord(c.element().getValue());
-                    helper.getDatumWriter().write(helper.getKafkaIndexedRecordWrapper(), encoder);
+                helper.getKafkaIndexedRecordWrapper().setIndexedRecord(c.element().getValue());
+                helper.getDatumWriter().write(helper.getKafkaIndexedRecordWrapper(), encoder);
                 encoder.flush();
                 byte[] result = out.toByteArray();
                 out.close();
@@ -256,8 +254,8 @@ public class KafkaOutput extends PTransform<PCollection<Record>, PDone> {
             try {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 BinaryEncoder encoder = EncoderFactory.get().binaryEncoder(out, null);
-                    helper.getKafkaIndexedRecordWrapper().setIndexedRecord(new AvroRecord(c.element()).unwrap(IndexedRecord.class));
-                    helper.getDatumWriter().write(helper.getKafkaIndexedRecordWrapper(), encoder);
+                helper.getKafkaIndexedRecordWrapper().setIndexedRecord(new AvroRecord(c.element()).unwrap(IndexedRecord.class));
+                helper.getDatumWriter().write(helper.getKafkaIndexedRecordWrapper(), encoder);
                 encoder.flush();
                 byte[] result = out.toByteArray();
                 out.close();
@@ -267,7 +265,6 @@ public class KafkaOutput extends PTransform<PCollection<Record>, PDone> {
             }
         }
     }
-
 
     /**
      * {@link IndexedRecord} helper to setup {@link DoFn} classes for working with incoming records

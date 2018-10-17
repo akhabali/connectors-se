@@ -17,6 +17,7 @@ import org.talend.sdk.component.api.configuration.ui.widget.TextArea;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import lombok.Data;
+import org.talend.sdk.component.api.service.Service;
 
 @Version(1)
 @Data
@@ -26,7 +27,6 @@ import lombok.Data;
         @GridLayout.Row("valueFormat"), //
         @GridLayout.Row("fieldDelimiter"), //
         @GridLayout.Row("specificFieldDelimiter"), //
-        @GridLayout.Row("isHierarchy"), //
         @GridLayout.Row("avroSchema") })
 @Documentation("Kafka records contained in a topic.")
 public class KafkaDatasetConfiguration implements Serializable {
@@ -62,16 +62,8 @@ public class KafkaDatasetConfiguration implements Serializable {
     private String specificFieldDelimiter = ";";
 
     @Option
-    @ActiveIf(target = "valueFormat", value = "AVRO")
-    @Documentation("TODO fill the documentation for this parameter")
-    // TODO: Rename to useAvroSchema. (we may do not need this parameter anymore as there is no schema supported, have to define it in avroSchema)
-    private boolean isHierarchy = true;
-
-    @Option
     @TextArea
-    @ActiveIfs({ //
-            @ActiveIf(target = "valueFormat", value = "AVRO"), //
-            @ActiveIf(target = "isHierarchy", value = "true") })
+    @ActiveIf(target = "valueFormat", value = "AVRO")
     @Code("json")
     @Documentation("TODO fill the documentation for this parameter")
     private String avroSchema;

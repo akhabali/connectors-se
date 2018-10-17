@@ -41,22 +41,17 @@ public class KafkaInput extends PTransform<PBegin, PCollection<Record>> {
 
     private final KafkaInputConfiguration configuration;
 
-    private final KafkaService service;
-
-    public KafkaInput(@Option("configuration") final KafkaInputConfiguration configuration, final KafkaService service) {
+    public KafkaInput(@Option("configuration") final KafkaInputConfiguration configuration) {
         this.configuration = configuration;
-        this.service = service;
     }
 
     @Override
     public PCollection<Record> expand(PBegin input) {
-        KafkaIO.Read<byte[], byte[]> kafkaRead = KafkaIO
-                .<byte[], byte[]>read()
+        KafkaIO.Read<byte[], byte[]> kafkaRead = KafkaIO.<byte[], byte[]> read()
                 .withBootstrapServers(configuration.getDataset().getConnection().getBrokers())
-                .withTopics(Arrays.asList(new String[]{configuration.getDataset().getTopic()}))
+                .withTopics(Arrays.asList(new String[] { configuration.getDataset().getTopic() }))
                 .updateConsumerProperties(KafkaService.createInputMaps(configuration))
-                .withKeyDeserializer(ByteArrayDeserializer.class)
-                .withValueDeserializer(ByteArrayDeserializer.class);
+                .withKeyDeserializer(ByteArrayDeserializer.class).withValueDeserializer(ByteArrayDeserializer.class);
 
         if (configuration.isUseMaxReadTime()) {
             kafkaRead = kafkaRead.withMaxReadTime(new Duration(configuration.getMaxReadTime()));
@@ -65,22 +60,19 @@ public class KafkaInput extends PTransform<PBegin, PCollection<Record>> {
             kafkaRead = kafkaRead.withMaxNumRecords(configuration.getMaxNumRecords());
         }
         // only consider value of kafkaRecord no matter which format selected
-        PCollection<byte[]> kafkaRecords = input
-                .apply(kafkaRead) //
+        PCollection<byte[]> kafkaRecords = input.apply(kafkaRead) //
                 .apply(ParDo.of(new ExtractRecord())) //
-                .apply(Values.<byte[]>create());
+                .apply(Values.<byte[]> create());
         switch (configuration.getDataset().getValueFormat()) {
-            case AVRO: {
-                return kafkaRecords.apply(ParDo.of(new ByteArrayToAvroRecord(configuration.getDataset().getAvroSchema())));
-            }
-            case CSV: {
-                return kafkaRecords
-                        .apply(ParDo.of(new ExtractCsvSplit(configuration.getDataset().getFieldDelimiter())))
-                        .apply(ParDo.of(new StringArrayToAvroRecord()));
-            }
-            default:
-                throw new RuntimeException(
-                        "To be implemented: " + configuration.getDataset().getValueFormat());
+        case AVRO: {
+            return kafkaRecords.apply(ParDo.of(new ByteArrayToAvroRecord(configuration.getDataset().getAvroSchema())));
+        }
+        case CSV: {
+            return kafkaRecords.apply(ParDo.of(new ExtractCsvSplit(configuration.getDataset().getFieldDelimiter())))
+                    .apply(ParDo.of(new StringArrayToAvroRecord()));
+        }
+        default:
+            throw new RuntimeException("To be implemented: " + configuration.getDataset().getValueFormat());
         }
     }
 

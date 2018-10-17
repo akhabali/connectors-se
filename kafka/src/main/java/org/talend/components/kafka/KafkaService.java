@@ -37,10 +37,9 @@ public class KafkaService {
     @Suggestions("KafkaTopics")
     public SuggestionValues listTopics(@Option("configuration.dataset.connection") final KafkaConnectionConfiguration conn) {
         final KafkaConsumer consumer = new KafkaConsumer(createConnProps(conn));
-        return new SuggestionValues(true, (Collection<SuggestionValues.Item>) StreamSupport
-                .stream(consumer.listTopics().keySet().spliterator(), false)
-                .map(topic -> new SuggestionValues.Item(topic.toString(), topic.toString()))
-                .collect(toList()));
+        return new SuggestionValues(true,
+                (Collection<SuggestionValues.Item>) StreamSupport.stream(consumer.listTopics().keySet().spliterator(), false)
+                        .map(topic -> new SuggestionValues.Item(topic.toString(), topic.toString())).collect(toList()));
     }
 
     public static Map<String, Object> createInputMaps(KafkaInputConfiguration input) {
@@ -53,7 +52,7 @@ public class KafkaService {
         }
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, input.getAutoOffsetReset().toString().toLowerCase());
 
-//        props.putAll(createConfigurationTable(input.configurations));
+        // props.putAll(createConfigurationTable(input.configurations));
 
         return props;
     }
@@ -66,22 +65,22 @@ public class KafkaService {
             props.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, output.getCompressType());
         }
 
-//        props.putAll(createConfigurationTable(output.configurations));
+        // props.putAll(createConfigurationTable(output.configurations));
 
         return props;
     }
 
-//    private static Map<String, Object> createConfigurationTable(KafkaConfTableProperties table) {
-//        Map<String, Object> props = new HashMap<>();
-//        List<String> configKeys = table.keyCol.getValue();
-//        List<String> configValues = table.valueCol.getValue();
-//        if (configKeys != null && !configKeys.isEmpty() && configValues != null && !configValues.isEmpty()) {
-//            for (int i = 0; i < configKeys.size(); i++) {
-//                props.put(configKeys.get(i), configValues.get(i));
-//            }
-//        }
-//        return props;
-//    }
+    // private static Map<String, Object> createConfigurationTable(KafkaConfTableProperties table) {
+    // Map<String, Object> props = new HashMap<>();
+    // List<String> configKeys = table.keyCol.getValue();
+    // List<String> configValues = table.valueCol.getValue();
+    // if (configKeys != null && !configKeys.isEmpty() && configValues != null && !configValues.isEmpty()) {
+    // for (int i = 0; i < configKeys.size(); i++) {
+    // props.put(configKeys.get(i), configValues.get(i));
+    // }
+    // }
+    // return props;
+    // }
 
     private static Properties createConnProps(KafkaConnectionConfiguration conn) {
         Properties props = new Properties();
