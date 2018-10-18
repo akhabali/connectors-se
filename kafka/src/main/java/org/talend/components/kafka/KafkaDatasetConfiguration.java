@@ -17,7 +17,6 @@ import org.talend.sdk.component.api.configuration.ui.widget.TextArea;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import lombok.Data;
-import org.talend.sdk.component.api.service.Service;
 
 @Version(1)
 @Data
@@ -41,7 +40,7 @@ public class KafkaDatasetConfiguration implements Serializable {
     @Documentation("The Kafka topic to read/write records from.")
     @Max(249) // See https://github.com/apache/kafka/blob/0.10.1/core/src/main/scala/kafka/common/Topic.scala#L29
     @Pattern("^[a-zA-Z0-9\\._\\-]+$")
-    @Suggestable(value = "KafkaTopics", parameters = {})
+    // @Suggestable(value = "KafkaTopics", parameters = { "connection" })
     private String topic;
 
     @Option
@@ -51,21 +50,21 @@ public class KafkaDatasetConfiguration implements Serializable {
 
     @Option
     @ActiveIf(target = "valueFormat", value = "CSV")
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("The format of the Kafka message value.")
     private FieldDelimiterType fieldDelimiter = FieldDelimiterType.SEMICOLON;
 
     @Option
     @ActiveIfs({ //
             @ActiveIf(target = "valueFormat", value = "CSV"), //
             @ActiveIf(target = "fieldDelimiter", value = "OTHER") })
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("A regex used to split the string message value.")
     private String specificFieldDelimiter = ";";
 
     @Option
     @TextArea
     @ActiveIf(target = "valueFormat", value = "AVRO")
     @Code("json")
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("The Avro Schema that corresponds to the binary message value.")
     private String avroSchema;
 
     public String getFieldDelimiter() {

@@ -31,7 +31,7 @@ import lombok.Data;
         @GridLayout.Row("keyStorePassword"), //
         @GridLayout.Row("verifyHost") })
 @Checkable("healthCheck")
-@Documentation("Information necessary to communicate with Kafka.")
+@Documentation("Configuration necessary to connect to Kafka.")
 public class KafkaConnectionConfiguration implements Serializable {
 
     @Option
