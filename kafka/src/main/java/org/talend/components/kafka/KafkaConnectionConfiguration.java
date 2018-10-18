@@ -48,7 +48,7 @@ public class KafkaConnectionConfiguration implements Serializable {
     @Option
     @ActiveIf(target = "useSsl", value = "true")
     @Documentation("TODO fill the documentation for this parameter")
-    private StoreType trustStoreType;
+    private StoreType trustStoreType = StoreType.JKS;
 
     @Option
     @ActiveIf(target = "useSsl", value = "true")
@@ -72,7 +72,7 @@ public class KafkaConnectionConfiguration implements Serializable {
             @ActiveIf(target = "useSsl", value = "true"), //
             @ActiveIf(target = "needClientAuth", value = "true") })
     @Documentation("TODO fill the documentation for this parameter")
-    private StoreType keyStoreType;
+    private StoreType keyStoreType = StoreType.JKS;
 
     @Option
     @ActiveIfs({ //
