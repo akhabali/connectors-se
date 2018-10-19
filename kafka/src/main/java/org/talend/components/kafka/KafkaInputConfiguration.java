@@ -30,12 +30,10 @@ public class KafkaInputConfiguration implements Serializable {
 
     // TODO change to hidden, how?
     @Option
-    @Required
     @Documentation("Hidden property used to specify that this component generates unbounded input. ")
     private boolean isStreaming = true;
 
     @Option
-    @Required
     @Documentation("TODO fill the documentation for this parameter")
     // https://github.com/apache/kafka/blob/1.0.0/core/src/main/scala/kafka/common/Config.scala#L26
     // KAFKA-3417
