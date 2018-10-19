@@ -41,11 +41,16 @@
 
     <tcomp0.version>0.23.2</tcomp0.version> <!-- until they are rewritten -->
     <daikon.version>0.23.0</daikon.version>
-
+    <junit-platform-surefire-provider.version>1.2.0</junit-platform-surefire-provider.version>
+    
     <junit5.version>5.3.1</junit5.version>
 
     <surefire.version>2.22.0</surefire.version>
     <jacoco.version>0.8.1</jacoco.version>
+    <docker-maven-plugin.version>0.26.0</docker-maven-plugin.version>
+
+    <jms-api.version>2.0.1</jms-api.version>
+    <activemq-client.version>5.15.6</activemq-client.version>
 
     <commons-csv.version>1.4</commons-csv.version>
     <guava.version>20.0</guava.version>
@@ -62,6 +67,7 @@
     <module>processing-tck</module>
     <module>jdbc</module>
     <module>salesforce</module>
+    <module>components-activemq</module>
   </modules>
 
   <profiles>
@@ -224,6 +230,16 @@
         <classifier>tests</classifier>
         <scope>test</scope>
       </dependency>
+      <dependency>
+        <groupId>javax.jms</groupId>
+        <artifactId>javax.jms-api</artifactId>
+        <version>${jms-api.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.activemq</groupId>
+        <artifactId>activemq-client</artifactId>
+        <version>${activemq-client.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -313,7 +329,7 @@
             </goals>
           </execution>
         </executions>
-        <dependencies>
+<!--        <dependencies>
           <dependency>
             <groupId>org.apache.beam</groupId>
             <artifactId>beam-sdks-java-core</artifactId>
@@ -324,7 +340,7 @@
             <artifactId>component-runtime-beam</artifactId>
             <version>${component-runtime.version}</version>
           </dependency>
-        </dependencies>
+        </dependencies>-->
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
