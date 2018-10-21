@@ -1,5 +1,10 @@
 package org.talend.components.kafka;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericDatumReader;
@@ -27,11 +32,6 @@ import org.talend.sdk.component.api.input.PartitionMapper;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.runtime.beam.spi.record.AvroRecord;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 @Version(1)
 @Icon(IconType.KAFKA)

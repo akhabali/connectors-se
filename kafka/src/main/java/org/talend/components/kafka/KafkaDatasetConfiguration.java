@@ -31,9 +31,8 @@ import lombok.Data;
 public class KafkaDatasetConfiguration implements Serializable {
 
     @Option
-    @Required
-    @Documentation("Kafka connection configuration.")
-    private KafkaConnectionConfiguration connection;
+    @Documentation("")
+    private KafkaConnectionConfiguration connection = new KafkaConnectionConfiguration();
 
     @Option
     @Required
