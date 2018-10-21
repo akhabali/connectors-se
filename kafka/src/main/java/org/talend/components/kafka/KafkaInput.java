@@ -13,6 +13,8 @@ import org.apache.avro.generic.IndexedRecord;
 import org.apache.avro.io.BinaryDecoder;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.DecoderFactory;
+import org.apache.beam.sdk.coders.CannotProvideCoderException;
+import org.apache.beam.sdk.coders.Coder;
 import org.apache.beam.sdk.io.kafka.KafkaIO;
 import org.apache.beam.sdk.io.kafka.KafkaRecord;
 import org.apache.beam.sdk.transforms.DoFn;
@@ -31,6 +33,7 @@ import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.input.PartitionMapper;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.runtime.beam.coder.record.FullSerializationRecordCoder;
 import org.talend.sdk.component.runtime.beam.spi.record.AvroRecord;
 
 @Version(1)
@@ -74,6 +77,12 @@ public class KafkaInput extends PTransform<PBegin, PCollection<Record>> {
         default:
             throw new RuntimeException("To be implemented: " + configuration.getDataset().getValueFormat());
         }
+    }
+
+    @Deprecated
+    protected Coder<?> getDefaultOutputCoder() throws CannotProvideCoderException {
+        // TODO: Why is this necessary for KafkaInput to run?
+        return new FullSerializationRecordCoder();
     }
 
     public static class ExtractRecord extends DoFn<KafkaRecord<byte[], byte[]>, KV<byte[], byte[]>> {
