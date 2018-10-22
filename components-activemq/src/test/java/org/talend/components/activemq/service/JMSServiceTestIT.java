@@ -40,7 +40,7 @@ public class JMSServiceTestIT {
     @Test
     public void sendAndReceiveJMSMessageQueue() {
         // Send message to QUEUE
-        componentsHandler.setInputData(asList(factory.createObjectBuilder().add("messageContent", TEST_MESSAGE).build()));
+        componentsHandler.setInputData(asList(factory.createObjectBuilder().add(MESSAGE_CONTENT, TEST_MESSAGE).build()));
 
         final String outputConfig = configurationByExample().forInstance(getOutputConfiguration()).configured().toQueryString();
         Job.components().component("activemq-output", "ActiveMQ://Output?" + outputConfig).component("emitter", "test://emitter")
@@ -72,7 +72,7 @@ public class JMSServiceTestIT {
                 .connections().from("activemq-input").to("collector").build().run();
 
         // Send message to TOPIC
-        componentsHandler.setInputData(asList(factory.createObjectBuilder().add("messageContent", TEST_MESSAGE).build()));
+        componentsHandler.setInputData(asList(factory.createObjectBuilder().add(MESSAGE_CONTENT, TEST_MESSAGE).build()));
 
         OutputConfiguration outputConfiguration = getOutputConfiguration();
         outputConfiguration.getBasicConfig().setMessageType(MessageType.TOPIC);
@@ -95,7 +95,7 @@ public class JMSServiceTestIT {
     @Test
     public void sendAndReceiveJMSMessageQueueFailover() {
         // Send message to QUEUE
-        componentsHandler.setInputData(asList(factory.createObjectBuilder().add("messageContent", TEST_MESSAGE).build()));
+        componentsHandler.setInputData(asList(factory.createObjectBuilder().add(MESSAGE_CONTENT, TEST_MESSAGE).build()));
 
         OutputConfiguration outputConfiguration = getOutputConfiguration();
         outputConfiguration.getBasicConfig().getConnection().setFailover(true);
@@ -140,7 +140,7 @@ public class JMSServiceTestIT {
                 .connections().from("activemq-input").to("collector").build().run();
 
         // Send message to TOPIC
-        componentsHandler.setInputData(asList(factory.createObjectBuilder().add("messageContent", TEST_MESSAGE).build()));
+        componentsHandler.setInputData(asList(factory.createObjectBuilder().add(MESSAGE_CONTENT, TEST_MESSAGE).build()));
 
         OutputConfiguration outputConfiguration = getOutputConfiguration();
         outputConfiguration.getBasicConfig().getConnection().setFailover(true);
@@ -167,7 +167,7 @@ public class JMSServiceTestIT {
     @Test
     public void sendAndReceiveJMSMessageQueueStaticDiscovery() {
         // Send message to QUEUE
-        componentsHandler.setInputData(asList(factory.createObjectBuilder().add("messageContent", TEST_MESSAGE).build()));
+        componentsHandler.setInputData(asList(factory.createObjectBuilder().add(MESSAGE_CONTENT, TEST_MESSAGE).build()));
 
         OutputConfiguration outputConfiguration = getOutputConfiguration();
         outputConfiguration.getBasicConfig().getConnection().setStaticDiscovery(true);
@@ -209,7 +209,7 @@ public class JMSServiceTestIT {
                 .connections().from("activemq-input").to("collector").build().run();
 
         // Send message to TOPIC
-        componentsHandler.setInputData(asList(factory.createObjectBuilder().add("messageContent", TEST_MESSAGE).build()));
+        componentsHandler.setInputData(asList(factory.createObjectBuilder().add(MESSAGE_CONTENT, TEST_MESSAGE).build()));
 
         OutputConfiguration outputConfiguration = getOutputConfiguration();
         outputConfiguration.getBasicConfig().getConnection().setStaticDiscovery(true);
@@ -248,13 +248,13 @@ public class JMSServiceTestIT {
     @Test
     public void testMessageSelector() {
         // Send Not Persistent message
-        componentsHandler.setInputData(asList(factory.createObjectBuilder().add("messageContent", TEST_MESSAGE).build()));
+        componentsHandler.setInputData(asList(factory.createObjectBuilder().add(MESSAGE_CONTENT, TEST_MESSAGE).build()));
         final String outputConfig = configurationByExample().forInstance(getOutputConfiguration()).configured().toQueryString();
         Job.components().component("activemq-output", "ActiveMQ://Output?" + outputConfig).component("emitter", "test://emitter")
                 .connections().from("emitter").to("activemq-output").build().run();
 
         // Send Persistent message
-        componentsHandler.setInputData(asList(factory.createObjectBuilder().add("messageContent", TEST_MESSAGE2).build()));
+        componentsHandler.setInputData(asList(factory.createObjectBuilder().add(MESSAGE_CONTENT, TEST_MESSAGE2).build()));
         OutputConfiguration outputConfiguration = getOutputConfiguration();
         outputConfiguration.setDeliveryMode(OutputConfiguration.DeliveryMode.PERSISTENT);
         final String outputConfig2 = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
@@ -280,7 +280,7 @@ public class JMSServiceTestIT {
     @Test
     public void testMaximumMessages() {
         // Send message to QUEUE
-        componentsHandler.setInputData(asList(factory.createObjectBuilder().add("messageContent", TEST_MESSAGE).build()));
+        componentsHandler.setInputData(asList(factory.createObjectBuilder().add(MESSAGE_CONTENT, TEST_MESSAGE).build()));
 
         final String outputConfig2 = configurationByExample().forInstance(getOutputConfiguration()).configured().toQueryString();
         Job.components().component("activemq-output", "ActiveMQ://Output?" + outputConfig2).component("emitter", "test://emitter")
