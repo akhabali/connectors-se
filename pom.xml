@@ -329,7 +329,7 @@
             </goals>
           </execution>
         </executions>
-<!--        <dependencies>
+        <dependencies>
           <dependency>
             <groupId>org.apache.beam</groupId>
             <artifactId>beam-sdks-java-core</artifactId>
@@ -340,7 +340,7 @@
             <artifactId>component-runtime-beam</artifactId>
             <version>${component-runtime.version}</version>
           </dependency>
-        </dependencies>-->
+        </dependencies>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
