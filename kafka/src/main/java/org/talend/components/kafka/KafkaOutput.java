@@ -64,7 +64,6 @@ public class KafkaOutput extends PTransform<PCollection<Record>, PDone> {
         case COLUMN: {
             PCollection pc1 = input.apply(WithKeys.of(new ProduceKey(configuration.getKeyColumn())));
             if (useAvro) {
-                // TODO for now use incoming avro schema directly, do not check configured schema, improvement it.
                 return ((PCollection<KV<byte[], byte[]>>) pc1.apply(ParDo.of(new AvroKVToByteArrayDoFn(indexedRecordHelper))))
                         .apply(kafkaWrite);
             } else { // csv
@@ -75,10 +74,9 @@ public class KafkaOutput extends PTransform<PCollection<Record>, PDone> {
         }
         case ROUND_ROBIN: {
             if (useAvro) {
-                // TODO for now use incoming avro schema directly, do not check configured schema, improvement it.
-                return (PDone) input.apply(ParDo.of(new AvroToByteArrayDoFn(indexedRecordHelper))).apply(kafkaWrite.values());
+                return input.apply(ParDo.of(new AvroToByteArrayDoFn(indexedRecordHelper))).apply(kafkaWrite.values());
             } else { // csv
-                return (PDone) input.apply(MapElements.via(new FormatCsv(configuration.getDataset().getFieldDelimiter())))
+                return input.apply(MapElements.via(new FormatCsv(configuration.getDataset().getFieldDelimiter())))
                         .apply(kafkaWrite.values());
             }
         }

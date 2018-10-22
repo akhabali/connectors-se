@@ -20,28 +20,28 @@ import lombok.Data;
 public class KafkaOutputConfiguration implements Serializable {
 
     @Option
-    @Required
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("")
     private KafkaDatasetConfiguration dataset;
 
     @Option
     @Required
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("Strategy for assigning partitions")
     private PartitionType partitionType = PartitionType.ROUND_ROBIN;
 
     @Option
     @ActiveIf(target = "partitionType", value = "COLUMN")
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("Partition by hash value of this key column")
     private String keyColumn;
 
     @Option
     @Required
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("")
     private boolean useCompress = false;
 
     @Option
     @ActiveIf(target = "useCompress", value = "true")
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("Produce compressed message")
+    // https://cwiki.apache.org/confluence/display/KAFKA/Compression
     private CompressType compressType = CompressType.GZIP;
 
     // TODO: Kafka Configuration Table

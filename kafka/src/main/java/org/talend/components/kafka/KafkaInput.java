@@ -1,10 +1,5 @@
 package org.talend.components.kafka;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericDatumReader;
@@ -13,8 +8,6 @@ import org.apache.avro.generic.IndexedRecord;
 import org.apache.avro.io.BinaryDecoder;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.DecoderFactory;
-import org.apache.beam.sdk.coders.CannotProvideCoderException;
-import org.apache.beam.sdk.coders.Coder;
 import org.apache.beam.sdk.io.kafka.KafkaIO;
 import org.apache.beam.sdk.io.kafka.KafkaRecord;
 import org.apache.beam.sdk.transforms.DoFn;
@@ -35,6 +28,11 @@ import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.runtime.beam.coder.record.FullSerializationRecordCoder;
 import org.talend.sdk.component.runtime.beam.spi.record.AvroRecord;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Version(1)
 @Icon(IconType.KAFKA)
@@ -68,21 +66,16 @@ public class KafkaInput extends PTransform<PBegin, PCollection<Record>> {
                 .apply(Values.<byte[]> create());
         switch (configuration.getDataset().getValueFormat()) {
         case AVRO: {
-            return kafkaRecords.apply(ParDo.of(new ByteArrayToAvroRecord(configuration.getDataset().getAvroSchema())));
+            return kafkaRecords.apply(ParDo.of(new ByteArrayToAvroRecord(configuration.getDataset().getAvroSchema())))
+                    .setCoder(FullSerializationRecordCoder.of());
         }
         case CSV: {
             return kafkaRecords.apply(ParDo.of(new ExtractCsvSplit(configuration.getDataset().getFieldDelimiter())))
-                    .apply(ParDo.of(new StringArrayToAvroRecord()));
+                    .apply(ParDo.of(new StringArrayToAvroRecord())).setCoder(FullSerializationRecordCoder.of());
         }
         default:
             throw new RuntimeException("To be implemented: " + configuration.getDataset().getValueFormat());
         }
-    }
-
-    @Deprecated
-    protected Coder<?> getDefaultOutputCoder() throws CannotProvideCoderException {
-        // TODO: Why is this necessary for KafkaInput to run?
-        return new FullSerializationRecordCoder();
     }
 
     public static class ExtractRecord extends DoFn<KafkaRecord<byte[], byte[]>, KV<byte[], byte[]>> {

@@ -1,7 +1,6 @@
 package org.talend.components.kafka;
 
-import java.io.Serializable;
-
+import lombok.Data;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Suggestable;
@@ -16,7 +15,7 @@ import org.talend.sdk.component.api.configuration.ui.widget.Code;
 import org.talend.sdk.component.api.configuration.ui.widget.TextArea;
 import org.talend.sdk.component.api.meta.Documentation;
 
-import lombok.Data;
+import java.io.Serializable;
 
 @Version(1)
 @Data
@@ -32,7 +31,7 @@ public class KafkaDatasetConfiguration implements Serializable {
 
     @Option
     @Documentation("")
-    private KafkaConnectionConfiguration connection = new KafkaConnectionConfiguration();
+    private KafkaConnectionConfiguration connection;
 
     @Option
     @Required

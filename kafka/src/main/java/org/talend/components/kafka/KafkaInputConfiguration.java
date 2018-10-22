@@ -24,7 +24,7 @@ public class KafkaInputConfiguration implements Serializable {
 
     @Option
     @Documentation("")
-    private KafkaDatasetConfiguration dataset = new KafkaDatasetConfiguration();
+    private KafkaDatasetConfiguration dataset;
 
     @Option
     @Documentation("Consumer group ID to fetch or create offsets for.")
