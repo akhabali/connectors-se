@@ -78,7 +78,7 @@ public class KafkaInput extends PTransform<PBegin, PCollection<Record>> {
         }
     }
 
-    public static class ExtractRecord extends DoFn<KafkaRecord<byte[], byte[]>, KV<byte[], byte[]>> {
+    private static class ExtractRecord extends DoFn<KafkaRecord<byte[], byte[]>, KV<byte[], byte[]>> {
 
         @DoFn.ProcessElement
         public void processElement(ProcessContext c) {

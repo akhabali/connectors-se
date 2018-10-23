@@ -29,6 +29,12 @@
       <groupId>org.talend.components</groupId>
       <artifactId>bigquery-runtime</artifactId>
       <version>${tcomp0.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.beam</groupId>
+          <artifactId>beam-sdks-java-extensions-google-cloud-platform-core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>

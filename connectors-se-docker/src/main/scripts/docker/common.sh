@@ -16,7 +16,7 @@
 #  limitations under the License.
 #
 
-export COMPONENT_SERVER_IMAGE_VERSION=1.1.2_20181016100528
+export COMPONENT_SERVER_IMAGE_VERSION="${COMPONENT_SERVER_IMAGE_VERSION:-1.1.2_20181016100528}"
 
 export BASEDIR=$(cd "$(dirname "$0")" ; pwd -P)/../../../..
 export CONNECTOR_VERSION=$(grep "<version>" "$BASEDIR/pom.xml" | head -n 1 | sed "s/.*>\\(.*\\)<.*/\\1/")
@@ -51,7 +51,7 @@ function buildAndTag() {
 }
 
 function pushImage() {
-    if [ -n "$DOCKER_LOGIN" ]; then
+    if [ -n "$DOCKER_LOGIN" -o -n "$DOCKER_PASSWORD"]; then
         set +x
         echo "$DOCKER_PASSWORD" | docker login "$TALEND_REGISTRY" -u "$DOCKER_LOGIN" --password-stdin
         set -x
@@ -59,7 +59,7 @@ function pushImage() {
             docker push "$TALEND_REGISTRY/$1" && break || sleep 15
         done
     else
-        echo "No DOCKER_LOGIN set so skipping push of >$1<"
+        echo "No DOCKER_LOGIN and $DOCKER_PASSWORD set so skipping push of >$1<"
     fi
 }
 

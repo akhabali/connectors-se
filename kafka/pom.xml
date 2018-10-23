@@ -118,6 +118,28 @@
             <artifactId>components-adapter-beam</artifactId>
             <version>${tcomp0.version}</version>
             <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.beam</groupId>
+                    <artifactId>beam-sdks-java-extensions-google-cloud-platform-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.talend.components</groupId>
+                    <artifactId>components-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.beam</groupId>
+                    <artifactId>beam-sdks-java-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.beam</groupId>
+                    <artifactId>beam-runners-direct-java</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.talend.daikon</groupId>
+                    <artifactId>daikon</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
