@@ -38,7 +38,7 @@ public class KafkaDatasetConfiguration implements Serializable {
     @Documentation("The Kafka topic to read/write records from.")
     @Max(249) // See https://github.com/apache/kafka/blob/0.10.1/core/src/main/scala/kafka/common/Topic.scala#L29
     @Pattern("^[a-zA-Z0-9\\._\\-]+$")
-    // @Suggestable(value = "KafkaTopics", parameters = { "connection" })
+    @Suggestable(value = "KafkaTopics", parameters = { "connection" })
     private String topic;
 
     @Option
