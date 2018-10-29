@@ -1,5 +1,11 @@
 package org.talend.components.kafka;
 
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericDatumReader;
@@ -17,7 +23,6 @@ import org.apache.beam.sdk.transforms.Values;
 import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
-import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.joda.time.Duration;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Icon.IconType;
@@ -28,11 +33,6 @@ import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.runtime.beam.coder.record.FullSerializationRecordCoder;
 import org.talend.sdk.component.runtime.beam.spi.record.AvroRecord;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 @Version(1)
 @Icon(IconType.KAFKA)
@@ -48,11 +48,10 @@ public class KafkaInput extends PTransform<PBegin, PCollection<Record>> {
 
     @Override
     public PCollection<Record> expand(PBegin input) {
-        KafkaIO.Read<byte[], byte[]> kafkaRead = KafkaIO.<byte[], byte[]> read()
+        KafkaIO.Read<byte[], byte[]> kafkaRead = KafkaIO.<byte[], byte[]> readBytes()
                 .withBootstrapServers(configuration.getDataset().getConnection().getBrokers())
                 .withTopics(Arrays.asList(new String[] { configuration.getDataset().getTopic() }))
-                .updateConsumerProperties(KafkaService.createInputMaps(configuration))
-                .withKeyDeserializer(ByteArrayDeserializer.class).withValueDeserializer(ByteArrayDeserializer.class);
+                .updateConsumerProperties(KafkaService.createInputMaps(configuration));
 
         if (configuration.isUseMaxReadTime()) {
             kafkaRead = kafkaRead.withMaxReadTime(new Duration(configuration.getMaxReadTime()));
@@ -78,11 +77,22 @@ public class KafkaInput extends PTransform<PBegin, PCollection<Record>> {
         }
     }
 
+    // TODO: We shouldn't need reflection for this to work! Under investigation.
+    // It appears that the KafkaIO.Read is contextualized with the SAME classloader as ExtractRecord
+    // (checked via debugger), but during the manipulation in Spark, the KafkaRecord instance
+    // emitted by the KafkaIO.Read (container class loader) ends up being a KafkaRecord from the
+    // SparkRunner class loader.
     private static class ExtractRecord extends DoFn<KafkaRecord<byte[], byte[]>, KV<byte[], byte[]>> {
 
+        private Method methodGetKV = null;
+
         @DoFn.ProcessElement
-        public void processElement(ProcessContext c) {
-            c.output(c.element().getKV());
+        public void processElement(ProcessContext c) throws Exception {
+            Object element = c.element();
+            if (methodGetKV == null) {
+                methodGetKV = element.getClass().getMethod("getKV");
+            }
+            c.output((KV<byte[], byte[]>) methodGetKV.invoke(element));
         }
     }
 

@@ -135,10 +135,6 @@
                     <groupId>org.apache.beam</groupId>
                     <artifactId>beam-runners-direct-java</artifactId>
                 </exclusion>
-                <exclusion>
-                    <groupId>org.talend.daikon</groupId>
-                    <artifactId>daikon</artifactId>
-                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -147,7 +143,6 @@
             <version>${guava.version}</version>
             <scope>compile</scope>
         </dependency>
-
 
     </dependencies>
 
