@@ -1,7 +1,12 @@
 package org.talend.components.kafka;
 
-import com.sun.org.apache.regexp.internal.RE;
-import org.apache.avro.AvroRemoteException;
+import static org.talend.sdk.component.api.component.Icon.IconType.KAFKA;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.Serializable;
+import java.nio.charset.Charset;
+
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.IndexedRecord;
@@ -27,14 +32,6 @@ import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.processor.Processor;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.runtime.beam.spi.record.AvroRecord;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.Serializable;
-import java.nio.charset.Charset;
-
-import static org.talend.sdk.component.api.component.Icon.IconType.FLOW_TARGET_O;
-import static org.talend.sdk.component.api.component.Icon.IconType.KAFKA;
 
 @Version(1)
 @Documentation("Write records to Kafka.")

@@ -1,7 +1,6 @@
 package org.talend.components.kafka;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,7 +47,7 @@ public class KafkaInput extends PTransform<PBegin, PCollection<Record>> {
 
     @Override
     public PCollection<Record> expand(PBegin input) {
-        KafkaIO.Read<byte[], byte[]> kafkaRead = KafkaIO.<byte[], byte[]> readBytes()
+        KafkaIO.Read<byte[], byte[]> kafkaRead = KafkaIO.readBytes()
                 .withBootstrapServers(configuration.getDataset().getConnection().getBrokers())
                 .withTopics(Arrays.asList(new String[] { configuration.getDataset().getTopic() }))
                 .updateConsumerProperties(KafkaService.createInputMaps(configuration));
@@ -84,15 +83,9 @@ public class KafkaInput extends PTransform<PBegin, PCollection<Record>> {
     // SparkRunner class loader.
     private static class ExtractRecord extends DoFn<KafkaRecord<byte[], byte[]>, KV<byte[], byte[]>> {
 
-        private Method methodGetKV = null;
-
         @DoFn.ProcessElement
         public void processElement(ProcessContext c) throws Exception {
-            Object element = c.element();
-            if (methodGetKV == null) {
-                methodGetKV = element.getClass().getMethod("getKV");
-            }
-            c.output((KV<byte[], byte[]>) methodGetKV.invoke(element));
+            c.output(c.element().getKV());
         }
     }
 

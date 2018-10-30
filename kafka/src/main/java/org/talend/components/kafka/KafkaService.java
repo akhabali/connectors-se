@@ -49,6 +49,7 @@ public class KafkaService {
         String groupID = input.getGroupId();
         if (groupID != null && !"".equals(groupID)) {
             props.put(ConsumerConfig.GROUP_ID_CONFIG, groupID);
+            props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
         }
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, input.getAutoOffsetReset().toString().toLowerCase());
 
