@@ -6,7 +6,6 @@ import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.constraint.Max;
 import org.talend.sdk.component.api.configuration.constraint.Min;
 import org.talend.sdk.component.api.configuration.constraint.Required;
-import org.talend.sdk.component.api.configuration.ui.DefaultValue;
 import org.talend.sdk.component.api.configuration.ui.OptionsOrder;
 import org.talend.sdk.component.api.meta.Documentation;
 
@@ -19,14 +18,14 @@ public class WindowConfiguration implements Serializable {
 
     @Option
     @Required
-    @Documentation("Enable the Window session to set a gap between each window (the gap starts at the latest arrived record)")
+    @Documentation("")
     private Boolean windowSession = false;
 
     @Option
     @Required
     @Min(1)
     @Max(Integer.MAX_VALUE)
-    @Documentation("Set the Window duration (session disabled), or set the gap after the latest arrived record (session enabled)")
+    @Documentation("")
     private Integer windowLength = 5000;
 
     @Option
@@ -34,7 +33,7 @@ public class WindowConfiguration implements Serializable {
     @ActiveIf(target = "windowSession", value = "false")
     @Min(0)
     @Max(Integer.MAX_VALUE)
-    @Documentation("The sliding duration between the previous Window beginning and the next Window (ms)")
+    @Documentation("")
     private Integer windowSlideLength = 5000;
 
 }
