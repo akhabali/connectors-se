@@ -102,10 +102,10 @@ public class KafkaService {
             props.put("security.protocol", "SSL");
             props.put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, conn.getTrustStoreType().toString());
             props.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, conn.getTrustStorePath());
-            props.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, conn.getTrustStorePassword());
+            props.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, conn.getTrustStorePassword());
             if (conn.isNeedClientAuth()) {
                 props.put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, conn.getKeyStoreType().toString());
-                props.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, conn.getKeyStorePath());
+                props.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, conn.getKeyStorePath());
                 props.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, conn.getKeyStorePassword());
             }
         }

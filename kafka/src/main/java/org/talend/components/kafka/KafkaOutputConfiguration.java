@@ -31,7 +31,7 @@ public class KafkaOutputConfiguration implements Serializable {
     @Option
     @ActiveIf(target = "partitionType", value = "COLUMN")
     @Documentation("Partition by hash value of this key column")
-    private String keyColumn;
+    private String keyColumn; // TODO provide incoming schema promote, like "widget.type.datalist"
 
     @Option
     @Required

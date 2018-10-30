@@ -47,23 +47,23 @@ public class KafkaConnectionConfiguration implements Serializable {
 
     @Option
     @ActiveIf(target = "useSsl", value = "true")
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("The file format of the trust store file")
     private StoreType trustStoreType = StoreType.JKS;
 
     @Option
-    @ActiveIf(target = "useSsl", value = "true")
-    @Documentation("TODO fill the documentation for this parameter")
+    @ActiveIf(target = "useSsl", value = "true") // TODO required when actived
+    @Documentation("The location of the trust store file")
     private String trustStorePath;
 
     @Option
     @Credential
-    @ActiveIf(target = "useSsl", value = "true")
-    @Documentation("TODO fill the documentation for this parameter")
+    @ActiveIf(target = "useSsl", value = "true") // TODO required when actived
+    @Documentation("The store password for the trust store file")
     private String trustStorePassword;
 
     @Option
     @ActiveIf(target = "useSsl", value = "true")
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("Two-way authentication for client")
     private boolean needClientAuth = false;
 
     @Option
@@ -71,22 +71,22 @@ public class KafkaConnectionConfiguration implements Serializable {
     @ActiveIfs({ //
             @ActiveIf(target = "useSsl", value = "true"), //
             @ActiveIf(target = "needClientAuth", value = "true") })
-    @Documentation("TODO fill the documentation for this parameter")
+    @Documentation("The file format of the key store file")
     private StoreType keyStoreType = StoreType.JKS;
 
     @Option
     @ActiveIfs({ //
             @ActiveIf(target = "useSsl", value = "true"), //
-            @ActiveIf(target = "needClientAuth", value = "true") })
-    @Documentation("TODO fill the documentation for this parameter")
+            @ActiveIf(target = "needClientAuth", value = "true") }) // TODO required when actived
+    @Documentation("The location of the key store file")
     private String keyStorePath;
 
     @Option
     @Credential
     @ActiveIfs({ //
             @ActiveIf(target = "useSsl", value = "true"), //
-            @ActiveIf(target = "needClientAuth", value = "true") })
-    @Documentation("TODO fill the documentation for this parameter")
+            @ActiveIf(target = "needClientAuth", value = "true") }) // TODO required when actived
+    @Documentation("The store password for the key store file")
     private String keyStorePassword;
 
     // For debugging, this is usually set to false.
