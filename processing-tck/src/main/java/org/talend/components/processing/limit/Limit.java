@@ -1,6 +1,6 @@
 package org.talend.components.processing.limit;
 
-import static org.talend.sdk.component.api.component.Icon.IconType.CUSTOM;
+import static org.talend.sdk.component.api.component.Icon.IconType.WARNING;
 
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicLong;
@@ -19,7 +19,7 @@ import org.talend.sdk.component.api.processor.Processor;
 
 @Version
 @Processor(name = "Limit")
-@Icon(custom = "limit", value = CUSTOM)
+@Icon(WARNING)
 @Documentation("This component filters the input with a counter/limit.")
 public class Limit implements Serializable {
 

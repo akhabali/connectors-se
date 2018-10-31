@@ -19,7 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 @Version
-@Icon(value = Icon.IconType.CUSTOM, custom = "FixedFlowInputRuntime")
+@Icon(value = Icon.IconType.FLOW_SOURCE_O)
 @PartitionMapper(name = "FixedFlowInputRuntime")
 @Documentation("This component duplicates an input a configured number of times.")
 public class FixedFlowInputRuntime implements Serializable {
