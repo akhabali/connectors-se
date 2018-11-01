@@ -5,9 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.json.JsonBuilderFactory;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
+import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 public class BulkResultSet {
 
@@ -15,15 +14,16 @@ public class BulkResultSet {
 
     private final List<String> header;
 
-    private JsonBuilderFactory jsonBuilderFactory;
+    private RecordBuilderFactory recordBuilderFactory;
 
-    public BulkResultSet(com.csvreader.CsvReader reader, List<String> header, final JsonBuilderFactory jsonBuilderFactory) {
+    public BulkResultSet(com.csvreader.CsvReader reader, List<String> header,
+            final RecordBuilderFactory recordBuilderFactory) {
         this.reader = reader;
         this.header = header;
-        this.jsonBuilderFactory = jsonBuilderFactory;
+        this.recordBuilderFactory = recordBuilderFactory;
     }
 
-    public JsonObject next() {
+    public Record next() {
         try {
             boolean hasNext = reader.readRecord();
             String[] row;
@@ -35,11 +35,15 @@ public class BulkResultSet {
                         // The relationShip Queries Use . in Salesforce and we use _ in Talend (Studio)
                         // So Account.Name in SF will be Account_Name in Talend
                         result.put(header.get(i).replace('.', '_'), row[i]);
+
                     }
-                    final JsonObjectBuilder jsonBuilder = jsonBuilderFactory.createObjectBuilder();
-                    result.entrySet().stream().filter(it -> it.getValue() != null)
-                            .forEach(e -> jsonBuilder.add(e.getKey(), e.getValue()));
-                    return jsonBuilder.build();
+                    Record.Builder recordBuilder = recordBuilderFactory.newRecordBuilder();
+                    result
+                            .entrySet()
+                            .stream()
+                            .filter(it -> it.getValue() != null)
+                            .forEach(e -> recordBuilder.withString(e.getKey(), e.getValue()));
+                    return recordBuilder.build();
                 } else {
                     return next();
                 }

@@ -9,14 +9,13 @@ import static org.talend.sdk.component.junit.SimpleFactory.configurationByExampl
 
 import java.util.List;
 
-import javax.json.JsonObject;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.talend.components.salesforce.SfHeaderFilter;
 import org.talend.components.salesforce.dataset.QueryDataSet;
 import org.talend.components.salesforce.datastore.BasicDataStore;
 import org.talend.sdk.component.api.DecryptedServer;
+import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.junit.BaseComponentsHandler;
 import org.talend.sdk.component.junit.http.api.HttpApiHandler;
 import org.talend.sdk.component.junit.http.junit5.HttpApi;
@@ -65,8 +64,14 @@ class SalesforceInputEmitterTest {
         queryDataSet.setDataStore(datasore);
         final String config = configurationByExample().forInstance(queryDataSet).configured().toQueryString();
         final IllegalStateException ex = assertThrows(IllegalStateException.class,
-                () -> Job.components().component("salesforce-input", "Salesforce://Input?" + config)
-                        .component("collector", "test://collector").connections().from("salesforce-input").to("collector").build()
+                () -> Job
+                        .components()
+                        .component("salesforce-input", "Salesforce://Input?" + config)
+                        .component("collector", "test://collector")
+                        .connections()
+                        .from("salesforce-input")
+                        .to("collector")
+                        .build()
                         .run());
     }
 
@@ -86,9 +91,16 @@ class SalesforceInputEmitterTest {
         queryDataSet.setDataStore(datasore);
         queryDataSet.setCondition("Name Like '%Oil%'");
         final String config = configurationByExample().forInstance(queryDataSet).configured().toQueryString();
-        Job.components().component("salesforce-input", "Salesforce://Input?" + config).component("collector", "test://collector")
-                .connections().from("salesforce-input").to("collector").build().run();
-        final List<JsonObject> res = componentsHandler.getCollectedData(JsonObject.class);
+        Job
+                .components()
+                .component("salesforce-input", "Salesforce://Input?" + config)
+                .component("collector", "test://collector")
+                .connections()
+                .from("salesforce-input")
+                .to("collector")
+                .build()
+                .run();
+        final List<Record> res = componentsHandler.getCollectedData(Record.class);
         assertEquals(4, res.size());
         assertTrue(res.iterator().next().getString("Name").contains("Oil"));
     }
@@ -108,8 +120,14 @@ class SalesforceInputEmitterTest {
         queryDataSet.setDataStore(datasore);
         final String config = configurationByExample().forInstance(queryDataSet).configured().toQueryString();
         IllegalStateException ex = assertThrows(IllegalStateException.class,
-                () -> Job.components().component("salesforce-input", "Salesforce://Input?" + config)
-                        .component("collector", "test://collector").connections().from("salesforce-input").to("collector").build()
+                () -> Job
+                        .components()
+                        .component("salesforce-input", "Salesforce://Input?" + config)
+                        .component("collector", "test://collector")
+                        .connections()
+                        .from("salesforce-input")
+                        .to("collector")
+                        .build()
                         .run());
     }
 
@@ -129,8 +147,14 @@ class SalesforceInputEmitterTest {
         queryDataSet.setDataStore(datasore);
         final String config = configurationByExample().forInstance(queryDataSet).configured().toQueryString();
         IllegalStateException ex = assertThrows(IllegalStateException.class,
-                () -> Job.components().component("salesforce-input", "Salesforce://Input?" + config)
-                        .component("collector", "test://collector").connections().from("salesforce-input").to("collector").build()
+                () -> Job
+                        .components()
+                        .component("salesforce-input", "Salesforce://Input?" + config)
+                        .component("collector", "test://collector")
+                        .connections()
+                        .from("salesforce-input")
+                        .to("collector")
+                        .build()
                         .run());
     }
 
@@ -148,10 +172,17 @@ class SalesforceInputEmitterTest {
         queryDataSet.setQuery("select Name from account where Name Like  '%Oil%'");
         queryDataSet.setDataStore(datasore);
         final String config = configurationByExample().forInstance(queryDataSet).configured().toQueryString();
-        Job.components().component("salesforce-input", "Salesforce://Input?" + config).component("collector", "test://collector")
-                .connections().from("salesforce-input").to("collector").build().run();
+        Job
+                .components()
+                .component("salesforce-input", "Salesforce://Input?" + config)
+                .component("collector", "test://collector")
+                .connections()
+                .from("salesforce-input")
+                .to("collector")
+                .build()
+                .run();
 
-        final List<JsonObject> res = componentsHandler.getCollectedData(JsonObject.class);
+        final List<Record> res = componentsHandler.getCollectedData(Record.class);
         assertEquals(4, res.size());
         assertTrue(res.iterator().next().getString("Name").contains("Oil"));
     }
@@ -171,8 +202,14 @@ class SalesforceInputEmitterTest {
         queryDataSet.setDataStore(datasore);
         final String config = configurationByExample().forInstance(queryDataSet).configured().toQueryString();
         IllegalStateException ex = assertThrows(IllegalStateException.class,
-                () -> Job.components().component("salesforce-input", "Salesforce://Input?" + config)
-                        .component("collector", "test://collector").connections().from("salesforce-input").to("collector").build()
+                () -> Job
+                        .components()
+                        .component("salesforce-input", "Salesforce://Input?" + config)
+                        .component("collector", "test://collector")
+                        .connections()
+                        .from("salesforce-input")
+                        .to("collector")
+                        .build()
                         .run());
     }
 
@@ -191,10 +228,17 @@ class SalesforceInputEmitterTest {
         queryDataSet.setDataStore(datasore);
 
         final String config = configurationByExample().forInstance(queryDataSet).configured().toQueryString();
-        Job.components().component("salesforce-input", "Salesforce://Input?" + config).component("collector", "test://collector")
-                .connections().from("salesforce-input").to("collector").build().run();
+        Job
+                .components()
+                .component("salesforce-input", "Salesforce://Input?" + config)
+                .component("collector", "test://collector")
+                .connections()
+                .from("salesforce-input")
+                .to("collector")
+                .build()
+                .run();
 
-        final List<JsonObject> records = componentsHandler.getCollectedData(JsonObject.class);
+        final List<Record> records = componentsHandler.getCollectedData(Record.class);
         assertEquals(0, records.size());
     }
 }

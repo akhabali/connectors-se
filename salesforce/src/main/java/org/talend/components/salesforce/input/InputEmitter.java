@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
-import javax.json.JsonBuilderFactory;
-import javax.json.JsonObject;
 
 import org.talend.components.salesforce.BulkResultSet;
 import org.talend.components.salesforce.dataset.QueryDataSet;
@@ -25,7 +23,9 @@ import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.input.Emitter;
 import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.meta.Documentation;
+import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.configuration.LocalConfiguration;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import com.sforce.async.AsyncApiException;
 import com.sforce.async.BulkConnection;
@@ -55,16 +55,17 @@ public class InputEmitter implements Serializable {
 
     private BulkResultSet bulkResultSet;
 
-    private JsonBuilderFactory jsonBuilderFactory;
+    private RecordBuilderFactory recordBuilderFactory;
 
     private Messages messages;
 
     public InputEmitter(@Option("configuration") final QueryDataSet queryDataSet, final SalesforceService service,
-            LocalConfiguration configuration, final JsonBuilderFactory jsonBuilderFactory, final Messages messages) {
+            LocalConfiguration configuration, final RecordBuilderFactory recordBuilderFactory,
+            final Messages messages) {
         this.service = service;
         this.dataset = queryDataSet;
         this.localConfiguration = configuration;
-        this.jsonBuilderFactory = jsonBuilderFactory;
+        this.recordBuilderFactory = recordBuilderFactory;
         this.messages = messages;
     }
 
@@ -72,7 +73,7 @@ public class InputEmitter implements Serializable {
     public void init() {
         try {
             final BulkConnection bulkConnection = service.bulkConnect(dataset.getDataStore(), localConfiguration);
-            bulkQueryService = new BulkQueryService(bulkConnection, jsonBuilderFactory, messages);
+            bulkQueryService = new BulkQueryService(bulkConnection, recordBuilderFactory, messages);
             bulkQueryService.doBulkQuery(getModuleName(), getSoqlQuery());
         } catch (ConnectionException e) {
             throw service.handleConnectionException(e);
@@ -84,12 +85,12 @@ public class InputEmitter implements Serializable {
     }
 
     @Producer
-    public JsonObject next() {
+    public Record next() {
         try {
             if (bulkResultSet == null) {
                 bulkResultSet = bulkQueryService.getQueryResultSet(bulkQueryService.nextResultId());
             }
-            JsonObject currentRecord = bulkResultSet.next();
+            Record currentRecord = bulkResultSet.next();
             if (currentRecord == null) {
                 String resultId = bulkQueryService.nextResultId();
                 if (resultId != null) {
@@ -145,9 +146,9 @@ public class InputEmitter implements Serializable {
         if (selectedColumns == null || selectedColumns.isEmpty()) {
             queryFields = allModuleFields;
         } else if (!allModuleFields.containsAll(selectedColumns)) { // ensure requested fields exist
-            throw new IllegalStateException(
-                    "columns { " + selectedColumns.stream().filter(c -> !allModuleFields.contains(c)).collect(joining(","))
-                            + " } " + "doesn't exist in module '" + dataset.getModuleName() + "'");
+            throw new IllegalStateException("columns { "
+                    + selectedColumns.stream().filter(c -> !allModuleFields.contains(c)).collect(joining(",")) + " } "
+                    + "doesn't exist in module '" + dataset.getModuleName() + "'");
         } else {
             queryFields = selectedColumns;
         }

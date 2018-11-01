@@ -25,9 +25,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.json.JsonBuilderFactory;
-
 import org.talend.components.salesforce.BulkResultSet;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import com.sforce.async.AsyncApiException;
 import com.sforce.async.AsyncExceptionCode;
@@ -52,7 +51,27 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class BulkQueryService {
 
+    public static final int DEFAULT_CHUNK_SIZE = 100_000;
+
+    public static final int DEFAULT_CHUNK_SLEEP_TIME = 15;
+
+    public static final int MAX_CHUNK_SIZE = 250_000;
+
+    public static final int DEFAULT_JOB_TIME_OUT = 0;
+
+    private static final String PK_CHUNKING_HEADER_NAME = "Sforce-Enable-PKChunking";
+
+    private static final String CHUNK_SIZE_PROPERTY_NAME = "chunkSize=";
+
+    private static final int MAX_BATCH_EXECUTION_TIME = 600 * 1000;
+
     private final String FILE_ENCODING = "UTF-8";
+
+    private final Messages messagesI18n;
+
+    private final RecordBuilderFactory recordBuilderFactory;
+
+    private final BulkConnection bulkConnection;
 
     private List<BatchInfo> batchInfoList;
 
@@ -69,34 +88,14 @@ public class BulkQueryService {
     private int chunkSize;
 
     private int chunkSleepTime;
+    // Default : no timeout to wait until the job fails or is in success
 
     private long jobTimeOut;
 
-    private final Messages messagesI18n;
-
-    private final JsonBuilderFactory jsonBuilderFactory;
-
-    private static final String PK_CHUNKING_HEADER_NAME = "Sforce-Enable-PKChunking";
-
-    private static final String CHUNK_SIZE_PROPERTY_NAME = "chunkSize=";
-
-    private static final int MAX_BATCH_EXECUTION_TIME = 600 * 1000;
-
-    public static final int DEFAULT_CHUNK_SIZE = 100_000;
-
-    public static final int DEFAULT_CHUNK_SLEEP_TIME = 15;
-
-    public static final int MAX_CHUNK_SIZE = 250_000;
-
-    public static final int DEFAULT_JOB_TIME_OUT = 0;
-    // Default : no timeout to wait until the job fails or is in success
-
-    private final BulkConnection bulkConnection;
-
-    public BulkQueryService(final BulkConnection bulkConnection, final JsonBuilderFactory jsonBuilderFactory,
+    public BulkQueryService(final BulkConnection bulkConnection, final RecordBuilderFactory recordBuilderFactory,
             final Messages messages) {
         this.bulkConnection = bulkConnection;
-        this.jsonBuilderFactory = jsonBuilderFactory;
+        this.recordBuilderFactory = recordBuilderFactory;
         this.messagesI18n = messages;
         this.chunkSize = DEFAULT_CHUNK_SIZE;
         chunkSleepTime = DEFAULT_CHUNK_SLEEP_TIME;
@@ -176,14 +175,15 @@ public class BulkQueryService {
     }
 
     public BulkResultSet getQueryResultSet(String resultId) throws AsyncApiException, IOException, ConnectionException {
-        final com.csvreader.CsvReader baseFileReader = new com.csvreader.CsvReader(new BufferedReader(
-                new InputStreamReader(getQueryResultStream(job.getId(), batchInfoList.get(0).getId(), resultId), FILE_ENCODING)),
+        final com.csvreader.CsvReader baseFileReader = new com.csvreader.CsvReader(
+                new BufferedReader(new InputStreamReader(
+                        getQueryResultStream(job.getId(), batchInfoList.get(0).getId(), resultId), FILE_ENCODING)),
                 ',');
         baseFileReader.setSafetySwitch(safetySwitch);
         if (baseFileReader.readRecord()) {
             baseFileHeader = Arrays.asList(baseFileReader.getValues());
         }
-        return new BulkResultSet(baseFileReader, baseFileHeader, jsonBuilderFactory);
+        return new BulkResultSet(baseFileReader, baseFileHeader, recordBuilderFactory);
     }
 
     private JobInfo createJob(JobInfo job) throws AsyncApiException, ConnectionException {
@@ -207,7 +207,8 @@ public class BulkQueryService {
         }
     }
 
-    private BatchInfo createBatchFromStream(JobInfo job, InputStream input) throws AsyncApiException, ConnectionException {
+    private BatchInfo createBatchFromStream(JobInfo job, InputStream input)
+            throws AsyncApiException, ConnectionException {
         try {
             return bulkConnection.createBatchFromStream(job, input);
         } catch (AsyncApiException sfException) {
@@ -243,7 +244,8 @@ public class BulkQueryService {
         }
     }
 
-    private QueryResultList getQueryResultList(String jobID, String batchID) throws AsyncApiException, ConnectionException {
+    private QueryResultList getQueryResultList(String jobID, String batchID)
+            throws AsyncApiException, ConnectionException {
         try {
             return bulkConnection.getQueryResultList(jobID, batchID);
         } catch (AsyncApiException sfException) {
@@ -286,7 +288,8 @@ public class BulkQueryService {
      * @throws ConnectionException
      * @throws InterruptedException
      */
-    private void retrieveResultsOfQuery(BatchInfo info) throws AsyncApiException, ConnectionException, InterruptedException {
+    private void retrieveResultsOfQuery(BatchInfo info)
+            throws AsyncApiException, ConnectionException, InterruptedException {
 
         if (BatchStateEnum.Completed == info.getState()) {
             QueryResultList list = getQueryResultList(job.getId(), info.getId());
