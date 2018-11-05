@@ -9,7 +9,6 @@ import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 
 import org.talend.sdk.component.junit5.WithComponents;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;

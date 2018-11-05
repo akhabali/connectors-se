@@ -79,10 +79,7 @@ public class InputSource implements Serializable {
         ConnectionFactory connectionFactory = service.createConnectionFactory(configuration.getBasicConfig().getConnection());
         try {
             try {
-                connection = service.getConnection(connectionFactory,
-                        configuration.getBasicConfig().getConnection().isUserIdentity(),
-                        configuration.getBasicConfig().getConnection().getUserName(),
-                        configuration.getBasicConfig().getConnection().getPassword());
+                connection = service.getConnection(connectionFactory, configuration.getBasicConfig().getConnection());
             } catch (JMSException e) {
                 throw new IllegalStateException(i18n.errorInvalidConnection());
             }

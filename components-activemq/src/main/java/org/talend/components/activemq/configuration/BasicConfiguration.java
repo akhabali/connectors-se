@@ -28,9 +28,8 @@ import static org.talend.components.activemq.service.ActionService.DISCOVER_SCHE
 
 @DataSet("JMSDataSet")
 @Data
-@GridLayout(value = { @GridLayout.Row({ "connection" }), @GridLayout.Row({ "messageType" }),
-        @GridLayout.Row({ "destination" }) }, names = GridLayout.FormType.MAIN)
-@GridLayout(value = { @GridLayout.Row({ "schema" }) }, names = GridLayout.FormType.ADVANCED)
+@GridLayout(value = { @GridLayout.Row({ "connection" }), @GridLayout.Row({ "messageType" }), @GridLayout.Row({ "destination" }),
+        @GridLayout.Row({ "schema" }) }, names = GridLayout.FormType.MAIN)
 public class BasicConfiguration implements Serializable {
 
     @Option
