@@ -58,8 +58,6 @@ public class Output implements Serializable {
 
     private Session session;
 
-    private Destination destination;
-
     private MessageProducer producer;
 
     public Output(@Option("configuration") final OutputConfiguration configuration, final JmsService service,
@@ -89,7 +87,7 @@ public class Output implements Serializable {
 
             session = service.getSession(connection, configuration.getBasicConfig().getConnection().getTransacted());
 
-            destination = service.getDestination(session, configuration.getBasicConfig().getDestination(),
+            Destination destination = service.getDestination(session, configuration.getBasicConfig().getDestination(),
                     configuration.getBasicConfig().getMessageType());
 
             producer = session.createProducer(destination);
