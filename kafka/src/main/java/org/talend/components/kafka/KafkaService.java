@@ -63,7 +63,7 @@ public class KafkaService {
         props.putAll(createConnMaps(output.getDataset().getConnection(), true));
 
         if (output.isUseCompress()) {
-            props.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, output.getCompressType());
+            props.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, output.getCompressType().toString().toLowerCase());
         }
 
         // props.putAll(createConfigurationTable(output.configurations));

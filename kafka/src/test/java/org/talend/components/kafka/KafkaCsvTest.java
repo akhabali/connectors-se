@@ -89,8 +89,33 @@ public class KafkaCsvTest {
     }
 
     /**
-     * Read csv format value and write csv format value without schema and do not write key
-     * using standard field delimiter
+     * Connection
+     *      Basic: [x]
+     *      Ssl:
+     * Dataset
+     *      Csv: [x]
+     *          SEMICOLON: [x]
+     *          Others:
+     *      Avro:
+     * Input
+     *      GroupId:
+     *      OffsetReset
+     *          LATEST:
+     *          EARLIEST: [x]
+     *          NONE:
+     *      SourceType
+     *          unbounded:
+     *          maxReadTime:
+     *          maxRecord: [x]
+     * Output
+     *      Partition
+     *          round_robin: [x]
+     *          by_key:
+     *      Compress
+     *          none: [x]
+     *          gzip:
+     *          snappy:
+     *
      */
     @Test
     public void csvBasicTest1() {
@@ -101,44 +126,44 @@ public class KafkaCsvTest {
     }
 
     /**
-     * Read csv format value and write csv format value without schema and do not write key
-     * using standard field delimiter
+     * Connection
+     *      Basic: [x]
+     *      Ssl:
+     * Dataset
+     *      Csv: [x]
+     *          SEMICOLON:
+     *          Others: [x]
+     *      Avro:
+     * Input
+     *      GroupId:
+     *      OffsetReset
+     *          LATEST:
+     *          EARLIEST: [x]
+     *          NONE:
+     *      SourceType
+     *          unbounded:
+     *          maxReadTime: [x]
+     *          maxRecord:
+     * Output
+     *      Partition
+     *          round_robin:
+     *          by_key: [x]
+     *      Compress
+     *          none:
+     *          gzip: [x]
+     *          snappy:
+     *
      */
     @Test
     public void csvBasicTest2() {
-        inputDatasetProperties.setFieldDelimiter(FieldDelimiterType.SEMICOLON);
-        outputDatasetProperties.setFieldDelimiter(FieldDelimiterType.SEMICOLON);
-
-        testCase2("csvBasicTest2", "2", fieldDelimiter);
-    }
-
-    /**
-     * Read csv format value and write csv format value without schema and do not write key
-     * using custom field delimiter
-     */
-    @Test
-    public void csvBasicTest1WithOtherFieldDelimiter() {
         inputDatasetProperties.setFieldDelimiter(FieldDelimiterType.OTHER);
         inputDatasetProperties.setSpecificFieldDelimiter(otherFieldDelimiter);
         outputDatasetProperties.setFieldDelimiter(FieldDelimiterType.OTHER);
         outputDatasetProperties.setSpecificFieldDelimiter(otherFieldDelimiter);
 
-        testCase1("csvBasicTest1WithOtherFieldDelimiter", "3", otherFieldDelimiter);
+        testCase2("csvBasicTest2", "2", otherFieldDelimiter);
     }
 
-    /**
-     * Read csv format value and write csv format value without schema and do not write key
-     * using standard field delimiter
-     */
-    @Test
-    public void csvBasicTest2WithOtherFieldDelimiter() {
-        inputDatasetProperties.setFieldDelimiter(FieldDelimiterType.OTHER);
-        inputDatasetProperties.setSpecificFieldDelimiter(otherFieldDelimiter);
-        outputDatasetProperties.setFieldDelimiter(FieldDelimiterType.OTHER);
-        outputDatasetProperties.setSpecificFieldDelimiter(otherFieldDelimiter);
-
-        testCase2("csvBasicTest2WithOtherFieldDelimiter", "4", otherFieldDelimiter);
-    }
 
     /**
      * Input with earliest & maxRecords
@@ -218,7 +243,7 @@ public class KafkaCsvTest {
 
     /**
      * Input with earliest & maxTime 5s
-     * Output with by_key partition & Non Compress
+     * Output with by_key partition & Gzip Compress
      */
     public void testCase2(String title, String topicSuffix, String fieldDelim) {
         String testID = title + new Random().nextInt();
@@ -249,6 +274,8 @@ public class KafkaCsvTest {
         outputProperties.setDataset(outputDatasetProperties);
         outputProperties.setPartitionType(KafkaOutputConfiguration.PartitionType.COLUMN);
         outputProperties.setKeyColumn("field1");
+        outputProperties.setUseCompress(true);
+        outputProperties.setCompressType(KafkaOutputConfiguration.CompressType.GZIP);
 
         inputDatasetProperties.setTopic(topicIn + topicSuffix);
         outputDatasetProperties.setTopic(topicOut + topicSuffix);
