@@ -16,8 +16,7 @@ public class BulkResultSet {
 
     private RecordBuilderFactory recordBuilderFactory;
 
-    public BulkResultSet(com.csvreader.CsvReader reader, List<String> header,
-            final RecordBuilderFactory recordBuilderFactory) {
+    public BulkResultSet(com.csvreader.CsvReader reader, List<String> header, final RecordBuilderFactory recordBuilderFactory) {
         this.reader = reader;
         this.header = header;
         this.recordBuilderFactory = recordBuilderFactory;
@@ -38,10 +37,7 @@ public class BulkResultSet {
 
                     }
                     Record.Builder recordBuilder = recordBuilderFactory.newRecordBuilder();
-                    result
-                            .entrySet()
-                            .stream()
-                            .filter(it -> it.getValue() != null)
+                    result.entrySet().stream().filter(it -> it.getValue() != null)
                             .forEach(e -> recordBuilder.withString(e.getKey(), e.getValue()));
                     return recordBuilder.build();
                 } else {

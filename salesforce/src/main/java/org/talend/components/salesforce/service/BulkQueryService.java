@@ -175,9 +175,8 @@ public class BulkQueryService {
     }
 
     public BulkResultSet getQueryResultSet(String resultId) throws AsyncApiException, IOException, ConnectionException {
-        final com.csvreader.CsvReader baseFileReader = new com.csvreader.CsvReader(
-                new BufferedReader(new InputStreamReader(
-                        getQueryResultStream(job.getId(), batchInfoList.get(0).getId(), resultId), FILE_ENCODING)),
+        final com.csvreader.CsvReader baseFileReader = new com.csvreader.CsvReader(new BufferedReader(
+                new InputStreamReader(getQueryResultStream(job.getId(), batchInfoList.get(0).getId(), resultId), FILE_ENCODING)),
                 ',');
         baseFileReader.setSafetySwitch(safetySwitch);
         if (baseFileReader.readRecord()) {
@@ -207,8 +206,7 @@ public class BulkQueryService {
         }
     }
 
-    private BatchInfo createBatchFromStream(JobInfo job, InputStream input)
-            throws AsyncApiException, ConnectionException {
+    private BatchInfo createBatchFromStream(JobInfo job, InputStream input) throws AsyncApiException, ConnectionException {
         try {
             return bulkConnection.createBatchFromStream(job, input);
         } catch (AsyncApiException sfException) {
@@ -244,8 +242,7 @@ public class BulkQueryService {
         }
     }
 
-    private QueryResultList getQueryResultList(String jobID, String batchID)
-            throws AsyncApiException, ConnectionException {
+    private QueryResultList getQueryResultList(String jobID, String batchID) throws AsyncApiException, ConnectionException {
         try {
             return bulkConnection.getQueryResultList(jobID, batchID);
         } catch (AsyncApiException sfException) {
@@ -288,8 +285,7 @@ public class BulkQueryService {
      * @throws ConnectionException
      * @throws InterruptedException
      */
-    private void retrieveResultsOfQuery(BatchInfo info)
-            throws AsyncApiException, ConnectionException, InterruptedException {
+    private void retrieveResultsOfQuery(BatchInfo info) throws AsyncApiException, ConnectionException, InterruptedException {
 
         if (BatchStateEnum.Completed == info.getState()) {
             QueryResultList list = getQueryResultList(job.getId(), info.getId());
