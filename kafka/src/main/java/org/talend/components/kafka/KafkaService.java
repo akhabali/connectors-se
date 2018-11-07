@@ -42,14 +42,15 @@ public class KafkaService {
                         .map(topic -> new SuggestionValues.Item(topic.toString(), topic.toString())).collect(toList()));
     }
 
-    public static Map<String, Object> createInputMaps(KafkaInputConfiguration input) {
+    public static Map<String, Object> createInputMaps(KafkaInputConfiguration input, boolean isBeam) {
         Map<String, Object> props = new HashMap<>();
-        props.putAll(createConnMaps(input.getDataset().getConnection(), true));
+        props.putAll(createConnMaps(input.getDataset().getConnection(), isBeam));
 
-        String groupID = input.getGroupId();
-        if (groupID != null && !"".equals(groupID)) {
-            props.put(ConsumerConfig.GROUP_ID_CONFIG, groupID);
-            props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
+        if (input.hasGroupId()) {
+            props.put(ConsumerConfig.GROUP_ID_CONFIG, input.getGroupId());
+            if (!input.isBoundedSource()) {
+                props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
+            }
         }
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, input.getAutoOffsetReset().toString().toLowerCase());
 

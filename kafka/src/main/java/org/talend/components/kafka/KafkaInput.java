@@ -1,10 +1,5 @@
 package org.talend.components.kafka;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericDatumReader;
@@ -22,6 +17,9 @@ import org.apache.beam.sdk.transforms.Values;
 import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.consumer.OffsetAndMetadata;
+import org.apache.kafka.common.TopicPartition;
 import org.joda.time.Duration;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Icon.IconType;
@@ -32,6 +30,12 @@ import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.runtime.beam.coder.record.FullSerializationRecordCoder;
 import org.talend.sdk.component.runtime.beam.spi.record.AvroRecord;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 @Version(1)
 @Icon(IconType.KAFKA)
@@ -49,8 +53,8 @@ public class KafkaInput extends PTransform<PBegin, PCollection<Record>> {
     public PCollection<Record> expand(PBegin input) {
         KafkaIO.Read<byte[], byte[]> kafkaRead = KafkaIO.readBytes()
                 .withBootstrapServers(configuration.getDataset().getConnection().getBrokers())
-                .withTopics(Arrays.asList(new String[] { configuration.getDataset().getTopic() }))
-                .updateConsumerProperties(KafkaService.createInputMaps(configuration));
+                .withTopics(Arrays.asList(new String[]{configuration.getDataset().getTopic()}))
+                .updateConsumerProperties(KafkaService.createInputMaps(configuration, true));
 
         if (configuration.isUseMaxReadTime()) {
             kafkaRead = kafkaRead.withMaxReadTime(new Duration(configuration.getMaxReadTime()));
@@ -58,33 +62,58 @@ public class KafkaInput extends PTransform<PBegin, PCollection<Record>> {
         if (configuration.isUseMaxNumRecords()) {
             kafkaRead = kafkaRead.withMaxNumRecords(configuration.getMaxNumRecords());
         }
+        PCollection<KafkaRecord<byte[], byte[]>> mayCommitOffset = input.apply(kafkaRead);
+        if (configuration.isBoundedSource() && configuration.hasGroupId()) {
+            mayCommitOffset = mayCommitOffset.apply(ParDo.of(new CommitOffset(configuration)));
+        }
         // only consider value of kafkaRecord no matter which format selected
-        PCollection<byte[]> kafkaRecords = input.apply(kafkaRead) //
+        PCollection<byte[]> kafkaRecords = mayCommitOffset //
                 .apply(ParDo.of(new ExtractRecord())) //
-                .apply(Values.<byte[]> create());
+                .apply(Values.<byte[]>create());
         switch (configuration.getDataset().getValueFormat()) {
-        case AVRO: {
-            return kafkaRecords.apply(ParDo.of(new ByteArrayToAvroRecord(configuration.getDataset().getAvroSchema())))
-                    .setCoder(FullSerializationRecordCoder.of());
-        }
-        case CSV: {
-            return kafkaRecords.apply(ParDo.of(new ExtractCsvSplit(configuration.getDataset().getFieldDelimiter())))
-                    .apply(ParDo.of(new StringArrayToAvroRecord())).setCoder(FullSerializationRecordCoder.of());
-        }
-        default:
-            throw new RuntimeException("To be implemented: " + configuration.getDataset().getValueFormat());
+            case AVRO: {
+                return kafkaRecords.apply(ParDo.of(new ByteArrayToAvroRecord(configuration.getDataset().getAvroSchema())))
+                        .setCoder(FullSerializationRecordCoder.of());
+            }
+            case CSV: {
+                return kafkaRecords.apply(ParDo.of(new ExtractCsvSplit(configuration.getDataset().getFieldDelimiter())))
+                        .apply(ParDo.of(new StringArrayToAvroRecord())).setCoder(FullSerializationRecordCoder.of());
+            }
+            default:
+                throw new RuntimeException("To be implemented: " + configuration.getDataset().getValueFormat());
         }
     }
 
-    // TODO: We shouldn't need reflection for this to work! Under investigation.
-    // It appears that the KafkaIO.Read is contextualized with the SAME classloader as ExtractRecord
-    // (checked via debugger), but during the manipulation in Spark, the KafkaRecord instance
-    // emitted by the KafkaIO.Read (container class loader) ends up being a KafkaRecord from the
-    // SparkRunner class loader.
+    private static class CommitOffset extends DoFn<KafkaRecord<byte[], byte[]>, KafkaRecord<byte[], byte[]>> {
+
+        private KafkaInputConfiguration conn;
+
+        private KafkaConsumer consumer;
+
+        public CommitOffset(KafkaInputConfiguration conn) {
+            this.conn = conn;
+        }
+
+        @DoFn.Setup
+        public void setup() {
+            consumer = new KafkaConsumer(KafkaService.createInputMaps(conn, false));
+        }
+
+        @DoFn.ProcessElement
+        public void processElement(ProcessContext c) {
+            KafkaRecord<byte[], byte[]> kafkaRecord = c.element();
+            consumer.commitSync(
+                    Collections.singletonMap(
+                            new TopicPartition(kafkaRecord.getTopic(), kafkaRecord.getPartition()),
+                            new OffsetAndMetadata(kafkaRecord.getOffset())));
+            c.output(kafkaRecord);
+        }
+    }
+
     private static class ExtractRecord extends DoFn<KafkaRecord<byte[], byte[]>, KV<byte[], byte[]>> {
 
         @DoFn.ProcessElement
-        public void processElement(ProcessContext c) throws Exception {
+        public void processElement(ProcessContext c) {
             c.output(c.element().getKV());
         }
     }

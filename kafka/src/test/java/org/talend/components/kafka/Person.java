@@ -133,4 +133,8 @@ public class Person {
         return false;
     }
 
+    @Override
+    public String toString() {
+        return String.format("{\"group\":\"%s\", \"name\":\"%s\", \"age\":%s, \"gender\":%s}", group, name, age, gender);
+    }
 }

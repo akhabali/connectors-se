@@ -1,24 +1,22 @@
 package org.talend.components.kafka;
 
-import java.io.Serializable;
-
+import lombok.Data;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.constraint.Pattern;
-import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
-import lombok.Data;
+import java.io.Serializable;
 
 @Version(1)
 @Data
-@GridLayout({ @GridLayout.Row("dataset"), // hidden?
+@GridLayout({@GridLayout.Row("dataset"), // hidden?
         @GridLayout.Row("groupId"), //
         @GridLayout.Row("autoOffsetReset"), //
-        @GridLayout.Row({ "useMaxReadTime", "maxReadTime" }), //
-        @GridLayout.Row({ "useMaxNumRecords", "maxNumRecords" }) })
+        @GridLayout.Row({"useMaxReadTime", "maxReadTime"}), //
+        @GridLayout.Row({"useMaxNumRecords", "maxNumRecords"})})
 @Documentation("TODO fill the documentation for this configuration")
 public class KafkaInputConfiguration implements Serializable {
 
@@ -63,5 +61,13 @@ public class KafkaInputConfiguration implements Serializable {
         LATEST,
         EARLIEST,
         NONE
+    }
+
+    protected boolean isBoundedSource() {
+        return useMaxNumRecords || useMaxReadTime;
+    }
+
+    protected boolean hasGroupId() {
+        return groupId != null && !"".equals(groupId);
     }
 }
