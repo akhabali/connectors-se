@@ -2,6 +2,7 @@ package org.talend.components.kafka;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,7 +34,36 @@ import net.manub.embeddedkafka.EmbeddedKafka$;
 import net.manub.embeddedkafka.EmbeddedKafkaConfig$;
 import scala.collection.Map$;
 
-public class KafkaCsvTest {
+/**
+ * Connection
+ *      Basic: [testCase1] [testCase2] [testCase3]
+ *      Ssl:
+ * Dataset
+ *      Csv
+ *          SEMICOLON: [testCase1]
+ *          Others: [testCase2]
+ *      Avro: [testCase3]
+ * Input
+ *      GroupId:
+ *      OffsetReset
+ *          LATEST:
+ *          EARLIEST: [testCase1] [testCase2] [testCase3]
+ *          NONE:
+ *      SourceType
+ *          unbounded:
+ *          maxReadTime: [testCase2]
+ *          maxRecord: [testCase1] [testCase3]
+ * Output
+ *      Partition
+ *          round_robin: [testCase1] [testCase3]
+ *          by_key: [testCase2]
+ *      Compress
+ *          none: [testCase1]
+ *          gzip: [testCase2]
+ *          snappy: [testCase3]
+ *
+ */
+public class KafkaInputOutputRuntimeTest {
 
     KafkaConnectionConfiguration datastoreProperties;
 
@@ -93,7 +123,7 @@ public class KafkaCsvTest {
      *      Basic: [x]
      *      Ssl:
      * Dataset
-     *      Csv: [x]
+     *      Csv
      *          SEMICOLON: [x]
      *          Others:
      *      Avro:
@@ -118,58 +148,14 @@ public class KafkaCsvTest {
      *
      */
     @Test
-    public void csvBasicTest1() {
+    public void testCase1() {
         inputDatasetProperties.setFieldDelimiter(FieldDelimiterType.SEMICOLON);
         outputDatasetProperties.setFieldDelimiter(FieldDelimiterType.SEMICOLON);
 
-        testCase1("csvBasicTest1", "1", fieldDelimiter);
-    }
+        String title = "testCase1";
+        String topicSuffix = "1";
+        String fieldDelim = fieldDelimiter;
 
-    /**
-     * Connection
-     *      Basic: [x]
-     *      Ssl:
-     * Dataset
-     *      Csv: [x]
-     *          SEMICOLON:
-     *          Others: [x]
-     *      Avro:
-     * Input
-     *      GroupId:
-     *      OffsetReset
-     *          LATEST:
-     *          EARLIEST: [x]
-     *          NONE:
-     *      SourceType
-     *          unbounded:
-     *          maxReadTime: [x]
-     *          maxRecord:
-     * Output
-     *      Partition
-     *          round_robin:
-     *          by_key: [x]
-     *      Compress
-     *          none:
-     *          gzip: [x]
-     *          snappy:
-     *
-     */
-    @Test
-    public void csvBasicTest2() {
-        inputDatasetProperties.setFieldDelimiter(FieldDelimiterType.OTHER);
-        inputDatasetProperties.setSpecificFieldDelimiter(otherFieldDelimiter);
-        outputDatasetProperties.setFieldDelimiter(FieldDelimiterType.OTHER);
-        outputDatasetProperties.setSpecificFieldDelimiter(otherFieldDelimiter);
-
-        testCase2("csvBasicTest2", "2", otherFieldDelimiter);
-    }
-
-
-    /**
-     * Input with earliest & maxRecords
-     * Output with round_robin partition & Non Compress
-     */
-    public void testCase1(String title, String topicSuffix, String fieldDelim) {
         String testID = title + new Random().nextInt();
 
         expectedPersons = Person.genRandomList(testID, maxRecords);
@@ -242,10 +228,45 @@ public class KafkaCsvTest {
     }
 
     /**
-     * Input with earliest & maxTime 5s
-     * Output with by_key partition & Gzip Compress
+     * Connection
+     *      Basic: [x]
+     *      Ssl:
+     * Dataset
+     *      Csv
+     *          SEMICOLON:
+     *          Others: [x]
+     *      Avro:
+     * Input
+     *      GroupId:
+     *      OffsetReset
+     *          LATEST:
+     *          EARLIEST: [x]
+     *          NONE:
+     *      SourceType
+     *          unbounded:
+     *          maxReadTime: [x]
+     *          maxRecord:
+     * Output
+     *      Partition
+     *          round_robin:
+     *          by_key: [x]
+     *      Compress
+     *          none:
+     *          gzip: [x]
+     *          snappy:
+     *
      */
-    public void testCase2(String title, String topicSuffix, String fieldDelim) {
+    @Test
+    public void testCase2() {
+        inputDatasetProperties.setFieldDelimiter(FieldDelimiterType.OTHER);
+        inputDatasetProperties.setSpecificFieldDelimiter(otherFieldDelimiter);
+        outputDatasetProperties.setFieldDelimiter(FieldDelimiterType.OTHER);
+        outputDatasetProperties.setSpecificFieldDelimiter(otherFieldDelimiter);
+
+        String title = "testCase2";
+        String topicSuffix = "2";
+        String fieldDelim = otherFieldDelimiter;
+
         String testID = title + new Random().nextInt();
 
         expectedPersons = Person.genRandomList(testID, maxRecords);
@@ -326,6 +347,118 @@ public class KafkaCsvTest {
             expectedKeys.add(person.name);
         }
         assertEquals(expectedKeys, keys);
+    }
+
+    /**
+     * Connection
+     *      Basic: [x]
+     *      Ssl:
+     * Dataset
+     *      Csv
+     *          SEMICOLON:
+     *          Others:
+     *      Avro: [x]
+     * Input
+     *      GroupId:
+     *      OffsetReset
+     *          LATEST:
+     *          EARLIEST: [x]
+     *          NONE:
+     *      SourceType
+     *          unbounded:
+     *          maxReadTime:
+     *          maxRecord: [x]
+     * Output
+     *      Partition
+     *          round_robin: [x]
+     *          by_key:
+     *      Compress
+     *          none:
+     *          gzip:
+     *          snappy: [x]
+     *
+     */
+    @Test
+    public void testCase3() throws IOException {
+        inputDatasetProperties.setValueFormat(ValueFormat.AVRO);
+        inputDatasetProperties.setAvroSchema(Person.schema.toString());
+        outputDatasetProperties.setValueFormat(ValueFormat.AVRO);
+        outputDatasetProperties.setAvroSchema(Person.schema.toString());
+
+        String title = "testCase3";
+        String topicSuffix = "3";
+
+        String testID = title + new Random().nextInt();
+
+        expectedPersons = Person.genRandomList(testID, maxRecords);
+
+        // ----------------- Send data to TOPIC_IN start --------------------
+        Properties props = new Properties();
+        props.put("bootstrap.servers", broker);
+        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
+
+        Producer<Void, byte[]> producer = new KafkaProducer<>(props);
+        for (Person person : expectedPersons) {
+            ProducerRecord<Void, byte[]> message = new ProducerRecord<>(topicIn + topicSuffix, person.serToAvroBytes());
+            producer.send(message);
+        }
+        producer.close();
+        // ----------------- Send data to TOPIC_IN done --------------------
+
+        KafkaInputConfiguration inputProperties = new KafkaInputConfiguration();
+        inputProperties.setDataset(inputDatasetProperties);
+        inputProperties.setAutoOffsetReset(OffsetResetStrategy.EARLIEST);
+        inputProperties.setUseMaxNumRecords(true);
+        inputProperties.setMaxNumRecords(Long.valueOf(maxRecords));
+
+        KafkaOutputConfiguration outputProperties = new KafkaOutputConfiguration();
+        outputProperties.setDataset(outputDatasetProperties);
+        outputProperties.setUseCompress(true);
+        outputProperties.setCompressType(KafkaOutputConfiguration.CompressType.SNAPPY);
+
+        inputDatasetProperties.setTopic(topicIn + topicSuffix);
+        outputDatasetProperties.setTopic(topicOut + topicSuffix);
+
+        KafkaInput inputRuntime = new KafkaInput(inputProperties);
+        KafkaOutput outputRuntime = new KafkaOutput(outputProperties);
+
+        // ----------------- pipeline start --------------------
+        pipeline.apply(inputRuntime).apply(outputRuntime);
+
+        // TODO: Remove this when tacokit coders are immutable.
+        DirectOptions options = pipeline.getOptions().as(DirectOptions.class);
+        options.setEnforceImmutability(false);
+
+        PipelineResult result = pipeline.run(options);
+        result.waitUntilFinish();
+        // ----------------- pipeline done --------------------
+
+        // ----------------- Read data from TOPIC_OUT start --------------------
+        props = new Properties();
+        props.put("bootstrap.servers", broker);
+        props.put("group.id", testID);
+        props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        props.put("value.deserializer", "org.apache.kafka.common.serialization.ByteArrayDeserializer");
+        props.put("auto.offset.reset", "earliest");
+        KafkaConsumer<String, byte[]> consumer = new KafkaConsumer<>(props);
+        consumer.subscribe(Arrays.asList(topicOut + topicSuffix));
+        List<Person> results = new ArrayList<>();
+        while (true) {
+            ConsumerRecords<String, byte[]> records = consumer.poll(100);
+            for (ConsumerRecord<String, byte[]> record : records) {
+                Person person = Person.desFromAvroBytes(record.value());
+                if (testID.equals(person.group)) {
+                    results.add(person);
+                }
+            }
+            if (results.size() >= maxRecords) {
+                break;
+            }
+        }
+        // ----------------- Read data from TOPIC_OUT end --------------------
+
+        assertEquals(expectedPersons, results);
     }
 
     public static class FilterByGroup implements SerializableFunction<Record, Boolean> {
