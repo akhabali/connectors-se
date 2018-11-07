@@ -37,7 +37,7 @@ public class KafkaConnectionConfiguration implements Serializable {
     @Option
     @Required
     @Documentation("Comma-delimited list of Kafka broker hosts with ports.")
-    @Pattern("^(\\w+)(\\.\\w+)*:\\d+(,(\\w+)(\\.\\w+)*:\\d+)*$")
+    @Pattern("\\[?([0-9a-zA-Z\\-%._:]*)\\]?:([0-9]+)(,(\\[?([0-9a-zA-Z\\-%._:]*)\\]?:([0-9]+)))*$") // https://github.com/apache/kafka/blob/0.10.1/core/src/main/scala/kafka/cluster/BrokerEndPoint.scala#L27
     private String brokers;
 
     @Option
