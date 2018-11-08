@@ -97,9 +97,9 @@ public class KafkaInputOutputRuntimeTest {
     @Before
     public void setup() {
         EmbeddedK brk = EmbeddedKafka$.MODULE$.start(EmbeddedKafkaConfig$.MODULE$.apply(0, 0, //
-                Map$.MODULE$.<String, String> empty(), //
-                Map$.MODULE$.<String, String> empty(), //
-                Map$.MODULE$.<String, String> empty()));
+                Map$.MODULE$.<String, String>empty(), //
+                Map$.MODULE$.<String, String>empty(), //
+                Map$.MODULE$.<String, String>empty()));
         broker = "localhost:" + brk.config().kafkaPort();
         zookeeper = "localhost:" + brk.config().zooKeeperPort();
 
@@ -568,8 +568,7 @@ public class KafkaInputOutputRuntimeTest {
         }
         // ----------------- Read data from TOPIC_OUT end --------------------
 
-        // we can see the offset commit correctly, but input will get one last record.
-        // assertEquals(expectedPersons, results);
+        assertEquals(expectedPersons, results);
         assertEquals(10, results.size());
     }
 

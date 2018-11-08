@@ -102,8 +102,9 @@ public class KafkaInput extends PTransform<PBegin, PCollection<Record>> {
         @DoFn.ProcessElement
         public void processElement(ProcessContext c) {
             KafkaRecord<byte[], byte[]> kafkaRecord = c.element();
+            // always add one on the current offset, https://kafka.apache.org/0110/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html#commitSync(java.util.Map)
             consumer.commitSync(Collections.singletonMap(new TopicPartition(kafkaRecord.getTopic(), kafkaRecord.getPartition()),
-                    new OffsetAndMetadata(kafkaRecord.getOffset())));
+                    new OffsetAndMetadata(kafkaRecord.getOffset() + 1)));
             c.output(kafkaRecord);
         }
     }
