@@ -26,7 +26,7 @@ public class KafkaService {
     @HealthCheck("healthCheck")
     public HealthCheckStatus healthCheck(@Option("configuration.dataset.connection") final KafkaConnectionConfiguration conn) {
         try {
-            KafkaConsumer consumer = new KafkaConsumer(createConnProps(conn));
+            KafkaConsumer consumer = new KafkaConsumer(createHealthCheckProps(conn));
             consumer.listTopics();
         } catch (Throwable exception) {
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, exception.getMessage());
@@ -36,7 +36,7 @@ public class KafkaService {
 
     @Suggestions("KafkaTopics")
     public SuggestionValues listTopics(@Option("configuration.dataset.connection") final KafkaConnectionConfiguration conn) {
-        final KafkaConsumer consumer = new KafkaConsumer(createConnProps(conn));
+        final KafkaConsumer consumer = new KafkaConsumer(createHealthCheckProps(conn));
         return new SuggestionValues(true,
                 (Collection<SuggestionValues.Item>) StreamSupport.stream(consumer.listTopics().keySet().spliterator(), false)
                         .map(topic -> new SuggestionValues.Item(topic.toString(), topic.toString())).collect(toList()));
@@ -90,6 +90,13 @@ public class KafkaService {
         for (String key : consumerMaps.keySet()) {
             props.setProperty(key, consumerMaps.get(key));
         }
+        return props;
+    }
+
+    private static Properties createHealthCheckProps(KafkaConnectionConfiguration conn) {
+        Properties props = createConnProps(conn);
+        // decrease REQUEST_TIMEOUT_MS to avoid wait for longtime with failed SSL/Kerberos connect
+        props.setProperty(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, "15000"); // default is 5min 305000ms
         return props;
     }
 
