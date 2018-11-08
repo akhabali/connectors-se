@@ -123,7 +123,7 @@ public class KafkaOutput extends PTransform<PCollection<Record>, PDone> {
 
         @Override
         public byte[] apply(Record record) {
-            IndexedRecord input = new AvroRecord(record).unwrap(IndexedRecord.class);
+            IndexedRecord input = AvroRecord.class.cast(record).unwrap(IndexedRecord.class);
             int size = input.getSchema().getFields().size();
             for (int i = 0; i < size; i++) {
                 if (sb.length() != 0)
