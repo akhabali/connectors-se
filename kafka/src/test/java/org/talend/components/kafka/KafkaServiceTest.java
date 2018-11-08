@@ -45,33 +45,4 @@ public class KafkaServiceTest {
         assertEquals(HealthCheckStatus.Status.KO, status.getStatus());
     }
 
-//    @Test
-//    void validateLongRetryConnection() {
-//        Map<String, String> m = new HashMap<>();
-//        m.put("ssl.keystore.location", "/home/bchen/Desktop/kafka.keystore");
-//        m.put("ssl.keystore.password", "talend");
-//        EmbeddedK brk = EmbeddedKafka$.MODULE$.start(EmbeddedKafkaConfig$.MODULE$.apply(0, 0, //
-//                JavaConverters.mapAsScalaMapConverter(m).asScala().toMap(Predef.$conforms()),//
-//                Map$.MODULE$.empty(), //
-//                Map$.MODULE$.empty()));
-//        KafkaConnectionConfiguration wrongConn = new KafkaConnectionConfiguration();
-//        wrongConn.setBrokers("192.168.30.125:9093");
-//        HealthCheckStatus status = service.healthCheck(wrongConn);
-//        assertEquals(HealthCheckStatus.Status.KO, status.getStatus());
-//    }
-//
-//    @Test
-//    void validateLongRetryConnectionOK() {
-//        KafkaConnectionConfiguration wrongConn = new KafkaConnectionConfiguration();
-//        wrongConn.setBrokers("192.168.30.125:9093");
-////        wrongConn.setUseSsl(true);
-////        String path = "";//ask
-////        wrongConn.setTrustStorePath(path + "kafka.truststore");
-////        wrongConn.setTrustStorePassword("talend");
-////        wrongConn.setKeyStorePath("/home/bchen/Desktop/kafka.truststore");
-////        wrongConn.setKeyStorePath("/home/bchen/Desktop/kafka.keystore");
-////        wrongConn.setKeyStorePassword("talend");
-//        HealthCheckStatus status = service.healthCheck(wrongConn);
-//        assertEquals(HealthCheckStatus.Status.OK, status.getStatus());
-//    }
 }
