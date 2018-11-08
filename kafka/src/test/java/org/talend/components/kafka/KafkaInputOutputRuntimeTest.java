@@ -97,9 +97,9 @@ public class KafkaInputOutputRuntimeTest {
     @Before
     public void setup() {
         EmbeddedK brk = EmbeddedKafka$.MODULE$.start(EmbeddedKafkaConfig$.MODULE$.apply(0, 0, //
-                Map$.MODULE$.<String, String>empty(), //
-                Map$.MODULE$.<String, String>empty(), //
-                Map$.MODULE$.<String, String>empty()));
+                Map$.MODULE$.<String, String> empty(), //
+                Map$.MODULE$.<String, String> empty(), //
+                Map$.MODULE$.<String, String> empty()));
         broker = "localhost:" + brk.config().kafkaPort();
         zookeeper = "localhost:" + brk.config().zooKeeperPort();
 
@@ -552,7 +552,7 @@ public class KafkaInputOutputRuntimeTest {
         KafkaConsumer<Void, String> consumer = new KafkaConsumer<>(props);
         consumer.subscribe(Arrays.asList(topicOut + uid));
         List<Person> results = new ArrayList<>();
-        long timeout = System.currentTimeMillis() + 5000; //timeout is 2s
+        long timeout = System.currentTimeMillis() + 5000; // timeout is 2s
         while (true) {
             ConsumerRecords<Void, String> records = consumer.poll(100);
             for (ConsumerRecord<Void, String> record : records) {

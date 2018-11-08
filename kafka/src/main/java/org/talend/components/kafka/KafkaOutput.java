@@ -249,7 +249,8 @@ public class KafkaOutput extends PTransform<PCollection<Record>, PDone> {
             try {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 BinaryEncoder encoder = EncoderFactory.get().binaryEncoder(out, null);
-                helper.getKafkaIndexedRecordWrapper().setIndexedRecord(AvroRecord.class.cast(c.element()).unwrap(IndexedRecord.class));
+                helper.getKafkaIndexedRecordWrapper()
+                        .setIndexedRecord(AvroRecord.class.cast(c.element()).unwrap(IndexedRecord.class));
                 helper.getDatumWriter().write(helper.getKafkaIndexedRecordWrapper(), encoder);
                 encoder.flush();
                 byte[] result = out.toByteArray();

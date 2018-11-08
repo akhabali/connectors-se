@@ -12,11 +12,11 @@ import java.io.Serializable;
 
 @Version(1)
 @Data
-@GridLayout({@GridLayout.Row("dataset"), // hidden?
+@GridLayout({ @GridLayout.Row("dataset"), // hidden?
         @GridLayout.Row("groupId"), //
         @GridLayout.Row("autoOffsetReset"), //
-        @GridLayout.Row({"useMaxReadTime", "maxReadTime"}), //
-        @GridLayout.Row({"useMaxNumRecords", "maxNumRecords"})})
+        @GridLayout.Row({ "useMaxReadTime", "maxReadTime" }), //
+        @GridLayout.Row({ "useMaxNumRecords", "maxNumRecords" }) })
 @Documentation("TODO fill the documentation for this configuration")
 public class KafkaInputConfiguration implements Serializable {
 

@@ -53,7 +53,7 @@ public class KafkaInput extends PTransform<PBegin, PCollection<Record>> {
     public PCollection<Record> expand(PBegin input) {
         KafkaIO.Read<byte[], byte[]> kafkaRead = KafkaIO.readBytes()
                 .withBootstrapServers(configuration.getDataset().getConnection().getBrokers())
-                .withTopics(Arrays.asList(new String[]{configuration.getDataset().getTopic()}))
+                .withTopics(Arrays.asList(new String[] { configuration.getDataset().getTopic() }))
                 .updateConsumerProperties(KafkaService.createInputMaps(configuration, true));
 
         if (configuration.isUseMaxReadTime()) {
@@ -69,18 +69,18 @@ public class KafkaInput extends PTransform<PBegin, PCollection<Record>> {
         // only consider value of kafkaRecord no matter which format selected
         PCollection<byte[]> kafkaRecords = mayCommitOffset //
                 .apply(ParDo.of(new ExtractRecord())) //
-                .apply(Values.<byte[]>create());
+                .apply(Values.<byte[]> create());
         switch (configuration.getDataset().getValueFormat()) {
-            case AVRO: {
-                return kafkaRecords.apply(ParDo.of(new ByteArrayToAvroRecord(configuration.getDataset().getAvroSchema())))
-                        .setCoder(FullSerializationRecordCoder.of());
-            }
-            case CSV: {
-                return kafkaRecords.apply(ParDo.of(new ExtractCsvSplit(configuration.getDataset().getFieldDelimiter())))
-                        .apply(ParDo.of(new StringArrayToAvroRecord())).setCoder(FullSerializationRecordCoder.of());
-            }
-            default:
-                throw new RuntimeException("To be implemented: " + configuration.getDataset().getValueFormat());
+        case AVRO: {
+            return kafkaRecords.apply(ParDo.of(new ByteArrayToAvroRecord(configuration.getDataset().getAvroSchema())))
+                    .setCoder(FullSerializationRecordCoder.of());
+        }
+        case CSV: {
+            return kafkaRecords.apply(ParDo.of(new ExtractCsvSplit(configuration.getDataset().getFieldDelimiter())))
+                    .apply(ParDo.of(new StringArrayToAvroRecord())).setCoder(FullSerializationRecordCoder.of());
+        }
+        default:
+            throw new RuntimeException("To be implemented: " + configuration.getDataset().getValueFormat());
         }
     }
 
@@ -102,10 +102,8 @@ public class KafkaInput extends PTransform<PBegin, PCollection<Record>> {
         @DoFn.ProcessElement
         public void processElement(ProcessContext c) {
             KafkaRecord<byte[], byte[]> kafkaRecord = c.element();
-            consumer.commitSync(
-                    Collections.singletonMap(
-                            new TopicPartition(kafkaRecord.getTopic(), kafkaRecord.getPartition()),
-                            new OffsetAndMetadata(kafkaRecord.getOffset())));
+            consumer.commitSync(Collections.singletonMap(new TopicPartition(kafkaRecord.getTopic(), kafkaRecord.getPartition()),
+                    new OffsetAndMetadata(kafkaRecord.getOffset())));
             c.output(kafkaRecord);
         }
     }
