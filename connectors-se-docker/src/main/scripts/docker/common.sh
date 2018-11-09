@@ -16,14 +16,20 @@
 #  limitations under the License.
 #
 
-export COMPONENT_SERVER_IMAGE_VERSION=1.1.0_20180930175420
+if [ -z $COMPONENT_SERVER_IMAGE_VERSION ]; then
+  read -p "Enter COMPONENT_SERVER_IMAGE_VERSION (ex: 1.1.2_20181108161652): " COMPONENT_SERVER_IMAGE_VERSION
+fi
+export COMPONENT_SERVER_IMAGE_VERSION
 
 export BASEDIR=$(cd "$(dirname "$0")" ; pwd -P)/../../../..
 export CONNECTOR_VERSION=$(grep "<version>" "$BASEDIR/pom.xml" | head -n 1 | sed "s/.*>\\(.*\\)<.*/\\1/")
 export TALEND_REGISTRY="${TALEND_REGISTRY:-registry.datapwn.com}"
 DOCKER_IMAGE_VERSION=${DOCKER_IMAGE_VERSION:-$CONNECTOR_VERSION}
 if [[ "$DOCKER_IMAGE_VERSION" = *"SNAPSHOT" ]]; then
-    BRANCH=_${1}
+    BRANCH=${1}
+    if [[ "x$BRANCH" != "x" ]]; then
+        BRANCH=_$BRANCH
+    fi
     DOCKER_IMAGE_VERSION=$(echo $CONNECTOR_VERSION | sed "s/-SNAPSHOT//")${BRANCH}_$(date +%Y%m%d%H%M%S)
 fi
 export DOCKER_IMAGE_VERSION
@@ -56,7 +62,7 @@ function pushImage() {
         echo "$DOCKER_PASSWORD" | docker login "$TALEND_REGISTRY" -u "$DOCKER_LOGIN" --password-stdin
         set -x
         for i in {1..5}; do
-            docker push "$TALEND_REGISTRY/$1" && break || sleep 15
+            docker push "$TALEND_REGISTRY/$1" && break || sleep 5
         done
     else
         echo "No DOCKER_LOGIN set so skipping push of >$1<"
@@ -82,5 +88,6 @@ function createComponentRegistry() {
 echo "Environment:"
 echo " - TALEND_REGISTRY=$TALEND_REGISTRY"
 echo " - DOCKER_IMAGE_VERSION=$DOCKER_IMAGE_VERSION"
+echo " - COMPONENT_SERVER_IMAGE_VERSION=$COMPONENT_SERVER_IMAGE_VERSION"
 echo ""
 echo "-----------------------------------------------------"
