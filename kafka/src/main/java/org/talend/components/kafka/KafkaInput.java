@@ -28,7 +28,7 @@ import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.input.PartitionMapper;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.record.Record;
-import org.talend.sdk.component.runtime.beam.coder.record.FullSerializationRecordCoder;
+import org.talend.sdk.component.runtime.beam.coder.registry.SchemaRegistryCoder;
 import org.talend.sdk.component.runtime.beam.spi.record.AvroRecord;
 
 import java.io.IOException;
@@ -73,11 +73,11 @@ public class KafkaInput extends PTransform<PBegin, PCollection<Record>> {
         switch (configuration.getDataset().getValueFormat()) {
         case AVRO: {
             return kafkaRecords.apply(ParDo.of(new ByteArrayToAvroRecord(configuration.getDataset().getAvroSchema())))
-                    .setCoder(FullSerializationRecordCoder.of());
+                    .setCoder(SchemaRegistryCoder.of());
         }
         case CSV: {
             return kafkaRecords.apply(ParDo.of(new ExtractCsvSplit(configuration.getDataset().getFieldDelimiter())))
-                    .apply(ParDo.of(new StringArrayToAvroRecord())).setCoder(FullSerializationRecordCoder.of());
+                    .apply(ParDo.of(new StringArrayToAvroRecord())).setCoder(SchemaRegistryCoder.of());
         }
         default:
             throw new RuntimeException("To be implemented: " + configuration.getDataset().getValueFormat());
