@@ -61,7 +61,6 @@
     <module>processing-beam</module>
     <module>processing-tck</module>
     <module>jdbc</module>
-    <module>kafka</module>
     <module>salesforce</module>
   </modules>
 
