@@ -1,0 +1,46 @@
+[
+  {
+    "request":{
+      "headers":{
+        "content-length":"0",
+        "Accept":"text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2",
+        "Connection":"keep-alive"
+      },
+      "method":"GET",
+      "uri":"https://586-UXQ-391.mktorest.com/identity/oauth/token"
+    },
+    "response":{
+      "headers":{
+        "Transfer-Encoding":"chunked",
+        "Server":"nginx",
+        "Cache-Control":"no-store",
+        "Connection":"keep-alive",
+        "Pragma":"no-cache",
+        "Content-Type":"application/json;charset=UTF-8"
+      },
+      "payload":"{\"access_token\":\"5b93383b-cdc0-43e9-bd72-c42ef6e31acb:sj\",\"token_type\":\"bearer\",\"expires_in\":3073,\"scope\":\"undx@talend.com\"}",
+      "status":200
+    }
+  },
+  {
+    "request":{
+      "headers":{
+        "content-length":"0",
+        "Accept":"text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2",
+        "Connection":"keep-alive"
+      },
+      "method":"GET",
+      "uri":"https://586-UXQ-391.mktorest.com/rest/v1/lists/1001/leads/ismember.json?access_token=5b93383b-cdc0-43e9-bd72-c42ef6e31acb%3Asj&id=-100"
+    },
+    "response":{
+      "headers":{
+        "Server":"nginx",
+        "Connection":"keep-alive",
+        "Content-Length":"145",
+        "Content-Type":"application/json;charset=UTF-8"
+      },
+      "payload":"{\"requestId\":\"1777e#16712603003\",\"result\":[{\"id\":-100,\"status\":\"skipped\",\"reasons\":[{\"code\":\"1004\",\"message\":\"Lead not found\"}]}],\"success\":true}",
+      "status":200
+    }
+  }
+]
