@@ -306,8 +306,7 @@ public class LeadSourceTest extends SourceBaseTest {
         inputDataSet.setLeadAction(LeadAction.getLeadActivity);
         inputDataSet.setSinceDateTime("2018-01-01 00:00:01 Z");
         SuggestionValues acts = uiActionService.getActivities(inputDataSet.getDataStore());
-        List<String> activities = acts.getItems().stream().limit(10).map(item -> String.valueOf(item.getId()))
-                .collect(toList());
+        List<String> activities = acts.getItems().stream().limit(10).map(item -> String.valueOf(item.getId())).collect(toList());
         inputDataSet.setActivityTypeIds(activities);
         inputDataSet.setFields(asList(fields.split(",")));
         inputDataSet.setBatchSize(300);

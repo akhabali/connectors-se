@@ -21,6 +21,7 @@ import org.junit.ClassRule;
 import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.talend.components.DataCollector;
 import org.talend.components.marketo.dataset.MarketoInputDataSet;
 import org.talend.components.marketo.dataset.MarketoOutputDataSet;
 import org.talend.components.marketo.datastore.MarketoDataStore;
@@ -163,6 +164,8 @@ public class MarketoBaseTest {
         dataStore.setClientSecret(clientSecret);
         inputDataSet.setDataStore(dataStore);
         outputDataSet.setDataStore(dataStore);
+        //
+        DataCollector.reset();
     }
 
 }
