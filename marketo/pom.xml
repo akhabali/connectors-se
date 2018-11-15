@@ -77,12 +77,5 @@
                 </executions>
             </plugin>
         </plugins>
-        <extensions>
-            <extension>
-                <groupId>org.talend.sdk.component</groupId>
-                <artifactId>talend-component-maven-plugin</artifactId>
-                <version>${component-runtime.version}</version>
-            </extension>
-        </extensions>
     </build>
 </project>
