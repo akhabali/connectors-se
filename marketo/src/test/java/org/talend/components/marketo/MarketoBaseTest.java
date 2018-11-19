@@ -21,10 +21,11 @@ import org.junit.ClassRule;
 import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.talend.components.DataCollector;
+import org.talend.components.marketo.component.DataCollector;
 import org.talend.components.marketo.dataset.MarketoInputDataSet;
 import org.talend.components.marketo.dataset.MarketoOutputDataSet;
 import org.talend.components.marketo.datastore.MarketoDataStore;
+import org.talend.components.marketo.output.MarketoProcessor;
 import org.talend.components.marketo.service.AuthorizationClient;
 import org.talend.components.marketo.service.CompanyClient;
 import org.talend.components.marketo.service.CustomObjectClient;
@@ -36,6 +37,7 @@ import org.talend.components.marketo.service.OpportunityClient;
 import org.talend.components.marketo.service.Toolbox;
 import org.talend.components.marketo.service.UIActionService;
 import org.talend.sdk.component.api.DecryptedServer;
+import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.junit.ComponentsHandler;
 import org.talend.sdk.component.junit.SimpleComponentRule;
@@ -47,6 +49,7 @@ import org.talend.sdk.component.junit5.WithMavenServers;
 import org.talend.sdk.component.maven.MavenDecrypter;
 import org.talend.sdk.component.maven.Server;
 import org.talend.sdk.component.runtime.manager.ComponentManager;
+import org.talend.sdk.component.runtime.manager.chain.Job;
 
 @HttpApi(useSsl = true, responseLocator = org.talend.sdk.component.junit.http.internal.impl.MarketoResponseLocator.class)
 @WithMavenServers
@@ -126,6 +129,12 @@ public class MarketoBaseTest {
 
     protected Boolean isProxyMode = Boolean.FALSE;
 
+    protected MarketoProcessor processor;
+
+    protected Record data, dataNotExist;
+
+    protected static final String MARKETO_TEST_DATA_COLLECTOR = "MarketoTest://DataCollector";
+
     protected transient static final Logger LOG = LoggerFactory.getLogger(MarketoBaseTest.class);
 
     static {
@@ -135,7 +144,7 @@ public class MarketoBaseTest {
             MARKETO_CLIENT_ID = serverWithNoCrm.getUsername();
             MARKETO_CLIENT_SECRET = serverWithNoCrm.getPassword();
             if (!"username".equals(MARKETO_CLIENT_ID)) {
-                // System.setProperty("talend.junit.http.capture", "true");
+              // System.setProperty("talend.junit.http.capture", "true");
             }
         } catch (Exception e) {
             // System.setProperty("talend.junit.http.capture", "false");
@@ -166,6 +175,26 @@ public class MarketoBaseTest {
         outputDataSet.setDataStore(dataStore);
         //
         DataCollector.reset();
+    }
+
+    protected void runInputPipeline(String config) {
+        Job.components() //
+                .component("MktoInput", "Marketo://Input?" + config) //
+                .component("collector", MARKETO_TEST_DATA_COLLECTOR) //
+                .connections() //
+                .from("MktoInput") //
+                .to("collector") //
+                .build().run();
+    }
+
+    public void runOutputPipeline(String generator, String inputConfig, String outputConfig) {
+        Job.components() //
+                .component("input", "MarketoTest://" + generator + "?" + inputConfig) //
+                .component("output", "Marketo://Output?" + outputConfig) //
+                .connections() //
+                .from("input") //
+                .to("output") //
+                .build().run();
     }
 
 }

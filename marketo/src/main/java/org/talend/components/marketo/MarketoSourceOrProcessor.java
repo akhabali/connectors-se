@@ -148,7 +148,8 @@ public class MarketoSourceOrProcessor implements Serializable {
     }
 
     public JsonObject toJson(final Record record) {
-        JsonReader reader = jsonReader.createReader(new StringReader(record.toString()));
+        String recordStr = record.toString().replaceAll("AvroRecord\\{delegate=(.*)\\}$", "$1");
+        JsonReader reader = jsonReader.createReader(new StringReader(recordStr));
         Throwable throwable = null;
         JsonObject json;
         try {

@@ -18,7 +18,7 @@
         "Pragma":"no-cache",
         "Content-Type":"application/json;charset=UTF-8"
       },
-      "payload":"{\"access_token\":\"5b93383b-cdc0-43e9-bd72-c42ef6e31acb:sj\",\"token_type\":\"bearer\",\"expires_in\":3141,\"scope\":\"undx@talend.com\"}",
+      "payload":"{\"access_token\":\"5132e3cc-c957-4c33-a045-4a8ceacc19a9:sj\",\"token_type\":\"bearer\",\"expires_in\":3291,\"scope\":\"undx@talend.com\"}",
       "status":200
     }
   },
@@ -41,7 +41,7 @@
         "Pragma":"no-cache",
         "Content-Type":"application/json;charset=UTF-8"
       },
-      "payload":"{\"access_token\":\"5b93383b-cdc0-43e9-bd72-c42ef6e31acb:sj\",\"token_type\":\"bearer\",\"expires_in\":3140,\"scope\":\"undx@talend.com\"}",
+      "payload":"{\"access_token\":\"5132e3cc-c957-4c33-a045-4a8ceacc19a9:sj\",\"token_type\":\"bearer\",\"expires_in\":3290,\"scope\":\"undx@talend.com\"}",
       "status":200
     }
   },
@@ -53,16 +53,16 @@
         "Connection":"keep-alive"
       },
       "method":"GET",
-      "uri":"https://586-UXQ-391.mktorest.com/rest/v1/lists.json?access_token=5b93383b-cdc0-43e9-bd72-c42ef6e31acb%3Asj&name=&programName=&workspaceName=&batchSize=3"
+      "uri":"https://586-UXQ-391.mktorest.com/rest/v1/lists.json?access_token=5132e3cc-c957-4c33-a045-4a8ceacc19a9%3Asj&name=&programName=&workspaceName=&batchSize=3"
     },
     "response":{
       "headers":{
         "Server":"nginx",
         "Connection":"keep-alive",
-        "Content-Length":"500",
+        "Content-Length":"499",
         "Content-Type":"application/json;charset=UTF-8"
       },
-      "payload":"{\"requestId\":\"11860#167125f2a4d\",\"result\":[{\"id\":1001,\"name\":\"GroupList000\",\"workspaceName\":\"Default\",\"createdAt\":\"2018-07-11T14:53:31Z\",\"updatedAt\":\"2018-07-11T14:53:32Z\"},{\"id\":1006,\"name\":\"GroupList001\",\"workspaceName\":\"Default\",\"createdAt\":\"2018-07-11T15:00:22Z\",\"updatedAt\":\"2018-07-11T15:00:23Z\"},{\"id\":1007,\"name\":\"GroupList002\",\"workspaceName\":\"Default\",\"createdAt\":\"2018-07-11T15:00:29Z\",\"updatedAt\":\"2018-07-11T15:00:30Z\"}],\"success\":true,\"nextPageToken\":\"6XRZQAPJO25B6HVGJ26VMYASDU======\"}",
+      "payload":"{\"requestId\":\"75ef#1672c9599f2\",\"result\":[{\"id\":1001,\"name\":\"GroupList000\",\"workspaceName\":\"Default\",\"createdAt\":\"2018-07-11T14:53:31Z\",\"updatedAt\":\"2018-07-11T14:53:32Z\"},{\"id\":1006,\"name\":\"GroupList001\",\"workspaceName\":\"Default\",\"createdAt\":\"2018-07-11T15:00:22Z\",\"updatedAt\":\"2018-07-11T15:00:23Z\"},{\"id\":1007,\"name\":\"GroupList002\",\"workspaceName\":\"Default\",\"createdAt\":\"2018-07-11T15:00:29Z\",\"updatedAt\":\"2018-07-11T15:00:30Z\"}],\"success\":true,\"nextPageToken\":\"6XRZQAPJO25B6HVGJ26VMYASDU======\"}",
       "status":200
     }
   },
@@ -74,7 +74,7 @@
         "Connection":"keep-alive"
       },
       "method":"GET",
-      "uri":"https://586-UXQ-391.mktorest.com/rest/v1/lists.json?access_token=5b93383b-cdc0-43e9-bd72-c42ef6e31acb%3Asj&nextPageToken=6XRZQAPJO25B6HVGJ26VMYASDU%3D%3D%3D%3D%3D%3D&name=&programName=&workspaceName=&batchSize=3"
+      "uri":"https://586-UXQ-391.mktorest.com/rest/v1/lists.json?access_token=5132e3cc-c957-4c33-a045-4a8ceacc19a9%3Asj&nextPageToken=6XRZQAPJO25B6HVGJ26VMYASDU%3D%3D%3D%3D%3D%3D&name=&programName=&workspaceName=&batchSize=3"
     },
     "response":{
       "headers":{
@@ -83,7 +83,7 @@
         "Content-Length":"319",
         "Content-Type":"application/json;charset=UTF-8"
       },
-      "payload":"{\"requestId\":\"1646f#167125f2e31\",\"result\":[{\"id\":1008,\"name\":\"GroupList003\",\"workspaceName\":\"Default\",\"createdAt\":\"2018-07-11T15:00:35Z\",\"updatedAt\":\"2018-07-11T15:00:37Z\"},{\"id\":1009,\"name\":\"GroupList004\",\"workspaceName\":\"Default\",\"createdAt\":\"2018-07-11T15:00:41Z\",\"updatedAt\":\"2018-07-11T15:00:43Z\"}],\"success\":true}",
+      "payload":"{\"requestId\":\"12e83#1672c959c18\",\"result\":[{\"id\":1008,\"name\":\"GroupList003\",\"workspaceName\":\"Default\",\"createdAt\":\"2018-07-11T15:00:35Z\",\"updatedAt\":\"2018-07-11T15:00:37Z\"},{\"id\":1009,\"name\":\"GroupList004\",\"workspaceName\":\"Default\",\"createdAt\":\"2018-07-11T15:00:41Z\",\"updatedAt\":\"2018-07-11T15:00:43Z\"}],\"success\":true}",
       "status":200
     }
   }

@@ -29,6 +29,9 @@ import org.talend.components.marketo.service.MarketoService;
 import org.talend.components.marketo.service.Toolbox;
 import org.talend.sdk.component.api.configuration.Option;
 
+/**
+ * Actually, this class is useless as we have remnoved the @Ouput parameters to the map function
+ */
 public class ListStrategy extends OutputComponentStrategy implements ProcessorStrategy {
 
     private transient static final Logger LOG = getLogger(ListStrategy.class);

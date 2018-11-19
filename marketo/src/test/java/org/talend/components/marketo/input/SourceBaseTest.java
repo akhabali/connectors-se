@@ -17,7 +17,6 @@ import org.talend.components.marketo.MarketoBaseTest;
 import org.talend.components.marketo.dataset.MarketoInputDataSet;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.junit5.WithComponents;
-import org.talend.sdk.component.runtime.manager.chain.Job;
 
 @WithComponents("org.talend.components.marketo")
 public class SourceBaseTest extends MarketoBaseTest {
@@ -26,24 +25,12 @@ public class SourceBaseTest extends MarketoBaseTest {
 
     protected Record result;
 
-    protected static final String MARKETO_TEST_DATA_COLLECTOR = "MarketoTest://DataCollector";
-
     @Override
     @BeforeEach
     protected void setUp() {
         super.setUp();
         dataset = new MarketoInputDataSet();
         dataset.setDataStore(dataStore);
-    }
-
-    protected void runInputPipeline(String config) {
-        Job.components() //
-                .component("MktoInput", "Marketo://Input?" + config) //
-                .component("collector", MARKETO_TEST_DATA_COLLECTOR) //
-                .connections() //
-                .from("MktoInput") //
-                .to("collector") //
-                .build().run();
     }
 
 }

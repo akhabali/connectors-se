@@ -31,7 +31,7 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.talend.components.DataCollector;
+import org.talend.components.marketo.component.DataCollector;
 import org.talend.components.marketo.dataset.MarketoDataSet.MarketoEntity;
 import org.talend.components.marketo.dataset.MarketoInputDataSet.OtherEntityAction;
 import org.talend.sdk.component.api.record.Record;

@@ -43,9 +43,9 @@ public interface ProcessorStrategy {
      * @param data
      * @return
      */
-    default JsonObject createRejectData(JsonObject data) {
-        return data;
-    }
+    // default JsonObject createRejectData(JsonObject data) {
+    // return data;
+    // }
 
     /**
      * Create a main flow record based on response data. Default implementation returns the object as it is.
@@ -53,9 +53,9 @@ public interface ProcessorStrategy {
      * @param data
      * @return
      */
-    default JsonObject createMainData(JsonObject data) {
-        return data;
-    }
+    // default JsonObject createMainData(JsonObject data) {
+    // return data;
+    // }
 
     /**
      * Check if API response for the operation is not successful.

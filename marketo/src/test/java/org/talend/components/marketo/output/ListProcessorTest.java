@@ -12,15 +12,20 @@
 // ============================================================================
 package org.talend.components.marketo.output;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_LEAD_ID;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_LIST_ID;
-import static org.talend.components.marketo.MarketoApiConstants.ATTR_STATUS;
+import static org.talend.components.marketo.component.ListGeneratorSource.LEAD_ID_ADDREMOVE;
+import static org.talend.components.marketo.component.ListGeneratorSource.LIST_ID;
+import static org.talend.components.marketo.dataset.MarketoInputDataSet.ListAction.isMemberOf;
+import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
-import javax.json.JsonObject;
-
+import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.talend.components.marketo.MarketoBaseTest;
+import org.talend.components.marketo.component.DataCollector;
 import org.talend.components.marketo.dataset.MarketoDataSet.MarketoEntity;
 import org.talend.components.marketo.dataset.MarketoOutputDataSet.ListAction;
 import org.talend.sdk.component.junit.http.junit5.HttpApi;
@@ -28,28 +33,20 @@ import org.talend.sdk.component.junit5.WithComponents;
 
 @HttpApi(useSsl = true, responseLocator = org.talend.sdk.component.junit.http.internal.impl.MarketoResponseLocator.class)
 @WithComponents("org.talend.components.marketo")
-public class ListProcessorTest extends MarketoProcessorBaseTest {
-
-    private static final int LEAD_ID = 5;
-
-    private static final int LEAD_ID_ADDREMOVE = 4;
-
-    private static final int LIST_ID = 1001;
-
-    private static final int LEAD_ID_INVALID = -100;
-
-    JsonObject dataInvalidLead;
-
-    private JsonObject dataAddRemove;
+public class ListProcessorTest extends MarketoBaseTest {
 
     @Override
     @BeforeEach
     protected void setUp() {
         super.setUp();
         outputDataSet.setEntity(MarketoEntity.List);
-        data = jsonFactory.createObjectBuilder().add(ATTR_LIST_ID, LIST_ID).add(ATTR_LEAD_ID, LEAD_ID).build();
-        dataAddRemove = jsonFactory.createObjectBuilder().add(ATTR_LIST_ID, LIST_ID).add(ATTR_LEAD_ID, LEAD_ID_ADDREMOVE).build();
-        dataInvalidLead = jsonFactory.createObjectBuilder().add(ATTR_LIST_ID, LIST_ID).add(ATTR_LEAD_ID, LEAD_ID_INVALID).build();
+        data = tools.getRecordBuilder().newRecordBuilder().withInt(ATTR_LIST_ID, LIST_ID).withInt(ATTR_LEAD_ID, LEAD_ID_ADDREMOVE)
+                .build();
+        outputDataSet.setListAction(ListAction.addTo);
+        initProcessor();
+        processor.map(data);
+
+        inputDataSet.setEntity(MarketoEntity.List);
     }
 
     private void initProcessor() {
@@ -60,71 +57,64 @@ public class ListProcessorTest extends MarketoProcessorBaseTest {
     @Test
     void testIsMemberOfList() {
         outputDataSet.setListAction(ListAction.isMemberOf);
-        initProcessor();
-        processor.map(data, main -> {
-            assertEquals("memberof", main.getString(ATTR_STATUS));
-        }, reject -> {
-            fail(FAIL_REJECT);
-        });
-    }
-
-    @Test
-    void testIsMemberOfListNotMember() {
-        outputDataSet.setListAction(ListAction.isMemberOf);
-        initProcessor();
-        processor.map(dataAddRemove, main -> {
-            assertEquals("notmemberof", main.getString(ATTR_STATUS));
-        }, reject -> {
-            fail(FAIL_REJECT);
-        });
+        final String config = configurationByExample().forInstance(outputDataSet).configured().toQueryString();
+        final String inputConfig = "config.isInvalid=false";
+        runOutputPipeline("ListGenerator", inputConfig, config);
+        //
+        inputDataSet.setListAction(isMemberOf);
+        inputDataSet.setListId(LIST_ID);
+        inputDataSet.setLeadIds(String.valueOf(LEAD_ID_ADDREMOVE));
+        runInputPipeline(configurationByExample().forInstance(inputDataSet).configured().toQueryString());
+        assertEquals(1, DataCollector.getData().size());
+        assertEquals("memberof", DataCollector.getData().poll().getString("status"));
     }
 
     @Test
     void testIsMemberOfListFail() {
-        outputDataSet.setListAction(ListAction.isMemberOf);
-        initProcessor();
-        // {"id":-100,"status":"skipped","reasons":[{"code":"1004","message":"Lead not found"}]}
-        processor.map(dataInvalidLead, main -> {
-            fail("Should not be in List");
-        }, reject -> {
-            assertEquals("skipped", reject.getString(ATTR_STATUS));
+        final Exception error = assertThrows(Exception.class, () -> {
+            outputDataSet.setListAction(ListAction.isMemberOf);
+            final String config = configurationByExample().forInstance(outputDataSet).configured().toQueryString();
+            final String inputConfig = "config.isInvalid=true";
+            runOutputPipeline("ListGenerator", inputConfig, config);
         });
+        Assert.assertTrue(error.getMessage().contains("[1004] Lead not found"));
     }
 
     @Test
     void testAddToList() {
         outputDataSet.setListAction(ListAction.removeFrom);
         initProcessor();
-        processor.map(dataAddRemove, main -> {
-
-        }, reject -> {
-        });
+        processor.map(data);
         //
         outputDataSet.setListAction(ListAction.addTo);
-        initProcessor();
-        processor.map(dataAddRemove, main -> {
-            assertEquals("added", main.getString(ATTR_STATUS));
-        }, reject -> {
-            fail(FAIL_REJECT);
-        });
+        final String config = configurationByExample().forInstance(outputDataSet).configured().toQueryString();
+        final String inputConfig = "config.isInvalid=false";
+        runOutputPipeline("ListGenerator", inputConfig, config);
+        //
+        inputDataSet.setListAction(isMemberOf);
+        inputDataSet.setListId(LIST_ID);
+        inputDataSet.setLeadIds(String.valueOf(LEAD_ID_ADDREMOVE));
+        runInputPipeline(configurationByExample().forInstance(inputDataSet).configured().toQueryString());
+        assertEquals(1, DataCollector.getData().size());
+        assertEquals("memberof", DataCollector.getData().poll().getString("status"));
     }
 
     @Test
     void testRemoveFromList() {
         outputDataSet.setListAction(ListAction.addTo);
         initProcessor();
-        processor.map(dataAddRemove, main -> {
-
-        }, reject -> {
-        });
+        processor.map(data);
         //
         outputDataSet.setListAction(ListAction.removeFrom);
-        initProcessor();
-        processor.map(dataAddRemove, main -> {
-            assertEquals("removed", main.getString(ATTR_STATUS));
-        }, reject -> {
-            fail(FAIL_REJECT);
-        });
+        final String config = configurationByExample().forInstance(outputDataSet).configured().toQueryString();
+        final String inputConfig = "config.isInvalid=false";
+        runOutputPipeline("ListGenerator", inputConfig, config);
+        inputDataSet.setListAction(isMemberOf);
+        inputDataSet.setListId(LIST_ID);
+        inputDataSet.setLeadIds(String.valueOf(LEAD_ID_ADDREMOVE));
+        runInputPipeline(configurationByExample().forInstance(inputDataSet).configured().toQueryString());
+        assertEquals(1, DataCollector.getData().size());
+        assertEquals("notmemberof", DataCollector.getData().poll().getString("status"));
     }
 
 }

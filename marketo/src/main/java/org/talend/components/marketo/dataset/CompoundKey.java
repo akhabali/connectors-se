@@ -12,7 +12,13 @@
 // ============================================================================
 package org.talend.components.marketo.dataset;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import static org.talend.components.marketo.service.UIActionService.FIELD_NAMES;
+
+import java.io.Serializable;
 
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Suggestable;
@@ -20,16 +26,12 @@ import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.ui.OptionsOrder;
 import org.talend.sdk.component.api.meta.Documentation;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @OptionsOrder({ "key", "value" })
 @Documentation("Compound Key")
-public class CompoundKey {
+public class CompoundKey implements Serializable {
 
     @Option
     @Required

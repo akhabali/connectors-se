@@ -19,7 +19,13 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_EMAIL;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_ID;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
@@ -29,7 +35,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 import java.util.function.Consumer;
-
 import javax.json.JsonObject;
 
 import org.junit.jupiter.api.Assertions;
@@ -37,14 +42,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.talend.components.DataCollector;
+import org.talend.components.marketo.component.DataCollector;
 import org.talend.components.marketo.dataset.MarketoDataSet.MarketoEntity;
 import org.talend.components.marketo.dataset.MarketoInputDataSet.LeadAction;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.junit.http.junit5.HttpApi;
 import org.talend.sdk.component.junit5.WithComponents;
-import org.talend.sdk.component.runtime.manager.chain.Job;
 
 @HttpApi(useSsl = true, responseLocator = org.talend.sdk.component.junit.http.internal.impl.MarketoResponseLocator.class)
 @WithComponents("org.talend.components.marketo")
@@ -54,7 +58,7 @@ public class LeadSourceTest extends SourceBaseTest {
 
     private String LEAD_EMAIL = "Marketo@talend.com";
 
-    private Integer LEAD_ID = 5;
+    private Integer LEAD_ID = 4;
 
     private Integer INVALID_LEAD_ID = -5;
 
@@ -111,7 +115,7 @@ public class LeadSourceTest extends SourceBaseTest {
         source.init();
         result = source.next();
         assertNotNull(result);
-        assertEquals(LEAD_EMAIL, result.getString(ATTR_EMAIL));
+        assertEquals("TDI38486_2_SOAP@talend.com", result.getString(ATTR_EMAIL));
         assertNull(source.next());
     }
 
@@ -246,13 +250,7 @@ public class LeadSourceTest extends SourceBaseTest {
         inputDataSet.setLeadId(LEAD_ID);
         inputDataSet.setFields(asList(fields.split(",")));
         final String config = configurationByExample().forInstance(inputDataSet).configured().toQueryString();
-        Job.components() //
-                .component("MktoInput", "Marketo://Input?" + config) //
-                .component("collector", MARKETO_TEST_DATA_COLLECTOR) //
-                .connections() //
-                .from("MktoInput") //
-                .to("collector") //
-                .build().run();
+        runInputPipeline(config);
         final Queue<Record> records = DataCollector.getData();
         assertNotNull(records);
         assertThat(records.size(), is(1));
@@ -264,13 +262,7 @@ public class LeadSourceTest extends SourceBaseTest {
         setMultipleLeadsDefault();
         inputDataSet.setFields(asList(fields.split(",")));
         final String config = configurationByExample().forInstance(inputDataSet).configured().toQueryString();
-        Job.components() //
-                .component("MktoInput", "Marketo://Input?" + config) //
-                .component("collector", MARKETO_TEST_DATA_COLLECTOR) //
-                .connections() //
-                .from("MktoInput") //
-                .to("collector") //
-                .build().run();
+        runInputPipeline(config);
         final Queue<Record> records = DataCollector.getData();
         assertNotNull(records);
         assertThat(records.size(), is(greaterThanOrEqualTo(1)));
@@ -283,13 +275,7 @@ public class LeadSourceTest extends SourceBaseTest {
         inputDataSet.setSinceDateTime("2018-01-01 00:00:01 Z");
         inputDataSet.setFields(asList(fields.split(",")));
         final String config = configurationByExample().forInstance(inputDataSet).configured().toQueryString();
-        Job.components() //
-                .component("MktoInput", "Marketo://Input?" + config) //
-                .component("collector", MARKETO_TEST_DATA_COLLECTOR) //
-                .connections() //
-                .from("MktoInput") //
-                .to("collector") //
-                .build().run();
+        runInputPipeline(config);
         final Queue<Record> records = DataCollector.getData();
         assertNotNull(records);
         assertThat(records.size(), is(greaterThanOrEqualTo(1)));
@@ -311,13 +297,7 @@ public class LeadSourceTest extends SourceBaseTest {
         inputDataSet.setFields(asList(fields.split(",")));
         inputDataSet.setBatchSize(300);
         final String config = configurationByExample().forInstance(inputDataSet).configured().toQueryString();
-        Job.components() //
-                .component("MktoInput", "Marketo://Input?" + config) //
-                .component("collector", MARKETO_TEST_DATA_COLLECTOR) //
-                .connections() //
-                .from("MktoInput") //
-                .to("collector") //
-                .build().run();
+        runInputPipeline(config);
         final Queue<Record> records = DataCollector.getData();
         assertNotNull(records);
         assertThat(records.size(), is(greaterThanOrEqualTo(1)));

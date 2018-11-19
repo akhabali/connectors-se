@@ -12,6 +12,9 @@
 // ============================================================================
 package org.talend.components.marketo.output;
 
+import static org.talend.components.marketo.MarketoApiConstants.ATTR_CODE;
+import static org.talend.components.marketo.MarketoApiConstants.ATTR_MESSAGE;
+import static org.talend.components.marketo.MarketoApiConstants.ATTR_REASONS;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_RESULT;
 
 import javax.annotation.PostConstruct;
@@ -28,9 +31,9 @@ import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.processor.ElementListener;
-import org.talend.sdk.component.api.processor.Output;
-import org.talend.sdk.component.api.processor.OutputEmitter;
+import org.talend.sdk.component.api.processor.Input;
 import org.talend.sdk.component.api.processor.Processor;
+import org.talend.sdk.component.api.record.Record;
 
 @Version
 @Processor(family = "Marketo", name = "Output")
@@ -77,8 +80,10 @@ public class MarketoProcessor extends MarketoSourceOrProcessor {
     }
 
     @ElementListener
-    public void map(final JsonObject data, @Output final OutputEmitter<JsonObject> main,
-            @Output("rejected") final OutputEmitter<JsonObject> rejected) {
+    // public void map(final JsonObject data, @Output final OutputEmitter<JsonObject> main, @Output("rejected") final
+    // OutputEmitter<JsonObject> rejected) {
+    public void map(@Input final Record incomingData) {
+        JsonObject data = toJson(incomingData);
         LOG.debug("[map] received: {}.", data);
         JsonObject payload = strategy.getPayload(data);
         LOG.debug("[map] payload : {}.", payload);
@@ -86,9 +91,11 @@ public class MarketoProcessor extends MarketoSourceOrProcessor {
         LOG.debug("[map] result  : {}.", result);
         for (JsonObject status : result.getJsonArray(ATTR_RESULT).getValuesAs(JsonObject.class)) {
             if (strategy.isRejected(status)) {
-                rejected.emit(strategy.createRejectData(status));
+                // rejected.emit(strategy.createRejectData(status));
+                JsonObject reason = status.getJsonArray(ATTR_REASONS).getJsonObject(0);
+                throw new RuntimeException(String.format("[%s] %s", reason.getString(ATTR_CODE), reason.getString(ATTR_MESSAGE)));
             } else {
-                main.emit(strategy.createMainData(status));
+                // main.emit(strategy.createMainData(status));
             }
         }
     }
