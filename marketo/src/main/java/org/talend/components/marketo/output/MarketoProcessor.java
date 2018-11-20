@@ -12,8 +12,6 @@
 // ============================================================================
 package org.talend.components.marketo.output;
 
-import static org.talend.components.marketo.MarketoApiConstants.ATTR_CODE;
-import static org.talend.components.marketo.MarketoApiConstants.ATTR_MESSAGE;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_REASONS;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_RESULT;
 
@@ -92,8 +90,7 @@ public class MarketoProcessor extends MarketoSourceOrProcessor {
         for (JsonObject status : result.getJsonArray(ATTR_RESULT).getValuesAs(JsonObject.class)) {
             if (strategy.isRejected(status)) {
                 // rejected.emit(strategy.createRejectData(status));
-                JsonObject reason = status.getJsonArray(ATTR_REASONS).getJsonObject(0);
-                throw new RuntimeException(String.format("[%s] %s", reason.getString(ATTR_CODE), reason.getString(ATTR_MESSAGE)));
+                throw new RuntimeException(getErrors(status.getJsonArray(ATTR_REASONS)));
             } else {
                 // main.emit(strategy.createMainData(status));
             }
