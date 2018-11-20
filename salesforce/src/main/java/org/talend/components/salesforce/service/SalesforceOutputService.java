@@ -51,6 +51,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SalesforceOutputService implements Serializable {
 
+    private static final String ID = "Id";
+
     protected final int commitLevel;
 
     protected final List<Record> deleteItems;
@@ -92,8 +94,6 @@ public class SalesforceOutputService implements Serializable {
     private DateCodec dateCodec = new DateCodec();
 
     private Map<String, Field> fieldMap;
-
-    private static final String ID = "Id";
 
     public SalesforceOutputService(WriteDataSet outputConfig, PartnerConnection connection,
             final RecordBuilderFactory factory, Messages messages) {
