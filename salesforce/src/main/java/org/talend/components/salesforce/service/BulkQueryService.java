@@ -1,4 +1,3 @@
-
 /*
  * Copyright (C) 2006-2018 Talend Inc. - www.talend.com
  *
