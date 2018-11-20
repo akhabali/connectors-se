@@ -1,3 +1,4 @@
+
 package org.talend.components.salesforce.dataset;
 
 import static org.talend.components.salesforce.dataset.QueryDataSet.SourceType.MODULE_SELECTION;
@@ -32,11 +33,12 @@ import lombok.Data;
 @Documentation("")
 public class QueryDataSet implements Serializable {
 
-    public static Set<String> MODULE_NOT_SUPPORT_BULK_API = new HashSet<String>(Arrays.asList("AcceptedEventRelation",
-            "ActivityHistory", "AggregateResult", "AttachedContentDocument", "CaseStatus", "CombinedAttachment", "ContractStatus",
-            "DeclinedEventRelation", "EmailStatus", "LookedUpFromActivity", "Name", "NoteAndAttachment", "OpenActivity",
-            "OwnedContentDocument", "PartnerRole", "ProcessInstanceHistory", "RecentlyViewed", "SolutionStatus", "TaskPriority",
-            "TaskStatus", "UndecidedEventRelation", "UserRecordAccess"));
+    public static Set<String> MODULE_NOT_SUPPORT_BULK_API = new HashSet<String>(Arrays
+            .asList("AcceptedEventRelation", "ActivityHistory", "AggregateResult", "AttachedContentDocument",
+                    "CaseStatus", "CombinedAttachment", "ContractStatus", "DeclinedEventRelation", "EmailStatus",
+                    "LookedUpFromActivity", "Name", "NoteAndAttachment", "OpenActivity", "OwnedContentDocument",
+                    "PartnerRole", "ProcessInstanceHistory", "RecentlyViewed", "SolutionStatus", "TaskPriority",
+                    "TaskStatus", "UndecidedEventRelation", "UserRecordAccess"));
 
     @Option
     @Documentation("")
@@ -61,6 +63,12 @@ public class QueryDataSet implements Serializable {
     public String condition;
 
     @Option
+    @ActiveIf(target = "sourceType", value = { "SOQL_QUERY" })
+    @Code("sql")
+    @Documentation("")
+    public String query;
+
+    @Option
     @Documentation("")
     @ActiveIfs({ @ActiveIf(target = "sourceType", value = { "MODULE_SELECTION" }),
             @ActiveIf(target = "moduleName", value = { "" }, negate = true) })
@@ -81,20 +89,14 @@ public class QueryDataSet implements Serializable {
     @Suggestable(value = "retrieveColumns", parameters = { "dataStore", "moduleName", "selectColumnIds" })
     private String selectedColumn;
 
-    @Option
-    @ActiveIf(target = "sourceType", value = { "SOQL_QUERY" })
-    @Code("sql")
-    @Documentation("")
-    public String query;
+    private List<String> filter(final List<String> moduleNames) {
+        moduleNames.removeAll(MODULE_NOT_SUPPORT_BULK_API);
+        return moduleNames;
+    }
 
     public enum SourceType {
         MODULE_SELECTION,
         SOQL_QUERY
-    }
-
-    private List<String> filter(final List<String> moduleNames) {
-        moduleNames.removeAll(MODULE_NOT_SUPPORT_BULK_API);
-        return moduleNames;
     }
 
 }

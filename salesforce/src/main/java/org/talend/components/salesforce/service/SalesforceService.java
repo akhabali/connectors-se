@@ -6,17 +6,27 @@ import java.io.InputStream;
 import java.net.Proxy;
 import java.net.ProxySelector;
 import java.net.URI;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.xml.namespace.QName;
 
 import org.talend.components.salesforce.datastore.BasicDataStore;
+import org.talend.components.salesforce.soql.FieldDescription;
+import org.talend.components.salesforce.soql.SoqlQuery;
+import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.configuration.LocalConfiguration;
 
 import com.sforce.async.AsyncApiException;
 import com.sforce.async.BulkConnection;
+import com.sforce.soap.partner.DescribeSObjectResult;
+import com.sforce.soap.partner.Field;
 import com.sforce.soap.partner.PartnerConnection;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.ws.ConnectionException;
@@ -47,6 +57,12 @@ public class SalesforceService {
 
     private static final int DEFAULT_TIMEOUT = 60000;
 
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
+    private static final SimpleDateFormat DATETIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.000Z'");
+
+    private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm:ss.SSS'Z'");
+
     /**
      * Load Dataprep user Salesforce properties file for endpoint & timeout default values.
      *
@@ -54,7 +70,8 @@ public class SalesforceService {
      */
     private Properties loadCustomConfiguration(final LocalConfiguration configuration) {
         final String configFile = configuration.get(CONFIG_FILE_lOCATION_KEY);
-        try (final InputStream is = configFile != null && !configFile.isEmpty() ? (new FileInputStream(configFile)) : null) {
+        try (final InputStream is =
+                configFile != null && !configFile.isEmpty() ? (new FileInputStream(configFile)) : null) {
             if (is != null) {
                 return new Properties() {
 
@@ -185,5 +202,69 @@ public class SalesforceService {
         } else {
             return new IllegalStateException("connection error", e);
         }
+    }
+
+    public Map<String, Field> getFieldMap(BasicDataStore dataStore, String moduleName,
+            final LocalConfiguration localConfiguration) {
+        try {
+            PartnerConnection connection = connect(dataStore, localConfiguration);
+            DescribeSObjectResult module = connection.describeSObject(moduleName);
+            Map<String, Field> fieldMap = new HashMap<>();
+            for (Field field : module.getFields()) {
+                fieldMap.put(field.getName(), field);
+            }
+            return fieldMap;
+
+        } catch (ConnectionException e) {
+            throw handleConnectionException(e);
+        }
+    }
+
+    public static void addField(final Record.Builder builder, Field field, final String value) {
+        if (value == null || field == null) {
+            return;
+        }
+        try {
+            switch (field.getType()) {
+            case _boolean:
+                builder.withBoolean(field.getName(), Boolean.valueOf(value));
+                break;
+            case _double:
+            case percent:
+                builder.withDouble(field.getName(), Double.parseDouble(value));
+                break;
+            case _int:
+                builder.withInt(field.getName(), Integer.valueOf(value));
+                break;
+            case currency:
+                builder.withDouble(field.getName(), Double.parseDouble(value));
+                break;
+            case date:
+                builder.withDateTime(field.getName(), DATE_FORMAT.parse(value));
+                break;
+            case datetime:
+                builder.withTimestamp(field.getName(), DATETIME_FORMAT.parse(value).getTime());
+                break;
+            case time:
+                builder.withTimestamp(field.getName(), TIME_FORMAT.parse(value).getTime());
+                break;
+            case base64:
+            default:
+                builder.withString(field.getName(), value);
+                break;
+            }
+        } catch (ParseException e) {
+            // TODO
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String guessModuleName(String soqlQuery) {
+        SoqlQuery query = SoqlQuery.getInstance();
+        query.init(soqlQuery);
+
+        List<FieldDescription> fieldDescriptions = query.getFieldDescriptions();
+        return query.getDrivingEntityName();
+
     }
 }

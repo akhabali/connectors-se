@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -60,7 +61,8 @@ public class InputEmitter implements Serializable {
     private Messages messages;
 
     public InputEmitter(@Option("configuration") final QueryDataSet queryDataSet, final SalesforceService service,
-            LocalConfiguration configuration, final RecordBuilderFactory recordBuilderFactory, final Messages messages) {
+            LocalConfiguration configuration, final RecordBuilderFactory recordBuilderFactory,
+            final Messages messages) {
         this.service = service;
         this.dataset = queryDataSet;
         this.localConfiguration = configuration;
@@ -72,7 +74,13 @@ public class InputEmitter implements Serializable {
     public void init() {
         try {
             final BulkConnection bulkConnection = service.bulkConnect(dataset.getDataStore(), localConfiguration);
+            String moduleName = dataset.getModuleName();
+            if (SOQL_QUERY.equals(dataset.getSourceType())) {
+                moduleName = SalesforceService.guessModuleName(dataset.getQuery());
+            }
+            Map<String, Field> fieldMap = service.getFieldMap(dataset.getDataStore(), moduleName, localConfiguration);
             bulkQueryService = new BulkQueryService(bulkConnection, recordBuilderFactory, messages);
+            bulkQueryService.setFieldMap(fieldMap);
             bulkQueryService.doBulkQuery(getModuleName(), getSoqlQuery());
         } catch (ConnectionException e) {
             throw service.handleConnectionException(e);
@@ -89,7 +97,7 @@ public class InputEmitter implements Serializable {
             if (bulkResultSet == null) {
                 bulkResultSet = bulkQueryService.getQueryResultSet(bulkQueryService.nextResultId());
             }
-            Record currentRecord = bulkResultSet.next();
+            Map<String, String> currentRecord = bulkResultSet.next();
             if (currentRecord == null) {
                 String resultId = bulkQueryService.nextResultId();
                 if (resultId != null) {
@@ -97,7 +105,7 @@ public class InputEmitter implements Serializable {
                     currentRecord = bulkResultSet.next();
                 }
             }
-            return currentRecord;
+            return bulkQueryService.convertRecord(currentRecord);
         } catch (ConnectionException e) {
             throw service.handleConnectionException(e);
         } catch (AsyncApiException e) {
@@ -145,9 +153,9 @@ public class InputEmitter implements Serializable {
         if (selectedColumns == null || selectedColumns.isEmpty()) {
             queryFields = allModuleFields;
         } else if (!allModuleFields.containsAll(selectedColumns)) { // ensure requested fields exist
-            throw new IllegalStateException(
-                    "columns { " + selectedColumns.stream().filter(c -> !allModuleFields.contains(c)).collect(joining(","))
-                            + " } " + "doesn't exist in module '" + dataset.getModuleName() + "'");
+            throw new IllegalStateException("columns { "
+                    + selectedColumns.stream().filter(c -> !allModuleFields.contains(c)).collect(joining(",")) + " } "
+                    + "doesn't exist in module '" + dataset.getModuleName() + "'");
         } else {
             queryFields = selectedColumns;
         }
@@ -185,4 +193,5 @@ public class InputEmitter implements Serializable {
         }
         return fields;
     }
+
 }

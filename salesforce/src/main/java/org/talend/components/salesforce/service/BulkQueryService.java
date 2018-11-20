@@ -1,16 +1,21 @@
-// ============================================================================
-//
-// Copyright (C) 2006-2018 Talend Inc. - www.talend.com
-//
-// This source code is available under agreement available at
-// %InstallDIR%\features\org.talend.rcp.branding.%PRODUCTNAME%\%PRODUCTNAME%license.txt
-//
-// You should have received a copy of the agreement
-// along with this program; if not, write to Talend SA
-// 9 rue Pages 92150 Suresnes, France
-//
-// ============================================================================
+
+/*
+ * Copyright (C) 2006-2018 Talend Inc. - www.talend.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ *
+ */
+
 package org.talend.components.salesforce.service;
+
+import static org.talend.components.salesforce.service.SalesforceService.addField;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -23,9 +28,11 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.talend.components.salesforce.BulkResultSet;
+import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import com.sforce.async.AsyncApiException;
@@ -39,6 +46,7 @@ import com.sforce.async.ContentType;
 import com.sforce.async.JobInfo;
 import com.sforce.async.OperationEnum;
 import com.sforce.async.QueryResultList;
+import com.sforce.soap.partner.Field;
 import com.sforce.ws.ConnectionException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -72,6 +80,8 @@ public class BulkQueryService {
     private final RecordBuilderFactory recordBuilderFactory;
 
     private final BulkConnection bulkConnection;
+
+    private Map<String, Field> fieldMap;
 
     private List<BatchInfo> batchInfoList;
 
@@ -175,14 +185,15 @@ public class BulkQueryService {
     }
 
     public BulkResultSet getQueryResultSet(String resultId) throws AsyncApiException, IOException, ConnectionException {
-        final com.csvreader.CsvReader baseFileReader = new com.csvreader.CsvReader(new BufferedReader(
-                new InputStreamReader(getQueryResultStream(job.getId(), batchInfoList.get(0).getId(), resultId), FILE_ENCODING)),
+        final com.csvreader.CsvReader baseFileReader = new com.csvreader.CsvReader(
+                new BufferedReader(new InputStreamReader(
+                        getQueryResultStream(job.getId(), batchInfoList.get(0).getId(), resultId), FILE_ENCODING)),
                 ',');
         baseFileReader.setSafetySwitch(safetySwitch);
         if (baseFileReader.readRecord()) {
             baseFileHeader = Arrays.asList(baseFileReader.getValues());
         }
-        return new BulkResultSet(baseFileReader, baseFileHeader, recordBuilderFactory);
+        return new BulkResultSet(baseFileReader, baseFileHeader);
     }
 
     private JobInfo createJob(JobInfo job) throws AsyncApiException, ConnectionException {
@@ -206,7 +217,8 @@ public class BulkQueryService {
         }
     }
 
-    private BatchInfo createBatchFromStream(JobInfo job, InputStream input) throws AsyncApiException, ConnectionException {
+    private BatchInfo createBatchFromStream(JobInfo job, InputStream input)
+            throws AsyncApiException, ConnectionException {
         try {
             return bulkConnection.createBatchFromStream(job, input);
         } catch (AsyncApiException sfException) {
@@ -242,7 +254,8 @@ public class BulkQueryService {
         }
     }
 
-    private QueryResultList getQueryResultList(String jobID, String batchID) throws AsyncApiException, ConnectionException {
+    private QueryResultList getQueryResultList(String jobID, String batchID)
+            throws AsyncApiException, ConnectionException {
         try {
             return bulkConnection.getQueryResultList(jobID, batchID);
         } catch (AsyncApiException sfException) {
@@ -285,7 +298,8 @@ public class BulkQueryService {
      * @throws ConnectionException
      * @throws InterruptedException
      */
-    private void retrieveResultsOfQuery(BatchInfo info) throws AsyncApiException, ConnectionException, InterruptedException {
+    private void retrieveResultsOfQuery(BatchInfo info)
+            throws AsyncApiException, ConnectionException, InterruptedException {
 
         if (BatchStateEnum.Completed == info.getState()) {
             QueryResultList list = getQueryResultList(job.getId(), info.getId());
@@ -367,5 +381,20 @@ public class BulkQueryService {
             resultId = queryResultIDs.next();
         }
         return resultId;
+    }
+
+    public Record convertRecord(Map<String, String> result) {
+        if (result == null) {
+            return null;
+        }
+        Record.Builder recordBuilder = recordBuilderFactory.newRecordBuilder();
+        result.entrySet().stream().filter(it -> it.getValue() != null).forEach(e -> {
+            addField(recordBuilder, fieldMap.get(e.getKey()), result.get(e.getKey()));
+        });
+        return recordBuilder.build();
+    }
+
+    public void setFieldMap(Map<String, Field> fieldMap) {
+        this.fieldMap = fieldMap;
     }
 }

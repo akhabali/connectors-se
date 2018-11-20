@@ -100,7 +100,8 @@ public class UiActionService {
                 if (selectedColumnsSet == null) {
                     selectedColumnsSet = new ArrayList<>();
                 }
-                if (selectedColumn != null && !selectedColumn.isEmpty() && !selectedColumnsSet.contains(selectedColumn)) {
+                if (selectedColumn != null && !selectedColumn.isEmpty()
+                        && !selectedColumnsSet.contains(selectedColumn)) {
                     selectedColumnsSet.add(selectedColumn);
                 }
                 for (String column : selectedColumnsSet) {
@@ -116,7 +117,8 @@ public class UiActionService {
 
     @Suggestions("retrieveColumns")
     public SuggestionValues retrieveColumns(@Option("dataStore") final BasicDataStore dataStore,
-            @Option("moduleName") final String moduleName, @Option("selectColumnIds") final List<String> selectColumnIds) {
+            @Option("moduleName") final String moduleName,
+            @Option("selectColumnIds") final List<String> selectColumnIds) {
         try {
             List<SuggestionValues.Item> items = new ArrayList<>();
             final PartnerConnection connection = this.service.connect(dataStore, configuration);

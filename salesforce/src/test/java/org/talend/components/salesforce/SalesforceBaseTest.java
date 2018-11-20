@@ -1,15 +1,14 @@
 package org.talend.components.salesforce;
 
-import static org.talend.components.salesforce.service.SalesforceService.URL;
-
 import java.io.Serializable;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.beam.sdk.testing.TestPipeline;
 import org.junit.ClassRule;
 import org.junit.Rule;
-import org.junit.jupiter.api.BeforeEach;
-import org.talend.components.salesforce.dataset.QueryDataSet;
 import org.talend.components.salesforce.datastore.BasicDataStore;
+import org.talend.sdk.component.api.service.Service;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.junit.SimpleComponentRule;
 import org.talend.sdk.component.maven.MavenDecrypter;
 import org.talend.sdk.component.maven.Server;
@@ -26,13 +25,6 @@ public class SalesforceBaseTest implements Serializable {
 
     public static String SECURITY_KEY;
 
-    @Rule
-    public transient final TestPipeline pipeline = TestPipeline.create();
-
-    protected BasicDataStore dataStore;
-
-    protected QueryDataSet dataSet;
-
     static {
         final MavenDecrypter decrypter = new MavenDecrypter();
         final Server serverWithPassword = decrypter.find("salesforce-password");
@@ -42,15 +34,16 @@ public class SalesforceBaseTest implements Serializable {
         SECURITY_KEY = serverWithSecuritykey.getPassword();
     }
 
-    @BeforeEach
-    protected void setUp() {
-        dataStore = new BasicDataStore();
-        dataStore.setEndpoint(URL);
-        dataStore.setUserId(USER_ID);
-        dataStore.setPassword(PASSWORD);
-        dataStore.setSecurityKey(SECURITY_KEY);
-        dataSet = new QueryDataSet();
-        dataSet.setDataStore(dataStore);
+    @Rule
+    public transient final TestPipeline pipeline = TestPipeline.create();
+
+    @Service
+    public final RecordBuilderFactory factory = COMPONENT_FACTORY.findService(RecordBuilderFactory.class);
+
+    public final BasicDataStore dataStore = new BasicDataStore();
+
+    public static String createNewRandom() {
+        return Integer.toString(ThreadLocalRandom.current().nextInt(1, 1000000));
     }
 
 }
