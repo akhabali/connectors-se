@@ -18,10 +18,7 @@ package org.talend.components.salesforce.dataset;
 import static org.talend.components.salesforce.dataset.QueryDataSet.SourceType.MODULE_SELECTION;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.talend.components.salesforce.datastore.BasicDataStore;
 import org.talend.sdk.component.api.configuration.Option;
@@ -31,7 +28,6 @@ import org.talend.sdk.component.api.configuration.condition.ActiveIfs;
 import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.constraint.Uniques;
 import org.talend.sdk.component.api.configuration.type.DataSet;
-import org.talend.sdk.component.api.configuration.ui.DefaultValue;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Code;
 import org.talend.sdk.component.api.configuration.ui.widget.Structure;
@@ -47,66 +43,50 @@ import lombok.Data;
 @Documentation("")
 public class QueryDataSet implements Serializable {
 
-    public static Set<String> MODULE_NOT_SUPPORT_BULK_API = new HashSet<String>(Arrays
-            .asList("AcceptedEventRelation", "ActivityHistory", "AggregateResult", "AttachedContentDocument",
-                    "CaseStatus", "CombinedAttachment", "ContractStatus", "DeclinedEventRelation", "EmailStatus",
-                    "LookedUpFromActivity", "Name", "NoteAndAttachment", "OpenActivity", "OwnedContentDocument",
-                    "PartnerRole", "ProcessInstanceHistory", "RecentlyViewed", "SolutionStatus", "TaskPriority",
-                    "TaskStatus", "UndecidedEventRelation", "UserRecordAccess"));
-
     @Option
     @Documentation("")
-    public BasicDataStore dataStore;
+    private BasicDataStore dataStore;
 
     @Option
     @Required
     @Documentation("")
-    public SourceType sourceType = MODULE_SELECTION;
+    private SourceType sourceType = MODULE_SELECTION;
 
     @Option
     @ActiveIf(target = "sourceType", value = { "MODULE_SELECTION" })
     @Suggestable(value = "loadSalesforceModules", parameters = { "dataStore" })
-    @DefaultValue("")
     @Documentation("")
-    public String moduleName;
+    private String moduleName;
 
     @Option
-    @ActiveIfs({ @ActiveIf(target = "sourceType", value = { "MODULE_SELECTION" }),
-            @ActiveIf(target = "moduleName", value = { "" }, negate = true) })
+    @ActiveIf(target = "sourceType", value = { "MODULE_SELECTION" })
     @Documentation("")
-    public String condition;
+    private String condition;
 
     @Option
     @ActiveIf(target = "sourceType", value = { "SOQL_QUERY" })
     @Code("sql")
     @Documentation("")
-    public String query;
+    private String query;
 
     @Option
     @Documentation("")
-    @ActiveIfs({ @ActiveIf(target = "sourceType", value = { "MODULE_SELECTION" }),
-            @ActiveIf(target = "moduleName", value = { "" }, negate = true) })
+    @ActiveIf(target = "sourceType", value = { "MODULE_SELECTION" })
     @Structure(type = Structure.Type.OUT, discoverSchema = "addColumns")
     @Uniques
     private List<String> selectColumnIds;
 
     @Option
+    @ActiveIf(target = "sourceType", value = { "MODULE_SELECTION" })
     @Documentation("")
-    @ActiveIfs({ @ActiveIf(target = "sourceType", value = { "MODULE_SELECTION" }),
-            @ActiveIf(target = "moduleName", value = { "" }, negate = true) })
-    // @DefaultValue("true")
     private boolean addAllColumns = true;
 
     @Option
     @Documentation("")
-    @ActiveIfs(@ActiveIf(target = "addAllColumns", value = { "false" }))
+    @ActiveIfs({ @ActiveIf(target = "sourceType", value = { "MODULE_SELECTION" }),
+            @ActiveIf(target = "addAllColumns", value = { "false" }) })
     @Suggestable(value = "retrieveColumns", parameters = { "dataStore", "moduleName", "selectColumnIds" })
     private String selectedColumn;
-
-    private List<String> filter(final List<String> moduleNames) {
-        moduleNames.removeAll(MODULE_NOT_SUPPORT_BULK_API);
-        return moduleNames;
-    }
 
     public enum SourceType {
         MODULE_SELECTION,

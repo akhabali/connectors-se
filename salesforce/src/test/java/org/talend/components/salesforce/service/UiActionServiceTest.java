@@ -24,6 +24,7 @@ import static org.talend.components.salesforce.service.SalesforceService.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.talend.components.salesforce.SfHeaderFilter;
@@ -33,7 +34,6 @@ import org.talend.sdk.component.api.DecryptedServer;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
-import org.talend.sdk.component.api.service.configuration.LocalConfiguration;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.junit.BaseComponentsHandler;
@@ -64,9 +64,6 @@ class UiActionServiceTest {
     @Service
     private Messages i18n;
 
-    @Service
-    private LocalConfiguration configuration;
-
     @Injected
     private BaseComponentsHandler componentsHandler;
 
@@ -88,7 +85,7 @@ class UiActionServiceTest {
         datasore.setUserId(serverWithPassword.getUsername());
         datasore.setPassword(serverWithPassword.getPassword());
         datasore.setSecurityKey(serverWithSecuritykey.getPassword());
-        final HealthCheckStatus status = service.validateBasicConnection(datasore, i18n, configuration);
+        final HealthCheckStatus status = service.validateBasicConnection(datasore, i18n);
         assertEquals(i18n.healthCheckOk(), status.getComment());
         assertEquals(HealthCheckStatus.Status.OK, status.getStatus());
 
@@ -100,7 +97,7 @@ class UiActionServiceTest {
     void validateBasicConnectionFailed() {
         final BasicDataStore datasore = new BasicDataStore();
         datasore.setEndpoint(URL);
-        final HealthCheckStatus status = service.validateBasicConnection(datasore, i18n, configuration);
+        final HealthCheckStatus status = service.validateBasicConnection(datasore, i18n);
         assertNotNull(status);
         assertEquals(HealthCheckStatus.Status.KO, status.getStatus());
         assertFalse(status.getComment().isEmpty());
@@ -118,7 +115,8 @@ class UiActionServiceTest {
         final SuggestionValues modules = service.loadSalesforceModules(datasore);
         assertNotNull(modules);
         assertTrue(modules.isCacheable());
-        assertEquals(376, modules.getItems().size());
+        assertEquals(354, modules.getItems().size());
+        modules.getItems().stream().forEach(c -> Assert.assertNotEquals(c.getLabel(), "AcceptedEventRelation"));
     }
 
     @Test
@@ -192,17 +190,90 @@ class UiActionServiceTest {
     }
 
     @Test
-    @DisplayName("Get default endpoint")
-    void getDefaultEndpoint() {
+    @HttpApiName("${class}_${method}")
+    @DisplayName("check retrieved field type")
+    void testFieldType() {
+        final String moduleName = "Account";
+        final QueryDataSet dataSet = new QueryDataSet();
         final BasicDataStore datasore = new BasicDataStore();
-        datasore.setUserId("basUserName");
-        datasore.setPassword("NoPass");
-        final SuggestionValues endpoint = service.getEndpoint();
-
-        assertEquals(1, endpoint.getItems().size());
-        for (SuggestionValues.Item item : endpoint.getItems()) {
-            assertEquals(URL, item.getLabel());
+        datasore.setEndpoint(URL);
+        datasore.setUserId(serverWithPassword.getUsername());
+        datasore.setPassword(serverWithPassword.getPassword());
+        datasore.setSecurityKey(serverWithSecuritykey.getPassword());
+        dataSet.setDataStore(datasore);
+        dataSet.setModuleName(moduleName);
+        // check add all field to schema
+        Schema schema = service.addColumns(dataSet, factory);
+        assertNotNull(schema);
+        List<Schema.Entry> columns = schema.getEntries();
+        assertNotNull(columns);
+        assertEquals(58, columns.size());
+        for (Schema.Entry column : columns) {
+            if ("Id".equals(column.getName())) {
+                assertEquals(Schema.Type.STRING, column.getType());
+            }
+            if ("IsDeleted".equals(column.getName())) {
+                assertEquals(Schema.Type.BOOLEAN, column.getType());
+            }
+            if ("BillingLatitude".equals(column.getName())) {
+                assertEquals(Schema.Type.DOUBLE, column.getType());
+            }
+            if ("AnnualRevenue".equals(column.getName())) {
+                assertEquals(Schema.Type.DOUBLE, column.getType());
+            }
+            if ("NumberOfEmployees".equals(column.getName())) {
+                assertEquals(Schema.Type.INT, column.getType());
+            }
+            if ("LastActivityDate".equals(column.getName())) {
+                assertEquals(Schema.Type.DATETIME, column.getType());
+            }
+            if ("LastViewedDate".equals(column.getName())) {
+                assertEquals(Schema.Type.DATETIME, column.getType());
+            }
         }
+
+        // check add field one by one
+        List<String> selectedColumns = new ArrayList<>();
+        selectedColumns.add("Id");
+        selectedColumns.add("IsDeleted");
+        selectedColumns.add("BillingLatitude");
+        selectedColumns.add("AnnualRevenue");
+        selectedColumns.add("NumberOfEmployees");
+        selectedColumns.add("LastActivityDate");
+
+        dataSet.setSelectColumnIds(null);
+        dataSet.setAddAllColumns(false);
+        dataSet.setSelectColumnIds(selectedColumns);
+        dataSet.setSelectedColumn("LastViewedDate");
+        schema = service.addColumns(dataSet, factory);
+        assertEquals(7, schema.getEntries().size());
+        for (Schema.Entry column : columns) {
+            if ("Id".equals(column.getName())) {
+                assertEquals(Schema.Type.STRING, column.getType());
+            }
+            if ("IsDeleted".equals(column.getName())) {
+                assertEquals(Schema.Type.BOOLEAN, column.getType());
+            }
+            if ("BillingLatitude".equals(column.getName())) {
+                assertEquals(Schema.Type.DOUBLE, column.getType());
+            }
+            if ("AnnualRevenue".equals(column.getName())) {
+                assertEquals(Schema.Type.DOUBLE, column.getType());
+            }
+            if ("NumberOfEmployees".equals(column.getName())) {
+                assertEquals(Schema.Type.INT, column.getType());
+            }
+            if ("LastActivityDate".equals(column.getName())) {
+                assertEquals(Schema.Type.DATETIME, column.getType());
+            }
+            if ("LastViewedDate".equals(column.getName())) {
+                assertEquals(Schema.Type.DATETIME, column.getType());
+            }
+        }
+
+        SuggestionValues values = service.retrieveColumns(datasore, moduleName, dataSet.getSelectColumnIds());
+        assertEquals(51, values.getItems().size());
+
     }
 
 }

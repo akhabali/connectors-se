@@ -75,8 +75,7 @@ public class InputEmitter implements Serializable {
     private Messages messages;
 
     public InputEmitter(@Option("configuration") final QueryDataSet queryDataSet, final SalesforceService service,
-            LocalConfiguration configuration, final RecordBuilderFactory recordBuilderFactory,
-            final Messages messages) {
+            LocalConfiguration configuration, final RecordBuilderFactory recordBuilderFactory, final Messages messages) {
         this.service = service;
         this.dataset = queryDataSet;
         this.localConfiguration = configuration;
@@ -119,7 +118,7 @@ public class InputEmitter implements Serializable {
                     currentRecord = bulkResultSet.next();
                 }
             }
-            return bulkQueryService.convertRecord(currentRecord);
+            return bulkQueryService.convertToRecord(currentRecord);
         } catch (ConnectionException e) {
             throw service.handleConnectionException(e);
         } catch (AsyncApiException e) {
@@ -167,9 +166,9 @@ public class InputEmitter implements Serializable {
         if (selectedColumns == null || selectedColumns.isEmpty()) {
             queryFields = allModuleFields;
         } else if (!allModuleFields.containsAll(selectedColumns)) { // ensure requested fields exist
-            throw new IllegalStateException("columns { "
-                    + selectedColumns.stream().filter(c -> !allModuleFields.contains(c)).collect(joining(",")) + " } "
-                    + "doesn't exist in module '" + dataset.getModuleName() + "'");
+            throw new IllegalStateException(
+                    "columns { " + selectedColumns.stream().filter(c -> !allModuleFields.contains(c)).collect(joining(","))
+                            + " } " + "doesn't exist in module '" + dataset.getModuleName() + "'");
         } else {
             queryFields = selectedColumns;
         }

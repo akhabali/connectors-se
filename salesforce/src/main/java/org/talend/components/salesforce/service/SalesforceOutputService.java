@@ -14,8 +14,8 @@
 
 package org.talend.components.salesforce.service;
 
-import static org.talend.components.salesforce.dataset.WriteDataSet.OutputAction.UPDATE;
-import static org.talend.components.salesforce.dataset.WriteDataSet.OutputAction.UPSERT;
+import static org.talend.components.salesforce.output.OutputConfiguration.OutputAction.UPDATE;
+import static org.talend.components.salesforce.output.OutputConfiguration.OutputAction.UPSERT;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.talend.components.salesforce.dataset.WriteDataSet;
+import org.talend.components.salesforce.output.OutputConfiguration;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
@@ -77,7 +77,7 @@ public class SalesforceOutputService implements Serializable {
 
     private PartnerConnection connection;
 
-    private WriteDataSet.OutputAction outputAction;
+    private OutputConfiguration.OutputAction outputAction;
 
     private String moduleName;
 
@@ -95,7 +95,7 @@ public class SalesforceOutputService implements Serializable {
 
     private Map<String, Field> fieldMap;
 
-    public SalesforceOutputService(WriteDataSet outputConfig, PartnerConnection connection,
+    public SalesforceOutputService(OutputConfiguration outputConfig, PartnerConnection connection,
             final RecordBuilderFactory factory, Messages messages) {
         this.connection = connection;
         this.outputAction = outputConfig.getOutputAction();
@@ -151,7 +151,7 @@ public class SalesforceOutputService implements Serializable {
         nullValueFields.clear();
         for (Schema.Entry field : input.getSchema().getEntries()) {
             // For "Id" column, we should ignore it for "INSERT" action
-            if (!("Id".equals(field.getName()) && WriteDataSet.OutputAction.INSERT.equals(outputAction))) {
+            if (!("Id".equals(field.getName()) && OutputConfiguration.OutputAction.INSERT.equals(outputAction))) {
                 Object value = input.get(Object.class, field.getName());
                 // TODO need check
                 Field sfField = fieldMap.get(field.getName());
@@ -195,8 +195,8 @@ public class SalesforceOutputService implements Serializable {
                     so.getChild(lookupRelationshipFieldName).setField("type", relationMap.get("lookupFieldModuleName"));
                     // No need get the real type. Because of the External IDs should not be special type in
                     // addSObjectField()
-                    addSObjectField(so.getChild(lookupRelationshipFieldName),
-                            relationMap.get("lookupFieldExternalIdName"), sfField.getType(), value);
+                    addSObjectField(so.getChild(lookupRelationshipFieldName), relationMap.get("lookupFieldExternalIdName"),
+                            sfField.getType(), value);
                 } else {
                     // Skip column "Id" for upsert, when "Id" is not specified as "upsertKey.Column"
                     if (!"Id".equals(field.getName()) || field.getName().equals(upsertKeyColumn)) {
@@ -474,7 +474,7 @@ public class SalesforceOutputService implements Serializable {
         return null;
     }
 
-    private void logout() throws IOException {
+    public void finish() throws IOException {
         // Finish anything uncommitted
         doInsert();
         doDelete();
@@ -505,14 +505,6 @@ public class SalesforceOutputService implements Serializable {
         // }
         // return referenceFieldsMap;
         return new HashMap<>();
-    }
-
-    public List<Record> getSuccessfulWrites() {
-        return Collections.unmodifiableList(successfulWrites);
-    }
-
-    public List<Record> getRejectedWrites() {
-        return Collections.unmodifiableList(rejectedWrites);
     }
 
     public void cleanWrites() {

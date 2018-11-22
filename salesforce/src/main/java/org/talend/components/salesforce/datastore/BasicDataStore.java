@@ -38,23 +38,22 @@ public class BasicDataStore implements Serializable {
     @Required
     @DefaultValue("local_configuration:salesforce.endpoint")
     @Documentation("")
-    public String endpoint;
+    private String endpoint;
 
     @Option
     @Required
     @Documentation("")
-    public String userId;
-
-    @Option
-    @Required
-    @Credential
-    @Documentation("")
-    public String password;
+    private String userId;
 
     @Option
     @Required
     @Credential
     @Documentation("")
-    public String securityKey;
+    private String password;
+
+    @Option
+    @Credential
+    @Documentation("")
+    private String securityKey;
 
 }

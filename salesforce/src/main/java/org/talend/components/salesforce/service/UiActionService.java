@@ -19,7 +19,10 @@ import static org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.talend.components.salesforce.dataset.QueryDataSet;
 import org.talend.components.salesforce.datastore.BasicDataStore;
@@ -48,19 +51,22 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class UiActionService {
 
-    public static final String GET_ENDPOINT = "GET_ENDPOINT";
+    private static Set<String> MODULE_NOT_SUPPORT_BULK_API = new HashSet<String>(Arrays.asList("AcceptedEventRelation",
+            "ActivityHistory", "AggregateResult", "AttachedContentDocument", "CaseStatus", "CombinedAttachment", "ContractStatus",
+            "DeclinedEventRelation", "EmailStatus", "LookedUpFromActivity", "Name", "NoteAndAttachment", "OpenActivity",
+            "OwnedContentDocument", "PartnerRole", "ProcessInstanceHistory", "RecentlyViewed", "SolutionStatus", "TaskPriority",
+            "TaskStatus", "UndecidedEventRelation", "UserRecordAccess"));
 
     @Service
     private SalesforceService service;
 
     @Service
-    private LocalConfiguration configuration;
+    private LocalConfiguration localConfiguration;
 
     @HealthCheck("basic.healthcheck")
-    public HealthCheckStatus validateBasicConnection(@Option final BasicDataStore datastore, final Messages i18n,
-            LocalConfiguration configuration) {
+    public HealthCheckStatus validateBasicConnection(@Option final BasicDataStore datastore, final Messages i18n) {
         try {
-            this.service.connect(datastore, configuration);
+            this.service.connect(datastore, localConfiguration);
         } catch (ConnectionException ex) {
             String error;
             if (ApiFault.class.isInstance(ex)) {
@@ -78,10 +84,12 @@ public class UiActionService {
     public SuggestionValues loadSalesforceModules(@Option("dataStore") final BasicDataStore dataStore) {
         try {
             List<SuggestionValues.Item> items = new ArrayList<>();
-            final PartnerConnection connection = this.service.connect(dataStore, configuration);
+            final PartnerConnection connection = this.service.connect(dataStore, localConfiguration);
             DescribeGlobalSObjectResult[] modules = connection.describeGlobal().getSobjects();
             for (DescribeGlobalSObjectResult module : modules) {
-                items.add(new SuggestionValues.Item(module.getName(), module.getLabel()));
+                if (!MODULE_NOT_SUPPORT_BULK_API.contains(module.getName())) {
+                    items.add(new SuggestionValues.Item(module.getName(), module.getLabel()));
+                }
             }
             return new SuggestionValues(true, items);
         } catch (ConnectionException e) {
@@ -97,45 +105,43 @@ public class UiActionService {
         final String moduleName = dataSet.getModuleName();
         final boolean isAddAllColumns = dataSet.isAddAllColumns();
         try {
+            if (moduleName == null || moduleName.isEmpty()) {
+                return schemaBuilder.build();
+            }
+            Map<String, Field> fieldMap = service.getFieldMap(dataSet.getDataStore(), moduleName, localConfiguration);
             if (isAddAllColumns) {
-                log.debug("create connection...");
-                final PartnerConnection connection = this.service.connect(dataSet.getDataStore(), configuration);
-                if (moduleName == null || moduleName.isEmpty()) {
-                    return schemaBuilder.build();
-                }
-                log.debug("retrieve columns from module: " + moduleName);
-                DescribeSObjectResult module = connection.describeSObject(moduleName);
-                for (Field field : module.getFields()) {
-                    schemaBuilder.withEntry(entryBuilder.withName(field.getName()).withType(Type.STRING).build());
-                }
+                service.guessSchema(fieldMap, schemaBuilder, entryBuilder);
                 return schemaBuilder.build();
             } else {
                 List<String> selectedColumnsSet = dataSet.getSelectColumnIds();
                 if (selectedColumnsSet == null) {
                     selectedColumnsSet = new ArrayList<>();
                 }
-                if (selectedColumn != null && !selectedColumn.isEmpty()
-                        && !selectedColumnsSet.contains(selectedColumn)) {
+                if (selectedColumn != null && !selectedColumn.isEmpty() && !selectedColumnsSet.contains(selectedColumn)) {
                     selectedColumnsSet.add(selectedColumn);
                 }
                 for (String column : selectedColumnsSet) {
-                    schemaBuilder.withEntry(entryBuilder.withName(column).withType(Type.STRING).build());
+                    Field field = fieldMap.get(column);
+                    if (field == null) {
+                        throw new RuntimeException("Field:" + column + " is not exist in moduel " + moduleName);
+                    } else {
+                        service.addSchemaEntry(fieldMap.get(column), schemaBuilder, entryBuilder);
+                    }
                 }
                 return schemaBuilder.build();
 
             }
-        } catch (ConnectionException e) {
-            throw service.handleConnectionException(e);
+        } catch (IllegalStateException e) {
+            throw e;
         }
     }
 
     @Suggestions("retrieveColumns")
     public SuggestionValues retrieveColumns(@Option("dataStore") final BasicDataStore dataStore,
-            @Option("moduleName") final String moduleName,
-            @Option("selectColumnIds") final List<String> selectColumnIds) {
+            @Option("moduleName") final String moduleName, @Option("selectColumnIds") final List<String> selectColumnIds) {
         try {
             List<SuggestionValues.Item> items = new ArrayList<>();
-            final PartnerConnection connection = this.service.connect(dataStore, configuration);
+            final PartnerConnection connection = this.service.connect(dataStore, localConfiguration);
             DescribeSObjectResult module = connection.describeSObject(moduleName);
             for (Field field : module.getFields()) {
                 if (selectColumnIds == null || !selectColumnIds.contains(field.getName())) {
@@ -146,12 +152,6 @@ public class UiActionService {
         } catch (ConnectionException e) {
             throw service.handleConnectionException(e);
         }
-    }
-
-    @Suggestions(GET_ENDPOINT)
-    public SuggestionValues getEndpoint() {
-        final String endpoint = this.service.getEndpoint(configuration);
-        return new SuggestionValues(false, Arrays.asList(new SuggestionValues.Item(endpoint, endpoint)));
     }
 
 }

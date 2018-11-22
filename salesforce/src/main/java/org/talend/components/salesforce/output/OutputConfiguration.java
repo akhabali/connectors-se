@@ -12,7 +12,7 @@
  *
  */
 
-package org.talend.components.salesforce.dataset;
+package org.talend.components.salesforce.output;
 
 import java.io.Serializable;
 import java.util.List;
@@ -38,7 +38,7 @@ import lombok.Data;
         @GridLayout.Row({ "outputAction" }), @GridLayout.Row({ "batchMode" }), @GridLayout.Row("commitLevel"),
         @GridLayout.Row("exceptionForErrors") })
 @Documentation("TODO fill the documentation for this configuration")
-public class WriteDataSet implements Serializable {
+public class OutputConfiguration implements Serializable {
 
     @Option
     @Documentation("")

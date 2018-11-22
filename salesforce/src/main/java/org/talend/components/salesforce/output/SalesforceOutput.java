@@ -21,7 +21,6 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.talend.components.salesforce.dataset.WriteDataSet;
 import org.talend.components.salesforce.service.Messages;
 import org.talend.components.salesforce.service.SalesforceOutputService;
 import org.talend.components.salesforce.service.SalesforceService;
@@ -47,11 +46,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Version
 @Icon(value = Icon.IconType.CUSTOM, custom = "SalesforceOutput")
-@Processor(name = "SalesforceOutput")
+@Processor(name = "SalesforceOutput", family = "Salesforce")
 @Documentation("Salesforce output")
 public class SalesforceOutput implements Serializable {
 
-    private final WriteDataSet outputConfig;
+    private final OutputConfiguration outputConfig;
 
     private final SalesforceService service;
 
@@ -63,9 +62,8 @@ public class SalesforceOutput implements Serializable {
 
     private Messages messages;
 
-    public SalesforceOutput(@Option("outputConfig") final WriteDataSet outputConfig,
-            LocalConfiguration localConfiguration, final SalesforceService service,
-            final RecordBuilderFactory recordBuilderFactory, final Messages messages) {
+    public SalesforceOutput(@Option("outputConfig") final OutputConfiguration outputConfig, LocalConfiguration localConfiguration,
+            final SalesforceService service, final RecordBuilderFactory recordBuilderFactory, final Messages messages) {
         this.outputConfig = outputConfig;
         this.service = service;
         this.localConfiguration = localConfiguration;
@@ -78,8 +76,8 @@ public class SalesforceOutput implements Serializable {
         try {
             final PartnerConnection connection = service.connect(outputConfig.getDataStore(), localConfiguration);
             outputService = new SalesforceOutputService(outputConfig, connection, recordBuilderFactory, messages);
-            Map<String, Field> fieldMap =
-                    service.getFieldMap(outputConfig.getDataStore(), outputConfig.getModuleName(), localConfiguration);
+            Map<String, Field> fieldMap = service.getFieldMap(outputConfig.getDataStore(), outputConfig.getModuleName(),
+                    localConfiguration);
             outputService.setFieldMap(fieldMap);
         } catch (ConnectionException e) {
             throw service.handleConnectionException(e);
@@ -102,9 +100,7 @@ public class SalesforceOutput implements Serializable {
     }
 
     @PreDestroy
-    public void release() {
-        // this is the symmetric method of the init() one,
-        // release potential connections you created or data you cached
-        // Note: if you don't need it you can delete it
+    public void release() throws IOException {
+        outputService.finish();
     }
 }

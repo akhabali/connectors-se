@@ -14,14 +14,14 @@
 
 package org.talend.components.salesforce.service;
 
-import static org.talend.components.salesforce.service.SalesforceService.addField;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -72,6 +72,12 @@ public class BulkQueryService {
 
     private static final int MAX_BATCH_EXECUTION_TIME = 600 * 1000;
 
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
+    private static final SimpleDateFormat DATETIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.000Z'");
+
+    private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm:ss.SSS'Z'");
+
     private final String FILE_ENCODING = "UTF-8";
 
     private final Messages messagesI18n;
@@ -91,13 +97,13 @@ public class BulkQueryService {
     private ConcurrencyMode concurrencyMode = null;
 
     private Iterator<String> queryResultIDs = null;
+    // Default : no timeout to wait until the job fails or is in success
 
     private boolean safetySwitch = true;
 
     private int chunkSize;
 
     private int chunkSleepTime;
-    // Default : no timeout to wait until the job fails or is in success
 
     private long jobTimeOut;
 
@@ -183,10 +189,12 @@ public class BulkQueryService {
         retrieveResultsOfQuery(info);
     }
 
+    /**
+     * Get bulk resultset base on the resultId
+     */
     public BulkResultSet getQueryResultSet(String resultId) throws AsyncApiException, IOException, ConnectionException {
-        final com.csvreader.CsvReader baseFileReader = new com.csvreader.CsvReader(
-                new BufferedReader(new InputStreamReader(
-                        getQueryResultStream(job.getId(), batchInfoList.get(0).getId(), resultId), FILE_ENCODING)),
+        final com.csvreader.CsvReader baseFileReader = new com.csvreader.CsvReader(new BufferedReader(
+                new InputStreamReader(getQueryResultStream(job.getId(), batchInfoList.get(0).getId(), resultId), FILE_ENCODING)),
                 ',');
         baseFileReader.setSafetySwitch(safetySwitch);
         if (baseFileReader.readRecord()) {
@@ -195,6 +203,9 @@ public class BulkQueryService {
         return new BulkResultSet(baseFileReader, baseFileHeader);
     }
 
+    /**
+     * Create bulk api job
+     */
     private JobInfo createJob(JobInfo job) throws AsyncApiException, ConnectionException {
         try {
             if (0 != chunkSize) {
@@ -216,8 +227,10 @@ public class BulkQueryService {
         }
     }
 
-    private BatchInfo createBatchFromStream(JobInfo job, InputStream input)
-            throws AsyncApiException, ConnectionException {
+    /**
+     * Get batch information from the stream
+     */
+    private BatchInfo createBatchFromStream(JobInfo job, InputStream input) throws AsyncApiException, ConnectionException {
         try {
             return bulkConnection.createBatchFromStream(job, input);
         } catch (AsyncApiException sfException) {
@@ -229,6 +242,9 @@ public class BulkQueryService {
         }
     }
 
+    /**
+     * Get batch information list from the job
+     */
     private BatchInfoList getBatchInfoList(String jobID) throws AsyncApiException, ConnectionException {
         try {
             return bulkConnection.getBatchInfoList(jobID);
@@ -241,6 +257,9 @@ public class BulkQueryService {
         }
     }
 
+    /**
+     * Get batch information
+     */
     private BatchInfo getBatchInfo(String jobID, String batchID) throws AsyncApiException, ConnectionException {
         try {
             return bulkConnection.getBatchInfo(jobID, batchID);
@@ -253,8 +272,10 @@ public class BulkQueryService {
         }
     }
 
-    private QueryResultList getQueryResultList(String jobID, String batchID)
-            throws AsyncApiException, ConnectionException {
+    /**
+     * Get query result list
+     */
+    private QueryResultList getQueryResultList(String jobID, String batchID) throws AsyncApiException, ConnectionException {
         try {
             return bulkConnection.getQueryResultList(jobID, batchID);
         } catch (AsyncApiException sfException) {
@@ -266,6 +287,9 @@ public class BulkQueryService {
         }
     }
 
+    /**
+     * Get query result stream
+     */
     private InputStream getQueryResultStream(String jobID, String batchID, String resultID)
             throws AsyncApiException, ConnectionException {
         try {
@@ -297,8 +321,7 @@ public class BulkQueryService {
      * @throws ConnectionException
      * @throws InterruptedException
      */
-    private void retrieveResultsOfQuery(BatchInfo info)
-            throws AsyncApiException, ConnectionException, InterruptedException {
+    private void retrieveResultsOfQuery(BatchInfo info) throws AsyncApiException, ConnectionException, InterruptedException {
 
         if (BatchStateEnum.Completed == info.getState()) {
             QueryResultList list = getQueryResultList(job.getId(), info.getId());
@@ -374,6 +397,9 @@ public class BulkQueryService {
         return false;
     }
 
+    /**
+     * Get next result Id
+     */
     public String nextResultId() {
         String resultId = null;
         if (queryResultIDs != null && queryResultIDs.hasNext()) {
@@ -382,18 +408,65 @@ public class BulkQueryService {
         return resultId;
     }
 
-    public Record convertRecord(Map<String, String> result) {
+    /**
+     * Convert result to record
+     */
+    public Record convertToRecord(Map<String, String> result) throws IOException {
         if (result == null) {
             return null;
         }
         Record.Builder recordBuilder = recordBuilderFactory.newRecordBuilder();
-        result.entrySet().stream().filter(it -> it.getValue() != null).forEach(e -> {
-            addField(recordBuilder, fieldMap.get(e.getKey()), result.get(e.getKey()));
-        });
+        for (Map.Entry entry : result.entrySet()) {
+            if (entry.getValue() != null) {
+                addField(recordBuilder, fieldMap.get(entry.getKey()), result.get(entry.getKey()));
+            }
+        }
         return recordBuilder.build();
     }
 
     public void setFieldMap(Map<String, Field> fieldMap) {
         this.fieldMap = fieldMap;
+    }
+
+    /**
+     * Add field to record
+     */
+    private void addField(final Record.Builder builder, Field field, final String value) throws IOException {
+        if (value == null || field == null) {
+            return;
+        }
+        try {
+            switch (field.getType()) {
+            case _boolean:
+                builder.withBoolean(field.getName(), Boolean.valueOf(value));
+                break;
+            case _double:
+            case percent:
+                builder.withDouble(field.getName(), Double.parseDouble(value));
+                break;
+            case _int:
+                builder.withInt(field.getName(), Integer.valueOf(value));
+                break;
+            case currency:
+                builder.withDouble(field.getName(), Double.parseDouble(value));
+                break;
+            case date:
+                builder.withDateTime(field.getName(), DATE_FORMAT.parse(value));
+                break;
+            case datetime:
+                builder.withTimestamp(field.getName(), DATETIME_FORMAT.parse(value).getTime());
+                break;
+            case time:
+                builder.withTimestamp(field.getName(), TIME_FORMAT.parse(value).getTime());
+                break;
+            case base64:
+            default:
+                builder.withString(field.getName(), value);
+                break;
+            }
+        } catch (ParseException e) {
+            // TODO
+            throw new IOException(e);
+        }
     }
 }

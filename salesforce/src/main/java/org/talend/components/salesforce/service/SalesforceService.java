@@ -14,26 +14,20 @@
 
 package org.talend.components.salesforce.service;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.Proxy;
 import java.net.ProxySelector;
 import java.net.URI;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.xml.namespace.QName;
 
 import org.talend.components.salesforce.datastore.BasicDataStore;
 import org.talend.components.salesforce.soql.FieldDescription;
 import org.talend.components.salesforce.soql.SoqlQuery;
-import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.configuration.LocalConfiguration;
 
@@ -65,48 +59,28 @@ public class SalesforceService {
     public static final String URL = "https://" + ACTIVE_ENDPOINT + "/services/Soap/u/" + DEFAULT_API_VERSION;
 
     /** Properties file key for endpoint storage. */
-    public static final String ENDPOINT_PROPERTY_KEY = "endpoint";
+    public static final String ENDPOINT_PROPERTY_KEY = "salesforce.endpoint";
 
-    public static final String TIMEOUT_PROPERTY_KEY = "timeout";
+    public static final String TIMEOUT_PROPERTY_KEY = "salesforce.timeout";
 
     private static final int DEFAULT_TIMEOUT = 60000;
 
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    public static String guessModuleName(String soqlQuery) {
+        SoqlQuery query = SoqlQuery.getInstance();
+        query.init(soqlQuery);
 
-    private static final SimpleDateFormat DATETIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.000Z'");
+        List<FieldDescription> fieldDescriptions = query.getFieldDescriptions();
+        return query.getDrivingEntityName();
 
-    private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm:ss.SSS'Z'");
-
-    /**
-     * Load Dataprep user Salesforce properties file for endpoint & timeout default values.
-     *
-     * @return a {@link Properties} objet (maybe empty) but never null.
-     */
-    private Properties loadCustomConfiguration(final LocalConfiguration configuration) {
-        final String configFile = configuration.get(CONFIG_FILE_lOCATION_KEY);
-        try (final InputStream is = configFile != null && !configFile.isEmpty() ? (new FileInputStream(configFile)) : null) {
-            if (is != null) {
-                return new Properties() {
-
-                    {
-                        load(is);
-                    }
-                };
-            } else {
-                log.warn("not found the property file, will use the default value for endpoint and timeout");
-            }
-        } catch (final IOException e) {
-            log.warn("not found the property file, will use the default value for endpoint and timeout", e);
-        }
-
-        return null;
     }
 
+    /**
+     * Create a partner connection
+     */
     public PartnerConnection connect(final BasicDataStore datastore, final LocalConfiguration localConfiguration)
             throws ConnectionException {
-        final Properties props = loadCustomConfiguration(localConfiguration);
-        final Integer timeout = (props != null)
-                ? Integer.parseInt(props.getProperty(TIMEOUT_PROPERTY_KEY, String.valueOf(DEFAULT_TIMEOUT)))
+        final Integer timeout = (localConfiguration != null && localConfiguration.get(TIMEOUT_PROPERTY_KEY) != null)
+                ? Integer.parseInt(localConfiguration.get(TIMEOUT_PROPERTY_KEY))
                 : DEFAULT_TIMEOUT;
         ConnectorConfig config = newConnectorConfig(datastore.getEndpoint());
         config.setAuthEndpoint(datastore.getEndpoint());
@@ -145,9 +119,8 @@ public class SalesforceService {
      */
     protected String getEndpoint(final LocalConfiguration localConfiguration) {
 
-        final Properties props = loadCustomConfiguration(localConfiguration);
-        if (props != null) {
-            String endpointProp = props.getProperty(ENDPOINT_PROPERTY_KEY);
+        if (localConfiguration != null) {
+            String endpointProp = localConfiguration.get(ENDPOINT_PROPERTY_KEY);
             if (endpointProp != null && !endpointProp.isEmpty()) {
                 if (endpointProp.contains(RETIRED_ENDPOINT)) {
                     endpointProp = endpointProp.replaceFirst(RETIRED_ENDPOINT, ACTIVE_ENDPOINT);
@@ -169,10 +142,12 @@ public class SalesforceService {
         };
     }
 
+    /**
+     * Connect with bulk mode and return the bulk connection instance
+     */
     public BulkConnection bulkConnect(final BasicDataStore datastore, final LocalConfiguration configuration)
             throws AsyncApiException, ConnectionException {
 
-        final Properties props = loadCustomConfiguration(configuration);
         final PartnerConnection partnerConnection = connect(datastore, configuration);
         final ConnectorConfig partnerConfig = partnerConnection.getConfig();
         ConnectorConfig bulkConfig = newConnectorConfig(datastore.getEndpoint());
@@ -206,6 +181,9 @@ public class SalesforceService {
         return new BulkConnection(bulkConfig);
     }
 
+    /**
+     * Handle connection exception
+     */
     public IllegalStateException handleConnectionException(final ConnectionException e) {
         if (e == null) {
             return new IllegalStateException("unexpected error. can't handle connection error.");
@@ -217,6 +195,9 @@ public class SalesforceService {
         }
     }
 
+    /**
+     * Retrieve module field map, filed name with filed
+     */
     public Map<String, Field> getFieldMap(BasicDataStore dataStore, String moduleName,
             final LocalConfiguration localConfiguration) {
         try {
@@ -233,51 +214,58 @@ public class SalesforceService {
         }
     }
 
-    public static void addField(final Record.Builder builder, Field field, final String value) {
-        if (value == null || field == null) {
-            return;
+    /**
+     * Generate schema base on provided module file map
+     */
+    public Schema guessSchema(Map<String, Field> fieldMap, Schema.Builder schemaBuilder, Schema.Entry.Builder entryBuilder) {
+        if (fieldMap == null) {
+            throw new RuntimeException("module is not set!");
         }
-        try {
-            switch (field.getType()) {
-            case _boolean:
-                builder.withBoolean(field.getName(), Boolean.valueOf(value));
-                break;
-            case _double:
-            case percent:
-                builder.withDouble(field.getName(), Double.parseDouble(value));
-                break;
-            case _int:
-                builder.withInt(field.getName(), Integer.valueOf(value));
-                break;
-            case currency:
-                builder.withDouble(field.getName(), Double.parseDouble(value));
-                break;
-            case date:
-                builder.withDateTime(field.getName(), DATE_FORMAT.parse(value));
-                break;
-            case datetime:
-                builder.withTimestamp(field.getName(), DATETIME_FORMAT.parse(value).getTime());
-                break;
-            case time:
-                builder.withTimestamp(field.getName(), TIME_FORMAT.parse(value).getTime());
-                break;
-            case base64:
-            default:
-                builder.withString(field.getName(), value);
-                break;
+        if (schemaBuilder == null) {
+            throw new RuntimeException("schemaBuilder is not set!");
+        }
+        if (entryBuilder == null) {
+            throw new RuntimeException("entryBuilder is not set!");
+        }
+        if (fieldMap != null) {
+            for (String fieldName : fieldMap.keySet()) {
+                Field field = fieldMap.get(fieldName);
+                addSchemaEntry(field, schemaBuilder, entryBuilder);
             }
-        } catch (ParseException e) {
-            // TODO
-            throw new RuntimeException(e);
+        }
+        return schemaBuilder.build();
+    }
+
+    /**
+     * Convert moduel field to schema entry and add into schema builder
+     */
+    public void addSchemaEntry(Field field, Schema.Builder schemaBuilder, Schema.Entry.Builder entryBuilder) {
+        switch (field.getType()) {
+        case _boolean:
+            schemaBuilder.withEntry(entryBuilder.withName(field.getName()).withType(Schema.Type.BOOLEAN).build());
+            break;
+        case _double:
+        case percent:
+        case currency:
+            schemaBuilder.withEntry(entryBuilder.withName(field.getName()).withType(Schema.Type.DOUBLE).build());
+            break;
+        case _int:
+            schemaBuilder.withEntry(entryBuilder.withName(field.getName()).withType(Schema.Type.INT).build());
+            break;
+        case date:
+            schemaBuilder.withEntry(entryBuilder.withName(field.getName()).withType(Schema.Type.DATETIME).build());
+            break;
+        case datetime:
+            schemaBuilder.withEntry(entryBuilder.withName(field.getName()).withType(Schema.Type.DATETIME).build());
+            break;
+        case time:
+            schemaBuilder.withEntry(entryBuilder.withName(field.getName()).withType(Schema.Type.DATETIME).build());
+            break;
+        case base64:
+        default:
+            schemaBuilder.withEntry(entryBuilder.withName(field.getName()).withType(Schema.Type.STRING).build());
+            break;
         }
     }
 
-    public static String guessModuleName(String soqlQuery) {
-        SoqlQuery query = SoqlQuery.getInstance();
-        query.init(soqlQuery);
-
-        List<FieldDescription> fieldDescriptions = query.getFieldDescriptions();
-        return query.getDrivingEntityName();
-
-    }
 }
