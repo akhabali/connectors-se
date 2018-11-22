@@ -83,6 +83,7 @@
     <surefire.version>3.0.0-M1</surefire.version>
     <jacoco.version>0.8.2</jacoco.version>
 
+    <commons-lang3.version>3.7</commons-lang3.version>
     <commons-csv.version>1.4</commons-csv.version>
     <guava.version>20.0</guava.version>
 
@@ -210,6 +211,11 @@
         <artifactId>gson</artifactId>
         <version>${gson.version}</version>
         <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>${commons-lang3.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
