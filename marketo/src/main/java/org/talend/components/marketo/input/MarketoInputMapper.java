@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.talend.components.marketo.dataset.MarketoInputDataSet;
 import org.talend.components.marketo.service.AuthorizationClient;
 import org.talend.components.marketo.service.MarketoService;
-import org.talend.components.marketo.service.Toolbox;
+
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
@@ -44,18 +44,14 @@ public class MarketoInputMapper implements Serializable {
 
     private MarketoService service;
 
-    private Toolbox tools;
-
     private AuthorizationClient authorizationClient;
 
     private transient static final Logger LOG = LoggerFactory.getLogger(MarketoInputMapper.class);
 
     public MarketoInputMapper(@Option("configuration") final MarketoInputDataSet dataset, //
-            final MarketoService service, //
-            final Toolbox tools) {
+            final MarketoService service) {
         this.dataset = dataset;
         this.service = service;
-        this.tools = tools;
         authorizationClient = service.getAuthorizationClient();
         LOG.debug("[MarketoInputMapper] {}", dataset);
         authorizationClient.base(dataset.getDataStore().getEndpoint());
@@ -80,18 +76,18 @@ public class MarketoInputMapper implements Serializable {
     public MarketoSource createWorker() {
         switch (dataset.getEntity()) {
         case Lead:
-            return new LeadSource(dataset, service, tools);
+            return new LeadSource(dataset, service);
         case List:
-            return new ListSource(dataset, service, tools);
+            return new ListSource(dataset, service);
         case CustomObject:
-            return new CustomObjectSource(dataset, service, tools);
+            return new CustomObjectSource(dataset, service);
         case Company:
-            return new CompanySource(dataset, service, tools);
+            return new CompanySource(dataset, service);
         case Opportunity:
         case OpportunityRole:
-            return new OpportunitySource(dataset, service, tools);
+            return new OpportunitySource(dataset, service);
         }
-        throw new IllegalArgumentException(tools.getI18n().invalidOperation());
+        throw new IllegalArgumentException(service.getI18n().invalidOperation());
     }
 
 }

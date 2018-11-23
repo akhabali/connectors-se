@@ -49,7 +49,7 @@ public class CustomObjectsSourceTest extends SourceBaseTest {
     }
 
     void initSource() {
-        source = new CustomObjectSource(inputDataSet, service, tools);
+        source = new CustomObjectSource(inputDataSet, service);
         source.init();
     }
 

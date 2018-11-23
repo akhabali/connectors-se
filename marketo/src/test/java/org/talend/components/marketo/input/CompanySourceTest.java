@@ -59,7 +59,7 @@ class CompanySourceTest extends SourceBaseTest {
     @Test
     void testDescribeCompanies() {
         inputDataSet.setOtherAction(OtherEntityAction.describe);
-        source = new CompanySource(inputDataSet, service, tools);
+        source = new CompanySource(inputDataSet, service);
         source.init();
         result = source.next();
         assertNotNull(result);
@@ -73,7 +73,7 @@ class CompanySourceTest extends SourceBaseTest {
         inputDataSet.setFilterType("externalCompanyId");
         inputDataSet.setFilterValues("google01,google02,google03,google04,google05,google06");
         inputDataSet.setFields(asList("mainPhone", "company", "website"));
-        source = new CompanySource(inputDataSet, service, tools);
+        source = new CompanySource(inputDataSet, service);
         source.init();
         while ((result = source.next()) != null) {
             assertNotNull(result);
@@ -87,7 +87,7 @@ class CompanySourceTest extends SourceBaseTest {
         inputDataSet.setFilterType("billingCountry");
         inputDataSet.setFilterValues("France");
         inputDataSet.setFields(asList("mainPhone", "company", "website"));
-        source = new CompanySource(inputDataSet, service, tools);
+        source = new CompanySource(inputDataSet, service);
         try {
             source.init();
         } catch (RuntimeException e) {
@@ -124,7 +124,7 @@ class CompanySourceTest extends SourceBaseTest {
         inputDataSet.setFilterType("");
         inputDataSet.setFilterValues("google01,google02,google03,google04,google05,google06");
         inputDataSet.setFields(asList(fields.split(".")));
-        source = new CompanySource(inputDataSet, service, tools);
+        source = new CompanySource(inputDataSet, service);
         try {
             source.init();
         } catch (RuntimeException e) {
@@ -135,7 +135,7 @@ class CompanySourceTest extends SourceBaseTest {
     @Test
     void testInvalidAccessToken() {
         inputDataSet.getDataStore().setEndpoint(MARKETO_ENDPOINT + "/bzh");
-        source = new CompanySource(inputDataSet, service, tools);
+        source = new CompanySource(inputDataSet, service);
         try {
             source.init();
             fail("Should have a 403 error. Should not be here");

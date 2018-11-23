@@ -48,16 +48,16 @@ class ProcessorsTest extends MarketoBaseTest {
         outputDataSet.setAction(OutputAction.sync);
         outputDataSet.setSyncMethod(SyncMethod.createOrUpdate);
         outputDataSet.setLookupField(ATTR_EMAIL);
-        processor = new MarketoProcessor(outputDataSet, service, tools);
+        processor = new MarketoProcessor(outputDataSet, service);
         processor.init();
-        data = tools.getRecordBuilder().newRecordBuilder().withString(ATTR_EMAIL, "egallois@talend.com")
+        data = service.getRecordBuilder().newRecordBuilder().withString(ATTR_EMAIL, "egallois@talend.com")
                 .withString("firstName", "Emmanuel").build();
         processor.map(data);
 
         inputDataSet.setLeadAction(LeadAction.getMultipleLeads);
         inputDataSet.setLeadKeyName(ATTR_EMAIL);
         inputDataSet.setLeadKeyValues("egallois@talend.com");
-        LeadSource source = new LeadSource(inputDataSet, service, tools);
+        LeadSource source = new LeadSource(inputDataSet, service);
         source.init();
         Record result;
         keyName = ATTR_ID;
@@ -118,11 +118,11 @@ class ProcessorsTest extends MarketoBaseTest {
             inputDataSet.setFilterValues("google666");
             inputDataSet.setFields(asList("mainPhone", "company", "website"));
 
-            data = tools.getRecordBuilder().newRecordBuilder().withString("externalCompanyId", "google666").build();
+            data = service.getRecordBuilder().newRecordBuilder().withString("externalCompanyId", "google666").build();
             // we create a record
             outputDataSet.setAction(OutputAction.sync);
             outputDataSet.setSyncMethod(SyncMethod.createOrUpdate);
-            processor = new MarketoProcessor(outputDataSet, service, tools);
+            processor = new MarketoProcessor(outputDataSet, service);
             processor.init();
             processor.map(data);
 

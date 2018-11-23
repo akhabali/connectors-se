@@ -15,18 +15,10 @@ package org.talend.components.marketo.service;
 import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_FIELDS;
-import static org.talend.components.marketo.MarketoApiConstants.ATTR_ID;
-import static org.talend.components.marketo.MarketoApiConstants.ATTR_MARKETO_GUID;
-import static org.talend.components.marketo.MarketoApiConstants.ATTR_REASONS;
-import static org.talend.components.marketo.MarketoApiConstants.ATTR_SEQ;
-import static org.talend.components.marketo.MarketoApiConstants.ATTR_STATUS;
-
-import java.util.Arrays;
 
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -95,62 +87,6 @@ class MarketoServiceTest extends MarketoBaseTest {
     void testGetOpportunityRoleInputSchema() {
         Schema schema = service.getInputSchema(MarketoEntity.OpportunityRole, LeadAction.getLead.name());
         assertNotNull(schema);
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = { "Lead" }) // , "List" })
-    void testLeadSyncOutputSchemas(String entity) {
-        Schema schema = service.getOutputSchema(MarketoEntity.valueOf(entity));
-        assertNotNull(schema);
-        assertFalse(schema.getEntries().isEmpty());
-        schema.getEntries().forEach(
-                entry -> assertThat(Arrays.asList(ATTR_ID, ATTR_STATUS, ATTR_REASONS), CoreMatchers.hasItem(entry.getName())));
-    }
-
-    @Test
-    void testListSyncOutputSchemas() {
-        Schema schema = service.getOutputSchema(MarketoEntity.List);
-        assertNotNull(schema);
-        assertFalse(schema.getEntries().isEmpty());
-        schema.getEntries().forEach(
-                entry -> assertThat(Arrays.asList(ATTR_ID, ATTR_STATUS, ATTR_REASONS), CoreMatchers.hasItem(entry.getName())));
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = { "CustomObject" }) // , "Company", "Opportunity", "OpportunityRole" })
-    void testCustomObjectSyncOutputSchemas(String entity) {
-        Schema schema = service.getOutputSchema(MarketoEntity.valueOf(entity));
-        assertNotNull(schema);
-        assertFalse(schema.getEntries().isEmpty());
-        schema.getEntries().forEach(entry -> assertThat(Arrays.asList(ATTR_SEQ, ATTR_MARKETO_GUID, ATTR_STATUS, ATTR_REASONS),
-                CoreMatchers.hasItem(entry.getName())));
-    }
-
-    @Test
-    void testCompanySyncOutputSchemas() {
-        Schema schema = service.getOutputSchema(MarketoEntity.Company);
-        assertNotNull(schema);
-        assertFalse(schema.getEntries().isEmpty());
-        schema.getEntries().forEach(entry -> assertThat(Arrays.asList(ATTR_SEQ, ATTR_MARKETO_GUID, ATTR_STATUS, ATTR_REASONS),
-                CoreMatchers.hasItem(entry.getName())));
-    }
-
-    @Test
-    void testOpportunitySyncOutputSchemas() {
-        Schema schema = service.getOutputSchema(MarketoEntity.Opportunity);
-        assertNotNull(schema);
-        assertFalse(schema.getEntries().isEmpty());
-        schema.getEntries().forEach(entry -> assertThat(Arrays.asList(ATTR_SEQ, ATTR_MARKETO_GUID, ATTR_STATUS, ATTR_REASONS),
-                CoreMatchers.hasItem(entry.getName())));
-    }
-
-    @Test
-    void testOpportunityRoleSyncOutputSchemas() {
-        Schema schema = service.getOutputSchema(MarketoEntity.OpportunityRole);
-        assertNotNull(schema);
-        assertFalse(schema.getEntries().isEmpty());
-        schema.getEntries().forEach(entry -> assertThat(Arrays.asList(ATTR_SEQ, ATTR_MARKETO_GUID, ATTR_STATUS, ATTR_REASONS),
-                CoreMatchers.hasItem(entry.getName())));
     }
 
 }

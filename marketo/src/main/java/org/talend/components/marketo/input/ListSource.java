@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.talend.components.marketo.dataset.MarketoInputDataSet;
 import org.talend.components.marketo.service.ListClient;
 import org.talend.components.marketo.service.MarketoService;
-import org.talend.components.marketo.service.Toolbox;
+
 import org.talend.sdk.component.api.configuration.Option;
 
 public class ListSource extends MarketoSource {
@@ -31,9 +31,8 @@ public class ListSource extends MarketoSource {
     private transient static final Logger LOG = getLogger(ListClient.class);
 
     public ListSource(@Option("configuration") final MarketoInputDataSet dataSet, //
-            final MarketoService service, //
-            final Toolbox tools) {
-        super(dataSet, service, tools);
+            final MarketoService service) {
+        super(dataSet, service);
         this.listClient = service.getListClient();
         this.listClient.base(this.dataSet.getDataStore().getEndpoint());
     }

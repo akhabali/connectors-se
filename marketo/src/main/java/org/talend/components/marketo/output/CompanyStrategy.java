@@ -25,7 +25,7 @@ import org.talend.components.marketo.dataset.MarketoOutputDataSet;
 import org.talend.components.marketo.dataset.MarketoOutputDataSet.OutputAction;
 import org.talend.components.marketo.service.CompanyClient;
 import org.talend.components.marketo.service.MarketoService;
-import org.talend.components.marketo.service.Toolbox;
+
 import org.talend.sdk.component.api.configuration.Option;
 
 public class CompanyStrategy extends OutputComponentStrategy implements ProcessorStrategy {
@@ -33,9 +33,8 @@ public class CompanyStrategy extends OutputComponentStrategy implements Processo
     private CompanyClient companyClient;
 
     public CompanyStrategy(@Option("configuration") final MarketoOutputDataSet dataSet, //
-            final MarketoService service, //
-            final Toolbox tools) {
-        super(dataSet, service, tools);
+            final MarketoService service) {
+        super(dataSet, service);
         this.companyClient = service.getCompanyClient();
         this.companyClient.base(this.dataSet.getDataStore().getEndpoint());
     }

@@ -23,16 +23,14 @@ import org.slf4j.Logger;
 import org.talend.components.marketo.dataset.MarketoInputDataSet;
 import org.talend.components.marketo.service.CustomObjectClient;
 import org.talend.components.marketo.service.MarketoService;
-import org.talend.components.marketo.service.Toolbox;
 
 public class CustomObjectSource extends MarketoSource {
 
     private final CustomObjectClient customObjectClient;
 
     public CustomObjectSource(MarketoInputDataSet dataSet, //
-            final MarketoService service, //
-            final Toolbox tools) {
-        super(dataSet, service, tools);
+            final MarketoService service) {
+        super(dataSet, service);
         this.customObjectClient = service.getCustomObjectClient();
         this.customObjectClient.base(this.dataSet.getDataStore().getEndpoint());
     }

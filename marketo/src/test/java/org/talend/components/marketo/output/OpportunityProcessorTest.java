@@ -48,17 +48,17 @@ class OpportunityProcessorTest extends MarketoBaseTest {
         outputDataSet.setDedupeBy(ATTR_DEDUPE_FIELDS);
         outputDataSet.setDeleteBy(DeleteBy.dedupeFields);
         // create our opportunity
-        data = tools.getRecordBuilder().newRecordBuilder().withString(ATTR_EXTERNAL_OPPORTUNITY_ID, OPPORTUNITY_101).build();
+        data = service.getRecordBuilder().newRecordBuilder().withString(ATTR_EXTERNAL_OPPORTUNITY_ID, OPPORTUNITY_101).build();
         // create our opportunityRole
-        dataOR = tools.getRecordBuilder().newRecordBuilder().withString(ATTR_EXTERNAL_OPPORTUNITY_ID, OPPORTUNITY_101) //
+        dataOR = service.getRecordBuilder().newRecordBuilder().withString(ATTR_EXTERNAL_OPPORTUNITY_ID, OPPORTUNITY_101) //
                 .withString(ATTR_ROLE, "newCust") //
                 .withInt(ATTR_LEAD_ID, 4) //
                 .build();
         // not existing opportunity
-        dataNotExist = tools.getRecordBuilder().newRecordBuilder().withString(ATTR_EXTERNAL_OPPORTUNITY_ID, "XxXOppportunityXxX")
-                .build();
+        dataNotExist = service.getRecordBuilder().newRecordBuilder()
+                .withString(ATTR_EXTERNAL_OPPORTUNITY_ID, "XxXOppportunityXxX").build();
         // not existing opportunityRole
-        dataNotExistOR = tools.getRecordBuilder().newRecordBuilder()
+        dataNotExistOR = service.getRecordBuilder().newRecordBuilder()
                 .withString(ATTR_EXTERNAL_OPPORTUNITY_ID, "XxXOppportunityXxX") //
                 .withString(ATTR_ROLE, "newCust") //
                 .withInt(ATTR_LEAD_ID, 4) //
@@ -89,7 +89,7 @@ class OpportunityProcessorTest extends MarketoBaseTest {
     }
 
     private void initProcessor() {
-        processor = new MarketoProcessor(outputDataSet, service, tools);
+        processor = new MarketoProcessor(outputDataSet, service);
         processor.init();
     }
 

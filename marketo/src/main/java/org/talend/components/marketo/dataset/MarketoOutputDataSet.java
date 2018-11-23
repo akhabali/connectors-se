@@ -14,9 +14,6 @@ package org.talend.components.marketo.dataset;
 
 import static org.talend.components.marketo.service.UIActionService.CUSTOM_OBJECT_NAMES;
 import static org.talend.components.marketo.service.UIActionService.FIELD_NAMES;
-import static org.talend.components.marketo.service.UIActionService.GUESS_ENTITY_SCHEMA_OUTPUT;
-
-import java.util.List;
 
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Suggestable;
@@ -24,8 +21,6 @@ import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayouts;
-import org.talend.sdk.component.api.configuration.ui.widget.Structure;
-import org.talend.sdk.component.api.configuration.ui.widget.Structure.Type;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import lombok.Data;
@@ -45,9 +40,6 @@ import lombok.ToString;
                 @GridLayout.Row({ "deleteBy" }), //
                 @GridLayout.Row({ "customObjectName" }), //
         }), //
-        @GridLayout(names = { GridLayout.FormType.ADVANCED }, value = { @GridLayout.Row({ "schema" }),
-                @GridLayout.Row({ "rejectSchema" }), //
-        })//
 })
 @Documentation("Marketo Processor DataSet")
 @ToString(callSuper = true)
@@ -77,16 +69,6 @@ public class MarketoOutputDataSet extends MarketoDataSet {
         dedupeFields,
         idField
     }
-
-    @Option
-    @Structure(discoverSchema = GUESS_ENTITY_SCHEMA_OUTPUT, type = Type.OUT)
-    @Documentation("Flow Schema")
-    private List<String> schema;
-
-    @Option
-    @Structure(value = "Reject", discoverSchema = GUESS_ENTITY_SCHEMA_OUTPUT, type = Type.OUT)
-    @Documentation("Reject Schema")
-    private List<String> rejectSchema;
 
     @Option
     @ActiveIf(target = "entity", value = { "Lead", "CustomObject", "Company", "Opportunity", "OpportunityRole" })

@@ -27,9 +27,7 @@ import java.util.List;
 import javax.json.JsonObject;
 
 import org.slf4j.Logger;
-import org.talend.components.marketo.dataset.MarketoDataSet.MarketoEntity;
 import org.talend.components.marketo.dataset.MarketoInputDataSet;
-import org.talend.components.marketo.dataset.MarketoOutputDataSet;
 import org.talend.components.marketo.datastore.MarketoDataStore;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.record.Schema;
@@ -43,7 +41,6 @@ import org.talend.sdk.component.api.service.completion.Suggestions;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.api.service.http.Response;
-import org.talend.sdk.component.api.service.schema.DiscoverSchema;
 
 @Service
 public class UIActionService extends MarketoService {
@@ -235,20 +232,6 @@ public class UIActionService extends MarketoService {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
-    }
-
-    @DiscoverSchema(GUESS_ENTITY_SCHEMA_INPUT)
-    public Schema guessEntitySchemaForInput(@Option(MarketoInputDataSet.NAME) final MarketoInputDataSet dataSet) {
-        LOG.debug("[guessEntitySchemaForInput] {}", dataSet);
-        MarketoEntity entity = dataSet.getEntity();
-        return getEntitySchema(dataSet.getDataStore(), dataSet.getEntity().name(), dataSet.getCustomObjectName(),
-                dataSet.getListAction().name());
-    }
-
-    @DiscoverSchema(GUESS_ENTITY_SCHEMA_OUTPUT)
-    public Schema guessEntitySchemaForOutput(@Option final MarketoOutputDataSet dataSet) {
-        LOG.debug("[guessEntitySchemaForOutput] {}", dataSet);
-        return getOutputSchema(dataSet.getEntity());
     }
 
 }

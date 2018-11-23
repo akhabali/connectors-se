@@ -12,16 +12,21 @@
 // ============================================================================
 package org.talend.components.marketo.service;
 
-import lombok.Getter;
-import lombok.experimental.Accessors;
-
 import static java.util.stream.Collectors.joining;
+import static javax.json.JsonValue.ValueType.NULL;
 import static org.slf4j.LoggerFactory.getLogger;
+import static org.talend.components.marketo.MarketoApiConstants.ATTR_ACTIVITY_DATE;
+import static org.talend.components.marketo.MarketoApiConstants.ATTR_ACTIVITY_TYPE_ID;
+import static org.talend.components.marketo.MarketoApiConstants.ATTR_ATTRIBUTES;
+import static org.talend.components.marketo.MarketoApiConstants.ATTR_CAMPAIGN_ID;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_CREATED_AT;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_FIELDS;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_ID;
+import static org.talend.components.marketo.MarketoApiConstants.ATTR_LEAD_ID;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_MARKETO_GUID;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_NAME;
+import static org.talend.components.marketo.MarketoApiConstants.ATTR_PRIMARY_ATTRIBUTE_VALUE;
+import static org.talend.components.marketo.MarketoApiConstants.ATTR_PRIMARY_ATTRIBUTE_VALUE_ID;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_REASONS;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_RESULT;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_SEQ;
@@ -29,16 +34,28 @@ import static org.talend.components.marketo.MarketoApiConstants.ATTR_STATUS;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_UPDATED_AT;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_WORKSPACE_NAME;
 
+import java.io.StringReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import javax.json.JsonArray;
+import javax.json.JsonBuilderFactory;
 import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonReaderFactory;
+import javax.json.JsonValue;
+import javax.json.JsonValue.ValueType;
+import javax.json.JsonWriterFactory;
 
 import org.slf4j.Logger;
 import org.talend.components.marketo.dataset.MarketoDataSet.MarketoEntity;
 import org.talend.components.marketo.dataset.MarketoInputDataSet;
 import org.talend.components.marketo.dataset.MarketoInputDataSet.ListAction;
 import org.talend.components.marketo.datastore.MarketoDataStore;
+import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.record.Schema.Builder;
 import org.talend.sdk.component.api.record.Schema.Entry;
@@ -47,16 +64,34 @@ import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.http.Response;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
+import lombok.Getter;
+import lombok.experimental.Accessors;
+
 @Accessors
 @Service
 public class MarketoService {
 
+    protected static final String DATETIME = "datetime";
+
+    @Getter
     @Service
     protected I18nMessage i18n;
 
     @Getter
     @Service
     protected RecordBuilderFactory recordBuilder;
+
+    @Getter
+    @Service
+    private JsonBuilderFactory jsonFactory;
+
+    @Getter
+    @Service
+    private JsonReaderFactory jsonReader;
+
+    @Getter
+    @Service
+    private JsonWriterFactory jsonWriter;
 
     @Getter
     @Service
@@ -105,7 +140,7 @@ public class MarketoService {
         return result.stream().collect(joining(","));
     }
 
-    protected JsonArray parseResultFromResponse(Response<JsonObject> response) throws IllegalArgumentException {
+    protected JsonArray parseResultFromResponse(Response<JsonObject> response) {
         if (response.status() == 200 && response.body() != null && response.body().getJsonArray(ATTR_RESULT) != null) {
             return response.body().getJsonArray(ATTR_RESULT);
         }
@@ -130,7 +165,7 @@ public class MarketoService {
             switch (MarketoEntity.valueOf(entity)) {
             case Lead:
                 entitySchema = parseResultFromResponse(leadClient.describeLead(accessToken));
-                break;
+                return mergeSchemas(getSchemaForEntity(entitySchema), getLeadChangesAndActivitiesSchema());
             case List:
                 if (ListAction.getLeads.name().equals(listAction)) {
                     entitySchema = parseResultFromResponse(leadClient.describeLead(accessToken));
@@ -158,9 +193,16 @@ public class MarketoService {
             LOG.debug("[getEntitySchema] entitySchema: {}.", entitySchema);
             return getSchemaForEntity(entitySchema);
         } catch (Exception e) {
-            LOG.error("Exception caught : {}.", e.getMessage());
+            LOG.error(i18n.exceptionOccured(e.getMessage()));
         }
         return null;
+    }
+
+    private Schema mergeSchemas(Schema first, Schema second) {
+        Builder b = recordBuilder.newSchemaBuilder(Type.RECORD);
+        first.getEntries().forEach(b::withEntry);
+        second.getEntries().forEach(b::withEntry);
+        return b.build();
     }
 
     protected Schema getSchemaForEntity(JsonArray entitySchema) {
@@ -203,7 +245,7 @@ public class MarketoService {
                 /*
                  * Used for date. Follows W3C format. 2010-05-07
                  */
-            case ("datetime"):
+            case DATETIME:
                 /*
                  * Used for a date & time. Follows W3C format (ISO 8601). The best practice is to always include the time zone
                  * offset.
@@ -216,7 +258,7 @@ public class MarketoService {
                 entryType = Type.DATETIME;
                 break;
             default:
-                LOG.warn("Non managed type : {}. for {}. Defaulting to String.", dataType, this);
+                LOG.warn(i18n.nonManagedType(dataType, entryName));
                 entryType = Schema.Type.STRING;
             }
             entries.add(
@@ -225,20 +267,6 @@ public class MarketoService {
         Builder b = recordBuilder.newSchemaBuilder(Schema.Type.RECORD);
         entries.forEach(b::withEntry);
         return b.build();
-    }
-
-    public Schema getOutputSchema(MarketoEntity entity) {
-        switch (entity) {
-        case Lead:
-        case List:
-            return getLeadListDefaultSchema();
-        case CustomObject:
-        case Company:
-        case Opportunity:
-        case OpportunityRole:
-            return getCustomObjectDefaultSchema();
-        }
-        return null;
     }
 
     // TODO this is not the correct defaults schemas!!!
@@ -262,6 +290,149 @@ public class MarketoService {
             return getCustomObjectDefaultSchema();
         }
         return null;
+    }
+
+    public JsonObject toJson(final Record record) {
+        String recordStr = record.toString().replaceAll("AvroRecord\\{delegate=(.*)\\}$", "$1");
+        JsonReader reader = jsonReader.createReader(new StringReader(recordStr));
+        Throwable throwable = null;
+        JsonObject json;
+        try {
+            json = reader.readObject();
+        } catch (Throwable throwable1) {
+            throwable = throwable1;
+            throw throwable1;
+        } finally {
+            if (reader != null) {
+                if (throwable != null) {
+                    try {
+                        reader.close();
+                    } catch (Throwable throwable2) {
+                        throwable.addSuppressed(throwable2);
+                    }
+                } else {
+                    reader.close();
+                }
+            }
+        }
+        return json;
+    }
+
+    public Record convertToRecord(final JsonObject json, final Map<String, Entry> schema) {
+        LOG.debug("[convertToRecord] json: {} with schema: {}.", json, schema);
+        LOG.debug("[convertToRecord] master schema :{}", schema);
+        Record.Builder b = getRecordBuilder().newRecordBuilder();
+        java.util.Set<java.util.Map.Entry<String, JsonValue>> props = json.entrySet();
+        for (java.util.Map.Entry<String, JsonValue> p : props) {
+            String key = p.getKey();
+            Schema.Entry e = schema.get(key);
+            LOG.debug("schema entry : {}.", e);
+            Type type = null;
+            ValueType jsonType = p.getValue().getValueType();
+            if (e == null) {
+                type = Type.STRING;
+                switch (p.getValue().getValueType()) {
+                case NUMBER:
+                    type = Type.DOUBLE;
+                    break;
+                case TRUE:
+                case FALSE:
+                    type = Type.BOOLEAN;
+                    break;
+                case ARRAY:
+                    type = Type.ARRAY;
+                    break;
+                case NULL:
+                case OBJECT:
+                case STRING:
+                    type = Type.STRING;
+                    break;
+                }
+            } else {
+                type = e.getType();
+                if (Type.LONG.equals(type) && DATETIME.equals(e.getComment())) {
+                    type = Type.DATETIME;
+                }
+            }
+            LOG.debug("[convertToRecord] {} - {} ({})", p, e, p.getValue().getValueType());
+            switch (type) {
+            case STRING:
+                switch (jsonType) {
+                case ARRAY:
+                    b.withString(key, json.getJsonArray(key).stream().map(JsonValue::toString).collect(joining(",")));
+                    break;
+                case OBJECT:
+                    b.withString(key, String.valueOf(json.getJsonObject(key).toString()));
+                    break;
+                case STRING:
+                    b.withString(key, json.getString(key));
+                    break;
+                case NUMBER:
+                    b.withString(key, String.valueOf(json.getJsonNumber(key)));
+                    break;
+                case TRUE:
+                case FALSE:
+                    b.withString(key, String.valueOf(json.getBoolean(key)));
+                    break;
+                case NULL:
+                    b.withString(key, null);
+                    break;
+                }
+                break;
+            case INT:
+                b.withInt(key, jsonType.equals(NULL) ? 0 : json.getInt(key));
+                break;
+            case LONG:
+                b.withLong(key, jsonType.equals(NULL) ? 0 : json.getJsonNumber(key).longValue());
+                break;
+            case FLOAT:
+                b.withFloat(key, jsonType.equals(NULL) ? 0 : Float.valueOf(json.getString(key)));
+                break;
+            case DOUBLE:
+                b.withDouble(key, jsonType.equals(NULL) ? 0 : json.getJsonNumber(key).doubleValue());
+                break;
+            case BOOLEAN:
+                b.withBoolean(key, jsonType.equals(NULL) ? false : json.getBoolean(key));
+                break;
+            case DATETIME:
+                try {
+                    b.withDateTime(key, jsonType.equals(NULL) ? null
+                            : new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").parse(json.getString(key)));
+                } catch (ParseException e1) {
+                    LOG.error("[convertToRecord] Date parsing error: {}.", e1.getMessage());
+                }
+                break;
+            case ARRAY:
+                String ary = json.getJsonArray(key).stream().map(JsonValue::toString).collect(joining(","));
+                // not in a sub array
+                if (!ary.contains("{")) {
+                    ary = ary.replaceAll("\"", "").replaceAll("(\\[|\\])", "");
+                }
+                b.withString(key, ary);
+                break;
+            case BYTES:
+            case RECORD:
+                b.withString(key, json.getString(key));
+            }
+        }
+
+        return b.build();
+    }
+
+    Schema getLeadChangesAndActivitiesSchema() {
+        return recordBuilder.newSchemaBuilder(Type.RECORD)
+                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_ACTIVITY_DATE).withType(Type.STRING)
+                        .withComment(DATETIME).build())
+                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_ACTIVITY_TYPE_ID).withType(Type.INT).build())
+                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_ATTRIBUTES).withType(Type.STRING).build())
+                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_FIELDS).withType(Type.STRING).build())
+                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_CAMPAIGN_ID).withType(Type.INT).build())
+                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_LEAD_ID).withType(Type.INT).build())
+                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_MARKETO_GUID).withType(Type.STRING).build())
+                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_PRIMARY_ATTRIBUTE_VALUE).withType(Type.STRING).build())
+                .withEntry(recordBuilder.newEntryBuilder().withName(ATTR_PRIMARY_ATTRIBUTE_VALUE_ID).withType(Type.INT).build())
+                //
+                .build();
     }
 
     Schema getLeadListDefaultSchema() {

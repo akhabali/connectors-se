@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.talend.components.marketo.dataset.MarketoInputDataSet;
 import org.talend.components.marketo.service.CompanyClient;
 import org.talend.components.marketo.service.MarketoService;
-import org.talend.components.marketo.service.Toolbox;
+
 import org.talend.sdk.component.api.configuration.Option;
 
 public class CompanySource extends MarketoSource {
@@ -29,9 +29,8 @@ public class CompanySource extends MarketoSource {
     private final CompanyClient companyClient;
 
     public CompanySource(@Option("configuration") MarketoInputDataSet dataSet, //
-            final MarketoService service, //
-            final Toolbox tools) {
-        super(dataSet, service, tools);
+            final MarketoService service) {
+        super(dataSet, service);
         this.companyClient = service.getCompanyClient();
         this.companyClient.base(this.dataSet.getDataStore().getEndpoint());
     }

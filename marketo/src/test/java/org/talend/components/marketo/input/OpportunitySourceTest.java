@@ -49,7 +49,7 @@ class OpportunitySourceTest extends SourceBaseTest {
     }
 
     private void initSource() {
-        source = new OpportunitySource(inputDataSet, service, tools);
+        source = new OpportunitySource(inputDataSet, service);
         source.init();
     }
 
@@ -131,4 +131,5 @@ class OpportunitySourceTest extends SourceBaseTest {
             assertNotNull(result.getString(ATTR_ROLE));
         }
     }
+
 }

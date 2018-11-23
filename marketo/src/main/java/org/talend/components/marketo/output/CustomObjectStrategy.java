@@ -25,7 +25,6 @@ import org.talend.components.marketo.dataset.MarketoOutputDataSet;
 import org.talend.components.marketo.dataset.MarketoOutputDataSet.OutputAction;
 import org.talend.components.marketo.service.CustomObjectClient;
 import org.talend.components.marketo.service.MarketoService;
-import org.talend.components.marketo.service.Toolbox;
 import org.talend.sdk.component.api.configuration.Option;
 
 public class CustomObjectStrategy extends OutputComponentStrategy {
@@ -35,9 +34,8 @@ public class CustomObjectStrategy extends OutputComponentStrategy {
     private String customObjectName;
 
     public CustomObjectStrategy(@Option("configuration") final MarketoOutputDataSet dataSet, //
-            final MarketoService service, //
-            final Toolbox tools) {
-        super(dataSet, service, tools);
+            final MarketoService service) {
+        super(dataSet, service);
         this.customObjectClient = service.getCustomObjectClient();
         this.customObjectClient.base(dataSet.getDataStore().getEndpoint());
     }

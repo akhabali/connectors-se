@@ -55,7 +55,7 @@ class ListSourceTest extends SourceBaseTest {
         inputDataSet.setListName("");
         inputDataSet.setProgramName("");
         inputDataSet.setWorkspaceName("");
-        source = new ListSource(inputDataSet, service, tools);
+        source = new ListSource(inputDataSet, service);
         source.init();
         while ((result = source.next()) != null) {
             assertNotNull(result);
@@ -67,7 +67,7 @@ class ListSourceTest extends SourceBaseTest {
     void testGetListById() {
         inputDataSet.setListAction(ListAction.get);
         inputDataSet.setListId(LIST_ID);
-        source = new ListSource(inputDataSet, service, tools);
+        source = new ListSource(inputDataSet, service);
         source.init();
         result = source.next();
         assertNotNull(result);
@@ -83,7 +83,7 @@ class ListSourceTest extends SourceBaseTest {
         inputDataSet.setListId(LIST_ID);
         inputDataSet.setLeadIds(LEAD_IDS);
         inputDataSet.setFields(asList(fields.split(",")));
-        source = new ListSource(inputDataSet, service, tools);
+        source = new ListSource(inputDataSet, service);
         source.init();
         while ((result = source.next()) != null) {
             assertNotNull(result);
@@ -95,7 +95,7 @@ class ListSourceTest extends SourceBaseTest {
         inputDataSet.setListAction(ListAction.isMemberOf);
         inputDataSet.setListId(LIST_ID);
         inputDataSet.setLeadIds(LEAD_IDS);
-        source = new ListSource(inputDataSet, service, tools);
+        source = new ListSource(inputDataSet, service);
         source.init();
         while ((result = source.next()) != null) {
             assertNotNull(result);

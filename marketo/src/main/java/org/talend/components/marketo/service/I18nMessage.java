@@ -22,4 +22,9 @@ public interface I18nMessage {
     String invalidOperation();
 
     String accessTokenRetrievalError(int code, String additionnalMessage);
+
+    String exceptionOccured(String message);
+
+    String nonManagedType(String type, String field);
+
 }

@@ -28,7 +28,7 @@ class MarketoInputMapperTest extends MarketoBaseTest {
     @BeforeEach
     protected void setUp() {
         super.setUp();
-        mapper = new MarketoInputMapper(inputDataSet, service, tools);
+        mapper = new MarketoInputMapper(inputDataSet, service);
         mapper.init();
     }
 

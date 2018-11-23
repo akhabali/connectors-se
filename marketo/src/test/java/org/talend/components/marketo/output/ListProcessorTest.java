@@ -40,8 +40,8 @@ public class ListProcessorTest extends MarketoBaseTest {
     protected void setUp() {
         super.setUp();
         outputDataSet.setEntity(MarketoEntity.List);
-        data = tools.getRecordBuilder().newRecordBuilder().withInt(ATTR_LIST_ID, LIST_ID).withInt(ATTR_LEAD_ID, LEAD_ID_ADDREMOVE)
-                .build();
+        data = service.getRecordBuilder().newRecordBuilder().withInt(ATTR_LIST_ID, LIST_ID)
+                .withInt(ATTR_LEAD_ID, LEAD_ID_ADDREMOVE).build();
         outputDataSet.setListAction(ListAction.addTo);
         initProcessor();
         processor.map(data);
@@ -50,7 +50,7 @@ public class ListProcessorTest extends MarketoBaseTest {
     }
 
     private void initProcessor() {
-        processor = new MarketoProcessor(outputDataSet, service, tools);
+        processor = new MarketoProcessor(outputDataSet, service);
         processor.init();
     }
 

@@ -35,7 +35,7 @@ import org.talend.components.marketo.MarketoSourceOrProcessor;
 import org.talend.components.marketo.dataset.CompoundKey;
 import org.talend.components.marketo.dataset.MarketoInputDataSet;
 import org.talend.components.marketo.service.MarketoService;
-import org.talend.components.marketo.service.Toolbox;
+
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
@@ -59,9 +59,8 @@ public abstract class MarketoSource extends MarketoSourceOrProcessor {
     private transient static final Logger LOG = getLogger(MarketoSource.class);
 
     public MarketoSource(@Option("configuration") final MarketoInputDataSet dataSet, //
-            final MarketoService service, //
-            final Toolbox tools) {
-        super(dataSet, service, tools);
+            final MarketoService service) {
+        super(dataSet, service);
         this.dataSet = dataSet;
     }
 
@@ -97,7 +96,7 @@ public abstract class MarketoSource extends MarketoSourceOrProcessor {
             processBatch();
             next = resultIterator.hasNext() ? resultIterator.next() : null;
         }
-        return next == null ? null : convertToRecord(next.asJsonObject(), schema);
+        return next == null ? null : marketoService.convertToRecord(next.asJsonObject(), schema);
     }
 
     public void processBatch() {

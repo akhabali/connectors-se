@@ -34,7 +34,7 @@ import org.talend.components.marketo.service.LeadClient;
 import org.talend.components.marketo.service.ListClient;
 import org.talend.components.marketo.service.MarketoService;
 import org.talend.components.marketo.service.OpportunityClient;
-import org.talend.components.marketo.service.Toolbox;
+
 import org.talend.components.marketo.service.UIActionService;
 import org.talend.sdk.component.api.DecryptedServer;
 import org.talend.sdk.component.api.record.Record;
@@ -91,9 +91,6 @@ public class MarketoBaseTest {
 
     @Service
     protected MarketoService service;
-
-    @Service
-    protected Toolbox tools;
 
     @Service
     protected UIActionService uiActionService;

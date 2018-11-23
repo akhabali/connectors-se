@@ -15,7 +15,6 @@ package org.talend.components.marketo.dataset;
 import static org.talend.components.marketo.service.UIActionService.ACTIVITIES_LIST;
 import static org.talend.components.marketo.service.UIActionService.CUSTOM_OBJECT_NAMES;
 import static org.talend.components.marketo.service.UIActionService.FIELD_NAMES;
-import static org.talend.components.marketo.service.UIActionService.GUESS_ENTITY_SCHEMA_INPUT;
 import static org.talend.components.marketo.service.UIActionService.LEAD_KEY_NAME_LIST;
 import static org.talend.components.marketo.service.UIActionService.LIST_NAMES;
 
@@ -28,8 +27,6 @@ import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.DefaultValue;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayouts;
-import org.talend.sdk.component.api.configuration.ui.widget.Structure;
-import org.talend.sdk.component.api.configuration.ui.widget.Structure.Type;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import lombok.Data;
@@ -63,7 +60,6 @@ import lombok.ToString;
                 @GridLayout.Row({ "workspaceName" }), //
                 @GridLayout.Row({ "fields" }), //
         }), //
-        @GridLayout(names = { GridLayout.FormType.ADVANCED }, value = { @GridLayout.Row({ "schema" }) })//
 })
 @Documentation("Marketo Source DataSet")
 @ToString(callSuper = true)
@@ -91,11 +87,6 @@ public class MarketoInputDataSet extends MarketoDataSet {
         list,
         get
     }
-
-    @Option
-    @Structure(discoverSchema = GUESS_ENTITY_SCHEMA_INPUT, type = Type.OUT)
-    @Documentation("Main output schema")
-    private List<String> schema;
 
     /*
      * Lead DataSet parameters

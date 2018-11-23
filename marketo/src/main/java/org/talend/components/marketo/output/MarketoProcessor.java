@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.talend.components.marketo.MarketoSourceOrProcessor;
 import org.talend.components.marketo.dataset.MarketoOutputDataSet;
 import org.talend.components.marketo.service.MarketoService;
-import org.talend.components.marketo.service.Toolbox;
+
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
@@ -46,27 +46,26 @@ public class MarketoProcessor extends MarketoSourceOrProcessor {
     private transient static final Logger LOG = LoggerFactory.getLogger(MarketoProcessor.class);
 
     public MarketoProcessor(@Option("configuration") final MarketoOutputDataSet dataSet, //
-            final MarketoService service, //
-            final Toolbox tools) {
-        super(dataSet, service, tools);
+            final MarketoService service) {
+        super(dataSet, service);
         this.dataSet = dataSet;
 
         switch (dataSet.getEntity()) {
         case Lead:
-            strategy = new LeadStrategy(dataSet, service, tools);
+            strategy = new LeadStrategy(dataSet, service);
             break;
         case List:
-            strategy = new ListStrategy(dataSet, service, tools);
+            strategy = new ListStrategy(dataSet, service);
             break;
         case CustomObject:
-            strategy = new CustomObjectStrategy(dataSet, service, tools);
+            strategy = new CustomObjectStrategy(dataSet, service);
             break;
         case Company:
-            strategy = new CompanyStrategy(dataSet, service, tools);
+            strategy = new CompanyStrategy(dataSet, service);
             break;
         case Opportunity:
         case OpportunityRole:
-            strategy = new OpportunityStrategy(dataSet, service, tools);
+            strategy = new OpportunityStrategy(dataSet, service);
             break;
         }
     }
@@ -81,7 +80,7 @@ public class MarketoProcessor extends MarketoSourceOrProcessor {
     // public void map(final JsonObject data, @Output final OutputEmitter<JsonObject> main, @Output("rejected") final
     // OutputEmitter<JsonObject> rejected) {
     public void map(@Input final Record incomingData) {
-        JsonObject data = toJson(incomingData);
+        JsonObject data = marketoService.toJson(incomingData);
         LOG.debug("[map] received: {}.", data);
         JsonObject payload = strategy.getPayload(data);
         LOG.debug("[map] payload : {}.", payload);

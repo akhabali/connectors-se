@@ -91,7 +91,7 @@ public class LeadSourceTest extends SourceBaseTest {
     @Test
     void testDescribeLead() {
         inputDataSet.setLeadAction(LeadAction.describeLead);
-        source = new LeadSource(inputDataSet, service, tools);
+        source = new LeadSource(inputDataSet, service);
         source.init();
         while ((result = source.next()) != null) {
             assertNotNull(result);
@@ -100,7 +100,7 @@ public class LeadSourceTest extends SourceBaseTest {
 
     @Test
     void testGetActivities() {
-        source = new LeadSource(inputDataSet, service, tools);
+        source = new LeadSource(inputDataSet, service);
         source.getAccessToken();
         JsonObject activities = source.getActivities();
         assertTrue(activities.getJsonArray("result").size() > 30);
@@ -110,7 +110,7 @@ public class LeadSourceTest extends SourceBaseTest {
     void testGetLead() {
         inputDataSet.setLeadAction(LeadAction.getLead);
         inputDataSet.setLeadId(LEAD_ID);
-        source = new LeadSource(inputDataSet, service, tools);
+        source = new LeadSource(inputDataSet, service);
         source.init();
         result = source.next();
         assertNotNull(result);
@@ -122,7 +122,7 @@ public class LeadSourceTest extends SourceBaseTest {
     void testGetLeadNotFound() {
         inputDataSet.setLeadAction(LeadAction.getLead);
         inputDataSet.setLeadId(INVALID_LEAD_ID);
-        source = new LeadSource(inputDataSet, service, tools);
+        source = new LeadSource(inputDataSet, service);
         source.init();
         assertNull(source.next());
     }
@@ -130,14 +130,14 @@ public class LeadSourceTest extends SourceBaseTest {
     @Test
     void testGetMultipleLeads() {
         setMultipleLeadsDefault();
-        source = new LeadSource(inputDataSet, service, tools);
+        source = new LeadSource(inputDataSet, service);
         source.init();
         while ((result = source.next()) != null) {
             assertNotNull(result);
         }
         // will all fields
         inputDataSet.setFields(asList(fields.split(",")));
-        source = new LeadSource(inputDataSet, service, tools);
+        source = new LeadSource(inputDataSet, service);
         source.init();
         while ((result = source.next()) != null) {
             assertNotNull(result);
@@ -148,7 +148,7 @@ public class LeadSourceTest extends SourceBaseTest {
     void testGetMultipleLeadsWithAllFields() {
         setMultipleLeadsDefault();
         inputDataSet.setFields(asList(fields.split(",")));
-        source = new LeadSource(inputDataSet, service, tools);
+        source = new LeadSource(inputDataSet, service);
         source.init();
         while ((result = source.next()) != null) {
             assertNotNull(result);
@@ -162,7 +162,7 @@ public class LeadSourceTest extends SourceBaseTest {
         longFields.addAll(asList(fields.split(",")));
         longFields.add(String.join(" ", Collections.nCopies(5000, " ")));
         inputDataSet.setFields(longFields);
-        source = new LeadSource(inputDataSet, service, tools);
+        source = new LeadSource(inputDataSet, service);
         source.init();
         while ((result = source.next()) != null) {
             assertNotNull(result);
@@ -173,7 +173,7 @@ public class LeadSourceTest extends SourceBaseTest {
     void testGetMultipleLeadsWithUnknownField() {
         setMultipleLeadsDefault();
         inputDataSet.setFields(asList("unknownField"));
-        source = new LeadSource(inputDataSet, service, tools);
+        source = new LeadSource(inputDataSet, service);
         try {
             source.init();
             fail("[1006] Field 'unknownField' not found -> should have been raised");
@@ -184,7 +184,7 @@ public class LeadSourceTest extends SourceBaseTest {
     @Test
     void testGetMultipleLeadsWithPager() {
         setMultipleLeadsDefault();
-        source = new LeadSource(inputDataSet, service, tools);
+        source = new LeadSource(inputDataSet, service);
         source.init();
         while ((result = source.next()) != null) {
             assertNotNull(result);
@@ -202,7 +202,7 @@ public class LeadSourceTest extends SourceBaseTest {
         inputDataSet.setLeadAction(LeadAction.getLeadChanges);
         inputDataSet.setSinceDateTime("2018-01-01 00:00:01 Z");
         inputDataSet.setFields(asList(fields.split(",")));
-        source = new LeadSource(inputDataSet, service, tools);
+        source = new LeadSource(inputDataSet, service);
         source.init();
         while ((result = source.next()) != null) {
             assertNotNull(result);
@@ -214,7 +214,7 @@ public class LeadSourceTest extends SourceBaseTest {
         inputDataSet.setLeadAction(LeadAction.getLeadChanges);
         inputDataSet.setSinceDateTime("2018-01-01 00:00:01 Z");
         inputDataSet.setFields(asList(fields.split(",")));
-        source = new LeadSource(inputDataSet, service, tools);
+        source = new LeadSource(inputDataSet, service);
         source.init();
         while ((result = source.next()) != null) {
             assertNotNull(result);
@@ -231,7 +231,7 @@ public class LeadSourceTest extends SourceBaseTest {
         LOG.debug("[testGetLeadActivities] activities: {}", activities);
         inputDataSet.setActivityTypeIds(activities);
         inputDataSet.setFields(asList(fields.split(",")));
-        source = new LeadSource(inputDataSet, service, tools);
+        source = new LeadSource(inputDataSet, service);
         source.init();
         while ((result = source.next()) != null) {
             assertNotNull(result);
@@ -284,10 +284,11 @@ public class LeadSourceTest extends SourceBaseTest {
     @Test
     void getLeadActivities() {
         inputDataSet.setLeadAction(LeadAction.getLeadActivity);
-        inputDataSet.setSinceDateTime("2018-01-01 00:00:01 Z");
+        inputDataSet.setSinceDateTime("2018-11-01 00:00:01 Z");
         SuggestionValues acts = uiActionService.getActivities(inputDataSet.getDataStore());
         List<String> activities = acts.getItems().stream().limit(10).map(item -> String.valueOf(item.getId())).collect(toList());
-        inputDataSet.setActivityTypeIds(activities);
+        // inputDataSet.setActivityTypeIds(activities);
+        inputDataSet.setActivityTypeIds(asList("12", "13"));
         inputDataSet.setFields(asList(fields.split(",")));
         final String config = configurationByExample().forInstance(inputDataSet).configured().toQueryString();
         runInputPipeline(config);
@@ -295,6 +296,7 @@ public class LeadSourceTest extends SourceBaseTest {
         assertNotNull(records);
         assertThat(records.size(), is(greaterThanOrEqualTo(1)));
         records.stream().forEach(record -> {
+            LOG.debug("[getLeadActivities] {}", record);
             assertNotNull(record.getDateTime("activityDate"));
             assertNotNull(record.getString("marketoGUID"));
             assertThat(record.getInt("activityTypeId"), is(greaterThanOrEqualTo(0)));
@@ -304,4 +306,5 @@ public class LeadSourceTest extends SourceBaseTest {
             assertNotNull(record.getString("attributes"));
         });
     }
+
 }

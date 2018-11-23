@@ -28,7 +28,7 @@ import org.talend.components.marketo.dataset.MarketoOutputDataSet;
 import org.talend.components.marketo.dataset.MarketoOutputDataSet.OutputAction;
 import org.talend.components.marketo.service.MarketoService;
 import org.talend.components.marketo.service.OpportunityClient;
-import org.talend.components.marketo.service.Toolbox;
+
 import org.talend.sdk.component.api.configuration.Option;
 
 public class OpportunityStrategy extends OutputComponentStrategy {
@@ -40,9 +40,8 @@ public class OpportunityStrategy extends OutputComponentStrategy {
     private transient static final Logger LOG = getLogger(OpportunityStrategy.class);
 
     public OpportunityStrategy(@Option("configuration") final MarketoOutputDataSet dataSet, //
-            final MarketoService service, //
-            final Toolbox tools) {
-        super(dataSet, service, tools);
+            final MarketoService service) {
+        super(dataSet, service);
         this.opportunityClient = service.getOpportunityClient();
         this.opportunityClient.base(dataSet.getDataStore().getEndpoint());
         isOpportunityRole = MarketoEntity.OpportunityRole.equals(dataSet.getEntity());

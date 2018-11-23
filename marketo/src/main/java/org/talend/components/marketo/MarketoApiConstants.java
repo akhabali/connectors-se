@@ -119,4 +119,15 @@ public class MarketoApiConstants {
     public static final String REQUEST_PARAM_QUERY_METHOD_GET = "GET";
 
     public static final String ATTR_LEAD_IDS = "leadIds";
+
+    public static final String ATTR_ATTRIBUTES = "attributes";
+
+    public static final String ATTR_ACTIVITY_DATE = "activityDate";
+
+    public static final String ATTR_ACTIVITY_TYPE_ID = "activityTypeId";
+
+    public static final String ATTR_PRIMARY_ATTRIBUTE_VALUE = "primaryAttributeValue";
+
+    public static final String ATTR_PRIMARY_ATTRIBUTE_VALUE_ID = "primaryAttributeValueId";
+
 }

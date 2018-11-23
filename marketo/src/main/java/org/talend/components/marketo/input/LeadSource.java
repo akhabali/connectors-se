@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 import org.talend.components.marketo.dataset.MarketoInputDataSet;
 import org.talend.components.marketo.service.LeadClient;
 import org.talend.components.marketo.service.MarketoService;
-import org.talend.components.marketo.service.Toolbox;
+
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.service.http.Response;
 
@@ -39,9 +39,8 @@ public class LeadSource extends MarketoSource {
     private transient static final Logger LOG = getLogger(LeadSource.class);
 
     public LeadSource(@Option("configuration") final MarketoInputDataSet dataSet, //
-            final MarketoService service, //
-            final Toolbox tools) {
-        super(dataSet, service, tools);
+            final MarketoService service) {
+        super(dataSet, service);
         this.leadClient = service.getLeadClient();
         this.leadClient.base(this.dataSet.getDataStore().getEndpoint());
     }

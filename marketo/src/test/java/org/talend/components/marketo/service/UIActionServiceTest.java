@@ -21,15 +21,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.talend.components.marketo.MarketoBaseTest;
 import org.talend.components.marketo.dataset.MarketoDataSet.MarketoEntity;
 import org.talend.components.marketo.dataset.MarketoInputDataSet.ListAction;
-import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.asyncvalidation.ValidationResult;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
@@ -113,61 +109,6 @@ class UIActionServiceTest extends MarketoBaseTest {
         activities = uiActionService.getActivities(inputDataSet.getDataStore());
         assertNotNull(activities);
         assertEquals(60, activities.getItems().size());
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = { "Lead" })
-    // , "List", "Company", "CustomObject", "Opportunity", "OpportunityRole" })
-    void testGuessEntitySchema(String entity) {
-        inputDataSet.setEntity(MarketoEntity.valueOf(entity));
-        Schema schema = uiActionService.guessEntitySchemaForInput(inputDataSet);
-        Assert.assertNotNull(schema);
-        assertFalse(schema.getEntries().isEmpty());
-    }
-
-    @Test
-    void testGuessListEntitySchema() {
-        inputDataSet.setEntity(MarketoEntity.List);
-        Schema schema = uiActionService.guessEntitySchemaForInput(inputDataSet);
-        Assert.assertNotNull(schema);
-        assertFalse(schema.getEntries().isEmpty());
-    }
-
-    @Test
-    void testGuessCompanyEntitySchema() {
-        inputDataSet.setEntity(MarketoEntity.Company);
-        Schema schema = uiActionService.guessEntitySchemaForInput(inputDataSet);
-        Assert.assertNotNull(schema);
-        assertFalse(schema.getEntries().isEmpty());
-    }
-
-    @Test
-    void testGuessCustomObjectEntitySchema() {
-        inputDataSet.setEntity(MarketoEntity.CustomObject);
-        Schema schema = uiActionService.guessEntitySchemaForInput(inputDataSet);
-        Assert.assertNotNull(schema);
-        assertFalse(schema.getEntries().isEmpty());
-    }
-
-    @Test
-    void testGuessOpportunityEntitySchema() {
-        inputDataSet.setEntity(MarketoEntity.Opportunity);
-        Schema schema = uiActionService.guessEntitySchemaForInput(inputDataSet);
-        Assert.assertNotNull(schema);
-        assertFalse(schema.getEntries().isEmpty());
-    }
-
-    @Test
-    void testGuessOpportunityRoleEntitySchema() {
-        inputDataSet.setEntity(MarketoEntity.OpportunityRole);
-        Schema schema = uiActionService.guessEntitySchemaForInput(inputDataSet);
-        Assert.assertNotNull(schema);
-        assertFalse(schema.getEntries().isEmpty());
-    }
-
-    @Test
-    void guessEntitySchemaForOutput() {
-        assertNotNull(uiActionService.guessEntitySchemaForOutput(outputDataSet));
     }
 
     @Test

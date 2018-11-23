@@ -26,7 +26,7 @@ import org.talend.components.marketo.dataset.MarketoOutputDataSet;
 import org.talend.components.marketo.dataset.MarketoOutputDataSet.OutputAction;
 import org.talend.components.marketo.service.LeadClient;
 import org.talend.components.marketo.service.MarketoService;
-import org.talend.components.marketo.service.Toolbox;
+
 import org.talend.sdk.component.api.configuration.Option;
 
 public class LeadStrategy extends OutputComponentStrategy implements ProcessorStrategy {
@@ -36,9 +36,8 @@ public class LeadStrategy extends OutputComponentStrategy implements ProcessorSt
     private transient static final Logger LOG = LoggerFactory.getLogger(LeadStrategy.class);
 
     public LeadStrategy(@Option("configuration") final MarketoOutputDataSet dataSet, //
-            final MarketoService service, //
-            final Toolbox tools) {
-        super(dataSet, service, tools);
+            final MarketoService service) {
+        super(dataSet, service);
         this.leadClient = service.getLeadClient();
         this.leadClient.base(this.dataSet.getDataStore().getEndpoint());
     }
