@@ -17,7 +17,6 @@ import org.talend.components.activemq.configuration.BasicConfiguration;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.constraint.Min;
-import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
@@ -42,17 +41,15 @@ public class InputMapperConfiguration implements Serializable {
     private DurableSubscriptionConfiguration subscriptionConfig;
 
     @Option
-    @Required
     @Min(0)
     @Documentation("JMS receive message timeout. A timeout of zero never expires, and the call blocks indefinitely.")
-    private Integer timeout;
+    private Integer timeout = -1;
 
     @Option
-    @Required
     @Min(0)
     @Documentation("Maximum messages defines a number of messages this component will listen to. "
             + "After reaching the maximum component will stop receiving messages")
-    private Integer maximumMessages;
+    private Integer maximumMessages = -1;
 
     @Option
     @Documentation("Message Selector Expression used to receive only messages whose headers and properties match the selector")

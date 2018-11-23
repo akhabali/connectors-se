@@ -90,9 +90,9 @@ public class JmsService {
         return connection.createSession(transacted, acknowledge);
     }
 
-    public Connection getConnection(ConnectionFactory connectionFactory, boolean isUserIdentity, String userName, String password)
-            throws JMSException {
-        return isUserIdentity ? connectionFactory.createConnection(userName, password) : connectionFactory.createConnection();
+    public Connection getConnection(ConnectionFactory connectionFactory, JmsDataStore dataStore) throws JMSException {
+        return dataStore.isUserIdentity() ? connectionFactory.createConnection(dataStore.getUserName(), dataStore.getPassword())
+                : connectionFactory.createConnection();
     }
 
     public void closeConnection(Connection connection) {

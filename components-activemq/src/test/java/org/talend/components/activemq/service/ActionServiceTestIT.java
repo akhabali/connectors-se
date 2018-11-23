@@ -1,14 +1,11 @@
 package org.talend.components.activemq.service;
 
 import org.junit.jupiter.api.Test;
-import org.talend.components.activemq.configuration.Broker;
 import org.talend.components.activemq.datastore.JmsDataStore;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.junit5.WithComponents;
 
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.talend.components.activemq.testutils.JmsTestConstants.LOCALHOST;
