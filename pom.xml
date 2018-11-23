@@ -39,6 +39,7 @@
     <module>processing-tck</module>
     <module>jdbc</module>
     <module>salesforce</module>
+    <module>components-rabbitmq</module>
   </modules>
 
   <scm>
@@ -83,6 +84,12 @@
 
     <commons-csv.version>1.4</commons-csv.version>
     <guava.version>20.0</guava.version>
+
+    <junit-platform-surefire-provider.version>1.2.0</junit-platform-surefire-provider.version>
+    <junit5.version>5.3.1</junit5.version>
+
+    <docker-maven-plugin.version>0.26.0</docker-maven-plugin.version>
+    <amqp-client.version>5.4.3</amqp-client.version>
 
     <validation.model>true</validation.model>
   </properties>
@@ -191,6 +198,11 @@
         <version>${daikon.version}</version>
         <classifier>tests</classifier>
         <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.rabbitmq</groupId>
+        <artifactId>amqp-client</artifactId>
+        <version>5.4.3</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
