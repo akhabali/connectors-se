@@ -67,7 +67,6 @@ public class CustomObjectSource extends MarketoSource {
         String filterType = dataSet.getFilterType();
         String filterValues = dataSet.getFilterValues();
         String fields = dataSet.getFields() == null ? null : dataSet.getFields().stream().collect(joining(","));
-        Integer batchSize = dataSet.getBatchSize();
         if (dataSet.getUseCompoundKey()) {
             JsonObject payload = generateCompoundKeyPayload(filterType, fields);
             return handleResponse(customObjectClient.getCustomObjectsWithCompoundKey(HEADER_CONTENT_TYPE_APPLICATION_JSON, name,
@@ -75,8 +74,8 @@ public class CustomObjectSource extends MarketoSource {
 
         } else {
 
-            return handleResponse(customObjectClient.getCustomObjects(accessToken, name, filterType, filterValues, fields,
-                    batchSize, nextPageToken));
+            return handleResponse(
+                    customObjectClient.getCustomObjects(accessToken, name, filterType, filterValues, fields, nextPageToken));
         }
     }
 }

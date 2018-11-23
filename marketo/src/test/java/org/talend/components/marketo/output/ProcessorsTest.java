@@ -78,7 +78,6 @@ class ProcessorsTest extends MarketoBaseTest {
         expectedErrorMessage = "[1013] Record not found";
         outputDataSet.setEntity(MarketoEntity.valueOf(entity));
         inputDataSet.setEntity(MarketoEntity.valueOf(entity));
-        inputDataSet.setBatchSize(1);
         switch (MarketoEntity.valueOf(entity)) {
         case Lead:
             expectedErrorMessage = "[1004] Lead not found";
@@ -118,7 +117,6 @@ class ProcessorsTest extends MarketoBaseTest {
             inputDataSet.setFilterType("externalCompanyId");
             inputDataSet.setFilterValues("google666");
             inputDataSet.setFields(asList("mainPhone", "company", "website"));
-            inputDataSet.setBatchSize(1);
 
             data = tools.getRecordBuilder().newRecordBuilder().withString("externalCompanyId", "google666").build();
             // we create a record

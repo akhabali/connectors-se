@@ -13,7 +13,6 @@
 package org.talend.components.marketo.service;
 
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_ACCESS_TOKEN;
-import static org.talend.components.marketo.MarketoApiConstants.ATTR_BATCH_SIZE;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_CAMPAIGN_ID;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_ID;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_IS_TRIGGERABLE;
@@ -44,7 +43,6 @@ public interface CampaignClient extends HttpClient {
      * are children of the designated programs.
      * @param workspaceName Comma-separated list of workspace names to filter on. If set, will only return campaigns in the
      * given workspaces.
-     * @param batchSize Maximum number of records to return. Maximum and default is 300.
      * @param isTriggerable Set to true to return active Campaigns which have a Campaign is Requested trigger and source is
      * Web Service API
      * @return
@@ -56,7 +54,6 @@ public interface CampaignClient extends HttpClient {
             @Query(ATTR_NAME) String name, //
             @Query(ATTR_PROGRAM_NAME) String programName, //
             @Query(ATTR_WORKSPACE_NAME) String workspaceName, //
-            @Query(ATTR_BATCH_SIZE) Integer batchSize, //
             @Query(ATTR_IS_TRIGGERABLE) Boolean isTriggerable //
     );
 

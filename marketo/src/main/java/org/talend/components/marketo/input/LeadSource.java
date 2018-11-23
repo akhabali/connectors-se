@@ -15,7 +15,6 @@ package org.talend.components.marketo.input;
 import static java.util.stream.Collectors.joining;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_ACCESS_TOKEN;
-import static org.talend.components.marketo.MarketoApiConstants.ATTR_BATCH_SIZE;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_FIELDS;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_FILTER_TYPE;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_FILTER_VALUES;
@@ -74,7 +73,7 @@ public class LeadSource extends MarketoSource {
         return handleResponse(leadClient.getLeadById(accessToken, leadId, fields));
     }
 
-    private Boolean isLeadUrlSizeGreaterThan8k(String filterType, String filterValues, String fields, Integer batchSize) {
+    private Boolean isLeadUrlSizeGreaterThan8k(String filterType, String filterValues, String fields) {
         int pathSize = 20;
         int endpointSize = dataSet.getDataStore().getEndpoint().length();
         int queryParameterNamesSize = ATTR_ACCESS_TOKEN.length() + 1 + (accessToken == null ? 0 : accessToken.length()) + //
@@ -84,24 +83,20 @@ public class LeadSource extends MarketoSource {
                 ATTR_ACCESS_TOKEN.length() + 1 + //
                 ATTR_FILTER_TYPE.length() + 1 + //
                 ATTR_FILTER_VALUES.length() + 1 + //
-                ATTR_FIELDS.length() + 1 + //
-                ATTR_BATCH_SIZE.length() + 1;
+                ATTR_FIELDS.length() + 1; //
         int queryParameterValuesSize = (filterType == null ? 0 : filterType.length())
-                + (filterValues == null ? 0 : filterValues.length()) + (fields == null ? 0 : fields.length())
-                + (batchSize == null ? 0 : String.valueOf(batchSize).length());
+                + (filterValues == null ? 0 : filterValues.length()) + (fields == null ? 0 : fields.length());
         int total = queryParameterNamesSize + queryParameterValuesSize;
         return total >= (8 * 1024);
     }
 
-    private String buildLeadForm(String filterType, String filterValues, String fields, Integer batchSize) {
+    private String buildLeadForm(String filterType, String filterValues, String fields) {
         StringBuilder sb = new StringBuilder();
         sb.append(ATTR_FILTER_TYPE + "=" + filterType.trim());
         sb.append("&");
         sb.append(ATTR_FILTER_VALUES + "=" + filterValues.trim());
         sb.append("&");
         sb.append(ATTR_FIELDS + "=" + fields.trim());
-        sb.append("&");
-        sb.append(ATTR_BATCH_SIZE + "=" + batchSize);
 
         return sb.toString();
     }
@@ -110,14 +105,12 @@ public class LeadSource extends MarketoSource {
         String filterType = dataSet.getLeadKeyName();
         String filterValues = dataSet.getLeadKeyValues();
         String fields = dataSet.getFields() == null ? null : dataSet.getFields().stream().collect(joining(","));
-        Integer batchSize = dataSet.getBatchSize();
-        if (isLeadUrlSizeGreaterThan8k(filterType, filterValues, fields, batchSize)) {
+        if (isLeadUrlSizeGreaterThan8k(filterType, filterValues, fields)) {
             return handleResponse(leadClient.getLeadByFilterType(HEADER_CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED,
-                    REQUEST_PARAM_QUERY_METHOD_GET, accessToken, nextPageToken,
-                    buildLeadForm(filterType, filterValues, fields, batchSize)));
+                    REQUEST_PARAM_QUERY_METHOD_GET, accessToken, nextPageToken, buildLeadForm(filterType, filterValues, fields)));
         } else {
-            return handleResponse(leadClient.getLeadByFilterTypeByQueryString(accessToken, filterType, filterValues, fields,
-                    batchSize, nextPageToken));
+            return handleResponse(
+                    leadClient.getLeadByFilterTypeByQueryString(accessToken, filterType, filterValues, fields, nextPageToken));
         }
     }
 
@@ -132,9 +125,8 @@ public class LeadSource extends MarketoSource {
         String assetIds = dataSet.getAssetIds();
         Integer listId = dataSet.getListId();
         String leadIds = dataSet.getLeadIds();
-        Integer batchSize = dataSet.getBatchSize();
         return handleResponse(
-                leadClient.getLeadActivities(accessToken, sinceDateTime, activityTypeIds, assetIds, listId, leadIds, batchSize));
+                leadClient.getLeadActivities(accessToken, sinceDateTime, activityTypeIds, assetIds, listId, leadIds));
     }
 
     private JsonObject getLeadChanges() {
@@ -144,8 +136,7 @@ public class LeadSource extends MarketoSource {
         Integer listId = dataSet.getListId();
         String leadIds = dataSet.getLeadIds();
         String fields = dataSet.getFields() == null ? null : dataSet.getFields().stream().collect(joining(","));
-        Integer batchSize = dataSet.getBatchSize();
-        return handleResponse(leadClient.getLeadChanges(accessToken, nextPageToken, listId, leadIds, fields, batchSize));
+        return handleResponse(leadClient.getLeadChanges(accessToken, nextPageToken, listId, leadIds, fields));
     }
 
     public JsonObject getActivities() {

@@ -55,7 +55,6 @@ class ListSourceTest extends SourceBaseTest {
         inputDataSet.setListName("");
         inputDataSet.setProgramName("");
         inputDataSet.setWorkspaceName("");
-        inputDataSet.setBatchSize(3);
         source = new ListSource(inputDataSet, service, tools);
         source.init();
         while ((result = source.next()) != null) {
@@ -83,7 +82,6 @@ class ListSourceTest extends SourceBaseTest {
         inputDataSet.setListAction(ListAction.getLeads);
         inputDataSet.setListId(LIST_ID);
         inputDataSet.setLeadIds(LEAD_IDS);
-        inputDataSet.setBatchSize(2);
         inputDataSet.setFields(asList(fields.split(",")));
         source = new ListSource(inputDataSet, service, tools);
         source.init();

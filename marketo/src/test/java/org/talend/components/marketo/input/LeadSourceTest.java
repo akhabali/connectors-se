@@ -86,7 +86,6 @@ public class LeadSourceTest extends SourceBaseTest {
     protected void setUp() {
         super.setUp();
         inputDataSet.setEntity(MarketoEntity.Lead);
-        inputDataSet.setBatchSize(200);
     }
 
     @Test
@@ -131,7 +130,6 @@ public class LeadSourceTest extends SourceBaseTest {
     @Test
     void testGetMultipleLeads() {
         setMultipleLeadsDefault();
-        inputDataSet.setBatchSize(2);
         source = new LeadSource(inputDataSet, service, tools);
         source.init();
         while ((result = source.next()) != null) {
@@ -139,7 +137,6 @@ public class LeadSourceTest extends SourceBaseTest {
         }
         // will all fields
         inputDataSet.setFields(asList(fields.split(",")));
-        inputDataSet.setBatchSize(2);
         source = new LeadSource(inputDataSet, service, tools);
         source.init();
         while ((result = source.next()) != null) {
@@ -187,7 +184,6 @@ public class LeadSourceTest extends SourceBaseTest {
     @Test
     void testGetMultipleLeadsWithPager() {
         setMultipleLeadsDefault();
-        inputDataSet.setBatchSize(1);
         source = new LeadSource(inputDataSet, service, tools);
         source.init();
         while ((result = source.next()) != null) {
@@ -218,7 +214,6 @@ public class LeadSourceTest extends SourceBaseTest {
         inputDataSet.setLeadAction(LeadAction.getLeadChanges);
         inputDataSet.setSinceDateTime("2018-01-01 00:00:01 Z");
         inputDataSet.setFields(asList(fields.split(",")));
-        inputDataSet.setBatchSize(5);
         source = new LeadSource(inputDataSet, service, tools);
         source.init();
         while ((result = source.next()) != null) {
@@ -236,7 +231,6 @@ public class LeadSourceTest extends SourceBaseTest {
         LOG.debug("[testGetLeadActivities] activities: {}", activities);
         inputDataSet.setActivityTypeIds(activities);
         inputDataSet.setFields(asList(fields.split(",")));
-        inputDataSet.setBatchSize(300);
         source = new LeadSource(inputDataSet, service, tools);
         source.init();
         while ((result = source.next()) != null) {
@@ -295,7 +289,6 @@ public class LeadSourceTest extends SourceBaseTest {
         List<String> activities = acts.getItems().stream().limit(10).map(item -> String.valueOf(item.getId())).collect(toList());
         inputDataSet.setActivityTypeIds(activities);
         inputDataSet.setFields(asList(fields.split(",")));
-        inputDataSet.setBatchSize(300);
         final String config = configurationByExample().forInstance(inputDataSet).configured().toQueryString();
         runInputPipeline(config);
         final Queue<Record> records = DataCollector.getData();

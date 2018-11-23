@@ -57,8 +57,7 @@ public class ListSource extends MarketoSource {
     private JsonObject getLeadsByListId() {
         Integer listId = dataSet.getListId();
         String fields = dataSet.getFields() == null ? null : dataSet.getFields().stream().collect(joining(","));
-        Integer batchSize = dataSet.getBatchSize();
-        return handleResponse(listClient.getLeadsByListId(accessToken, nextPageToken, listId, fields, batchSize));
+        return handleResponse(listClient.getLeadsByListId(accessToken, nextPageToken, listId, fields));
     }
 
     private JsonObject isMemberOfList() {
@@ -77,7 +76,6 @@ public class ListSource extends MarketoSource {
         String name = dataSet.getListName();
         String workspaceName = dataSet.getWorkspaceName();
         String programName = dataSet.getProgramName();
-        Integer batchSize = dataSet.getBatchSize();
-        return handleResponse(listClient.getLists(accessToken, nextPageToken, id, name, programName, workspaceName, batchSize));
+        return handleResponse(listClient.getLists(accessToken, nextPageToken, id, name, programName, workspaceName));
     }
 }

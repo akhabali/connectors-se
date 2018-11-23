@@ -44,7 +44,6 @@ import lombok.ToString;
                 @GridLayout.Row({ "dedupeBy" }), //
                 @GridLayout.Row({ "deleteBy" }), //
                 @GridLayout.Row({ "customObjectName" }), //
-                @GridLayout.Row({ "batchSize" }) //
         }), //
         @GridLayout(names = { GridLayout.FormType.ADVANCED }, value = { @GridLayout.Row({ "schema" }),
                 @GridLayout.Row({ "rejectSchema" }), //

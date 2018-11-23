@@ -194,7 +194,7 @@ public class UIActionService extends MarketoService {
             initClients(dataStore);
             String aToken = authorizationClient.getAccessToken(dataStore);
             List<Item> listNames = new ArrayList<>();
-            for (JsonObject l : parseResultFromResponse(listClient.getLists(aToken, null, null, "", "", "", 300))
+            for (JsonObject l : parseResultFromResponse(listClient.getLists(aToken, null, null, "", "", ""))
                     .getValuesAs(JsonObject.class)) {
                 listNames.add(new SuggestionValues.Item(String.valueOf(l.getString(ATTR_NAME)), l.getString(ATTR_NAME)));
             }

@@ -61,7 +61,6 @@ public class OpportunitySource extends MarketoSource {
         String filterType = dataSet.getFilterType();
         String filterValues = dataSet.getFilterValues();
         String fields = dataSet.getFields() == null ? null : dataSet.getFields().stream().collect(joining(","));
-        int batchSize = dataSet.getBatchSize();
         if (isOpportunityRole) {
             if (dataSet.getUseCompoundKey()) {
 
@@ -70,12 +69,12 @@ public class OpportunitySource extends MarketoSource {
                 return handleResponse(opportunityClient.getOpportunityRolesWithCompoundKey(HEADER_CONTENT_TYPE_APPLICATION_JSON,
                         REQUEST_PARAM_QUERY_METHOD_GET, accessToken, payload));
             } else {
-                return handleResponse(opportunityClient.getOpportunityRoles(accessToken, filterType, filterValues, fields,
-                        batchSize, nextPageToken));
+                return handleResponse(
+                        opportunityClient.getOpportunityRoles(accessToken, filterType, filterValues, fields, nextPageToken));
             }
         } else {
             return handleResponse(
-                    opportunityClient.getOpportunities(accessToken, filterType, filterValues, fields, batchSize, nextPageToken));
+                    opportunityClient.getOpportunities(accessToken, filterType, filterValues, fields, nextPageToken));
         }
     }
 

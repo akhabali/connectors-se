@@ -13,7 +13,6 @@
 package org.talend.components.marketo.service;
 
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_ACCESS_TOKEN;
-import static org.talend.components.marketo.MarketoApiConstants.ATTR_BATCH_SIZE;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_FIELDS;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_FILTER_TYPE;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_FILTER_VALUES;
@@ -58,7 +57,6 @@ public interface CompanyClient extends HttpClient {
      * @param filterType The company field to filter on. Searchable fields can be retrieved with the Describe Company call
      * @param filterValues Comma-separated list of values to match against query
      * @param fields Comma-separated list of fields to include in the response query
-     * @param batchSize The batch size to return. The max and default value is 300.
      * @param nextPageToken A token will be returned by this endpoint if the result set is greater than the batch size and
      * can be passed in a subsequent call through this parameter
      * @return company records
@@ -69,7 +67,6 @@ public interface CompanyClient extends HttpClient {
             @Query(ATTR_FILTER_TYPE) String filterType, //
             @Query(ATTR_FILTER_VALUES) String filterValues, //
             @Query(ATTR_FIELDS) String fields, //
-            @Query(ATTR_BATCH_SIZE) Integer batchSize, //
             @Query(ATTR_NEXT_PAGE_TOKEN) String nextPageToken //
     );
 

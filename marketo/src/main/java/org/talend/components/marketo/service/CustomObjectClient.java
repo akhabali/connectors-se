@@ -13,7 +13,6 @@
 package org.talend.components.marketo.service;
 
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_ACCESS_TOKEN;
-import static org.talend.components.marketo.MarketoApiConstants.ATTR_BATCH_SIZE;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_CUSTOM_OBJECT_NAME;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_FIELDS;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_FILTER_TYPE;
@@ -81,7 +80,6 @@ public interface CustomObjectClient extends HttpClient {
      * @param filterValues Comma-separated list of field values to match against.
      * @param fields Comma-separated list of fields to return for each record. If unset marketoGuid, dedupeFields,
      * updatedAt, createdAt will be returned.
-     * @param batchSize The batch size to return. The max and default value is 300.
      * @param nextPageToken A token will be returned by this endpoint if the result set is greater than the batch size and
      * can be passed in a subsequent call through this parameter.
      * @return
@@ -93,7 +91,6 @@ public interface CustomObjectClient extends HttpClient {
             @Query(ATTR_FILTER_TYPE) String filterType, //
             @Query(ATTR_FILTER_VALUES) String filterValues, //
             @Query(ATTR_FIELDS) String fields, //
-            @Query(ATTR_BATCH_SIZE) Integer batchSize, //
             @Query(ATTR_NEXT_PAGE_TOKEN) String nextPageToken //
     );
 

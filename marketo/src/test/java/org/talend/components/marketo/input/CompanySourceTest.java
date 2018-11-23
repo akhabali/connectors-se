@@ -73,7 +73,6 @@ class CompanySourceTest extends SourceBaseTest {
         inputDataSet.setFilterType("externalCompanyId");
         inputDataSet.setFilterValues("google01,google02,google03,google04,google05,google06");
         inputDataSet.setFields(asList("mainPhone", "company", "website"));
-        inputDataSet.setBatchSize(10);
         source = new CompanySource(inputDataSet, service, tools);
         source.init();
         while ((result = source.next()) != null) {
@@ -88,7 +87,6 @@ class CompanySourceTest extends SourceBaseTest {
         inputDataSet.setFilterType("billingCountry");
         inputDataSet.setFilterValues("France");
         inputDataSet.setFields(asList("mainPhone", "company", "website"));
-        inputDataSet.setBatchSize(10);
         source = new CompanySource(inputDataSet, service, tools);
         try {
             source.init();
@@ -152,7 +150,6 @@ class CompanySourceTest extends SourceBaseTest {
         inputDataSet.setFilterType("externalCompanyId");
         inputDataSet.setFilterValues("google01,google02,google03,google04,google05,google06");
         inputDataSet.setFields(asList("mainPhone", "company", "website", "createdAt", "updatedAt"));
-        inputDataSet.setBatchSize(10);
         final String config = configurationByExample().forInstance(inputDataSet).configured().toQueryString();
         LOG.debug("[getCompanies] config: {}", config);
         runInputPipeline(config);
@@ -190,7 +187,6 @@ class CompanySourceTest extends SourceBaseTest {
         inputDataSet.setFilterType("externalCompanyId");
         inputDataSet.setFilterValues("google01,google02,google03,google04,google05,google06");
         inputDataSet.setFields(asList("mainPhone", "company", "website"));
-        inputDataSet.setBatchSize(10);
         //
 
     }

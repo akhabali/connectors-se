@@ -45,7 +45,6 @@ class OpportunitySourceTest extends SourceBaseTest {
     protected void setUp() {
         super.setUp();
         inputDataSet.setEntity(MarketoEntity.Opportunity);
-        inputDataSet.setBatchSize(3);
         inputDataSet.setUseCompoundKey(false);
     }
 

@@ -13,7 +13,6 @@
 package org.talend.components.marketo.service;
 
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_ACCESS_TOKEN;
-import static org.talend.components.marketo.MarketoApiConstants.ATTR_BATCH_SIZE;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_FIELDS;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_FILTER_TYPE;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_FILTER_VALUES;
@@ -73,7 +72,6 @@ public interface LeadClient extends HttpClient {
      * sfdcLeadOwnerId, sfdcOpptyId.
      * @param filterValues A comma-separated list of values to filter on in the specified fields.
      * @param fields A comma-separated list of lead fields to return for each record
-     * @param batchSize The batch size to return. The max and default value is 300.
      * @param nextPageToken A token will be returned by this endpoint if the result set is greater than the batch size and
      * can be passed in a subsequent call through this parameter
      * @return
@@ -84,7 +82,6 @@ public interface LeadClient extends HttpClient {
             @Query(ATTR_FILTER_TYPE) String filterType, //
             @Query(ATTR_FILTER_VALUES) String filterValues, //
             @Query(ATTR_FIELDS) String fields, //
-            @Query(ATTR_BATCH_SIZE) Integer batchSize, //
             @Query(ATTR_NEXT_PAGE_TOKEN) String nextPageToken// .
     );
 
@@ -101,7 +98,6 @@ public interface LeadClient extends HttpClient {
      * sfdcLeadOwnerId, sfdcOpptyId.</li>
      * <li>@param filterValues A comma-separated list of values to filter on in the specified fields.</li>
      * <li>@param fields A comma-separated list of lead fields to return for each record</li>
-     * <li>@param batchSize The batch size to return. The max and default value is 300.</li>
      * </ul>
      * @param nextPageToken A token will be returned by this endpoint if the result set is greater than the batch size and
      * can be passed in a subsequent call through this parameter
@@ -175,7 +171,6 @@ public interface LeadClient extends HttpClient {
      * @param listId Id of a static list. If set, will only return activities of members of this static list.
      * @param leadIds Comma-separated list of lead ids. If set, will only return activities of the leads with these ids.
      * Allows up to 30 entries.
-     * @param batchSize Maximum number of records to return. Maximum and default is 300.
      * @return
      */
     @Request(path = "/rest/v1/activities/leadchanges.json")
@@ -184,8 +179,7 @@ public interface LeadClient extends HttpClient {
             @Query(ATTR_NEXT_PAGE_TOKEN) String nextPageToken, //
             @Query(ATTR_LIST_ID) Integer listId, //
             @Query(ATTR_LEAD_IDS) String leadIds, //
-            @Query(ATTR_FIELDS) String fields, //
-            @Query(ATTR_BATCH_SIZE) Integer batchSize //
+            @Query(ATTR_FIELDS) String fields //
     );
 
     /**
@@ -214,7 +208,6 @@ public interface LeadClient extends HttpClient {
      * @param listId Id of a static list. If set, will only return activities of members of this static list.
      * @param leadIds Comma-separated list of lead ids. If set, will only return activities of the leads with these ids.
      * Allows up to 30 entries.
-     * @param batchSize
      * @return
      */
     @Request(path = "/rest/v1/activities.json")
@@ -224,8 +217,7 @@ public interface LeadClient extends HttpClient {
             @Query("activityTypeIds") String activityTypeIds, //
             @Query("assetIds") String assetIds, //
             @Query(ATTR_LIST_ID) Integer listId, //
-            @Query(ATTR_LEAD_IDS) String leadIds, //
-            @Query(ATTR_BATCH_SIZE) Integer batchSize //
+            @Query(ATTR_LEAD_IDS) String leadIds //
     );
 
 }

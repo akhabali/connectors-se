@@ -16,8 +16,6 @@ import java.io.Serializable;
 
 import org.talend.components.marketo.datastore.MarketoDataStore;
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.constraint.Max;
-import org.talend.sdk.component.api.configuration.constraint.Min;
 import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.DefaultValue;
 import org.talend.sdk.component.api.meta.Documentation;
@@ -48,12 +46,5 @@ public class MarketoDataSet implements Serializable {
     @DefaultValue(value = "Lead")
     @Documentation("Marketo Entity to manage")
     private MarketoEntity entity;
-
-    @Option
-    @Min(1)
-    @Max(300)
-    @DefaultValue(value = "200")
-    @Documentation("Batch Size")
-    private Integer batchSize;
 
 }

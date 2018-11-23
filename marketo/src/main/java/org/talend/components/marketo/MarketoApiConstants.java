@@ -18,8 +18,6 @@ public class MarketoApiConstants {
 
     public static final String ATTR_ACTION = "action";
 
-    public static final String ATTR_BATCH_SIZE = "batchSize";
-
     public static final String ATTR_CAMPAIGN_ID = "campaignId";
 
     public static final String ATTR_CLIENT_ID = "client_id";

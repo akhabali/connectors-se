@@ -13,7 +13,6 @@
 package org.talend.components.marketo.service;
 
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_ACCESS_TOKEN;
-import static org.talend.components.marketo.MarketoApiConstants.ATTR_BATCH_SIZE;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_FIELDS;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_ID;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_LIST_ID;
@@ -60,7 +59,6 @@ public interface ListClient extends HttpClient {
      * @param listId Id of the static list to retrieve records from
      * @param fields Comma-separated list of field names to return changes for. Field names can be retrieved with the
      * Describe Lead API.
-     * @param batchSize The batch size to return. The max and default value is 300.
      * @return
      */
     @Request(path = "/rest/v1/lists/{listId}/leads.json")
@@ -68,8 +66,7 @@ public interface ListClient extends HttpClient {
             @Query(ATTR_ACCESS_TOKEN) String accessToken, //
             @Query(ATTR_NEXT_PAGE_TOKEN) String nextPageToken, //
             @Path(ATTR_LIST_ID) Integer listId, //
-            @Query(ATTR_FIELDS) String fields, //
-            @Query(ATTR_BATCH_SIZE) Integer batchSize //
+            @Query(ATTR_FIELDS) String fields //
     );
 
     /**
@@ -97,7 +94,6 @@ public interface ListClient extends HttpClient {
      * the given programs.
      * @param workspaceName Comma-separated list of workspace names. If set will return all static lists that are children
      * of the given workspaces.
-     * @param batchSize The batch size to return. The max and default value is 300.
      * @return
      */
     @Request(path = "/rest/v1/lists.json")
@@ -107,8 +103,7 @@ public interface ListClient extends HttpClient {
             @Query(ATTR_ID) Integer id, //
             @Query(ATTR_NAME) String name, //
             @Query(ATTR_PROGRAM_NAME) String programName, //
-            @Query(ATTR_WORKSPACE_NAME) String workspaceName, //
-            @Query(ATTR_BATCH_SIZE) Integer batchSize //
+            @Query(ATTR_WORKSPACE_NAME) String workspaceName //
     );
 
     /**

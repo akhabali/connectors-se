@@ -44,7 +44,6 @@ public class CustomObjectsSourceTest extends SourceBaseTest {
     protected void setUp() {
         super.setUp();
         inputDataSet.setEntity(MarketoEntity.CustomObject);
-        inputDataSet.setBatchSize(10);
         inputDataSet.setFields(asList(fields.split(",")));
         inputDataSet.setUseCompoundKey(false);
     }

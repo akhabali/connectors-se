@@ -12,9 +12,6 @@
 // ============================================================================
 package org.talend.components.marketo.dataset;
 
-import lombok.Data;
-import lombok.ToString;
-
 import static org.talend.components.marketo.service.UIActionService.ACTIVITIES_LIST;
 import static org.talend.components.marketo.service.UIActionService.CUSTOM_OBJECT_NAMES;
 import static org.talend.components.marketo.service.UIActionService.FIELD_NAMES;
@@ -34,6 +31,9 @@ import org.talend.sdk.component.api.configuration.ui.layout.GridLayouts;
 import org.talend.sdk.component.api.configuration.ui.widget.Structure;
 import org.talend.sdk.component.api.configuration.ui.widget.Structure.Type;
 import org.talend.sdk.component.api.meta.Documentation;
+
+import lombok.Data;
+import lombok.ToString;
 
 @Data
 @DataSet(MarketoInputDataSet.NAME)
@@ -62,7 +62,6 @@ import org.talend.sdk.component.api.meta.Documentation;
                 @GridLayout.Row({ "programName" }), //
                 @GridLayout.Row({ "workspaceName" }), //
                 @GridLayout.Row({ "fields" }), //
-                @GridLayout.Row({ "batchSize" }) //
         }), //
         @GridLayout(names = { GridLayout.FormType.ADVANCED }, value = { @GridLayout.Row({ "schema" }) })//
 })

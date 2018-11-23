@@ -59,9 +59,7 @@ public class CompanySource extends MarketoSource {
         String filterType = dataSet.getFilterType();
         String filterValues = dataSet.getFilterValues();
         String fields = dataSet.getFields() == null ? null : dataSet.getFields().stream().collect(joining(","));
-        Integer batchSize = dataSet.getBatchSize();
-        return handleResponse(
-                companyClient.getCompanies(accessToken, filterType, filterValues, fields, batchSize, nextPageToken));
+        return handleResponse(companyClient.getCompanies(accessToken, filterType, filterValues, fields, nextPageToken));
     }
 
 }
