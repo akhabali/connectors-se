@@ -19,13 +19,11 @@ import java.net.ProxySelector;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
 
 import org.talend.components.salesforce.datastore.BasicDataStore;
-import org.talend.components.salesforce.soql.FieldDescription;
 import org.talend.components.salesforce.soql.SoqlQuery;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
@@ -35,6 +33,7 @@ import com.sforce.async.AsyncApiException;
 import com.sforce.async.BulkConnection;
 import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.soap.partner.Field;
+import com.sforce.soap.partner.FieldType;
 import com.sforce.soap.partner.PartnerConnection;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.ws.ConnectionException;
@@ -46,9 +45,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class SalesforceService {
-
-    // TODO maybe no need for this
-    public static final String CONFIG_FILE_lOCATION_KEY = "org.talend.component.salesforce.config.file";
 
     public static final String RETIRED_ENDPOINT = "www.salesforce.com";
 
@@ -68,8 +64,6 @@ public class SalesforceService {
     public static String guessModuleName(String soqlQuery) {
         SoqlQuery query = SoqlQuery.getInstance();
         query.init(soqlQuery);
-
-        List<FieldDescription> fieldDescriptions = query.getFieldDescriptions();
         return query.getDrivingEntityName();
 
     }
@@ -205,6 +199,7 @@ public class SalesforceService {
             DescribeSObjectResult module = connection.describeSObject(moduleName);
             Map<String, Field> fieldMap = new HashMap<>();
             for (Field field : module.getFields()) {
+
                 fieldMap.put(field.getName(), field);
             }
             return fieldMap;
@@ -230,6 +225,9 @@ public class SalesforceService {
         if (fieldMap != null) {
             for (String fieldName : fieldMap.keySet()) {
                 Field field = fieldMap.get(fieldName);
+                if (!isSuppotedType(field)) {
+                    continue;
+                }
                 addSchemaEntry(field, schemaBuilder, entryBuilder);
             }
         }
@@ -266,6 +264,18 @@ public class SalesforceService {
             schemaBuilder.withEntry(entryBuilder.withName(field.getName()).withType(Schema.Type.STRING).build());
             break;
         }
+    }
+
+    public boolean isSuppotedType(Field field) {
+        // filter the invalid compound columns for salesforce bulk query api
+        if (field == null || field.getType() == FieldType.address || // no address
+                field.getType() == FieldType.location || // no location
+                // no picklist that has a parent
+                (field.getType() == FieldType.picklist && field.getCompoundFieldName() != null
+                        && !field.getCompoundFieldName().trim().isEmpty())) {
+            return false;
+        }
+        return true;
     }
 
 }

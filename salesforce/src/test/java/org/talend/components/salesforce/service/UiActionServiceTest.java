@@ -28,7 +28,7 @@ import org.junit.Assert;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.talend.components.salesforce.SfHeaderFilter;
-import org.talend.components.salesforce.dataset.QueryDataSet;
+import org.talend.components.salesforce.dataset.ModuleQueryDataSet;
 import org.talend.components.salesforce.datastore.BasicDataStore;
 import org.talend.sdk.component.api.DecryptedServer;
 import org.talend.sdk.component.api.record.Schema;
@@ -137,7 +137,7 @@ class UiActionServiceTest {
     @DisplayName("Retrive module column names")
     void retriveColumnsName() {
         final String moduleName = "Account";
-        final QueryDataSet dataSet = new QueryDataSet();
+        final ModuleQueryDataSet dataSet = new ModuleQueryDataSet();
         final BasicDataStore datasore = new BasicDataStore();
         datasore.setEndpoint(URL);
         datasore.setUserId(serverWithPassword.getUsername());
@@ -149,20 +149,20 @@ class UiActionServiceTest {
         assertNotNull(schema);
         List<Schema.Entry> columns = schema.getEntries();
         assertNotNull(columns);
-        assertEquals(58, columns.size());
+        assertEquals(54, columns.size());
 
         List<String> selectedColumns = new ArrayList<>();
         selectedColumns.add("Id");
         selectedColumns.add("Name");
         SuggestionValues values = service.retrieveColumns(datasore, moduleName, selectedColumns);
-        assertEquals(56, values.getItems().size());
+        assertEquals(52, values.getItems().size());
     }
 
     @Test
     @HttpApiName("${class}_${method}")
     @DisplayName("add selected column")
     void addColumnsName() {
-        final QueryDataSet dataSet = new QueryDataSet();
+        final ModuleQueryDataSet dataSet = new ModuleQueryDataSet();
         final BasicDataStore datasore = new BasicDataStore();
         datasore.setEndpoint(URL);
         datasore.setUserId(serverWithPassword.getUsername());
@@ -194,7 +194,7 @@ class UiActionServiceTest {
     @DisplayName("check retrieved field type")
     void testFieldType() {
         final String moduleName = "Account";
-        final QueryDataSet dataSet = new QueryDataSet();
+        final ModuleQueryDataSet dataSet = new ModuleQueryDataSet();
         final BasicDataStore datasore = new BasicDataStore();
         datasore.setEndpoint(URL);
         datasore.setUserId(serverWithPassword.getUsername());
@@ -207,7 +207,7 @@ class UiActionServiceTest {
         assertNotNull(schema);
         List<Schema.Entry> columns = schema.getEntries();
         assertNotNull(columns);
-        assertEquals(58, columns.size());
+        assertEquals(54, columns.size());
         for (Schema.Entry column : columns) {
             if ("Id".equals(column.getName())) {
                 assertEquals(Schema.Type.STRING, column.getType());
@@ -272,7 +272,7 @@ class UiActionServiceTest {
         }
 
         SuggestionValues values = service.retrieveColumns(datasore, moduleName, dataSet.getSelectColumnIds());
-        assertEquals(51, values.getItems().size());
+        assertEquals(47, values.getItems().size());
 
     }
 

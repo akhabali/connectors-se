@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.talend.components.salesforce.dataset.QueryDataSet;
+import org.talend.components.salesforce.dataset.ModuleQueryDataSet;
 import org.talend.components.salesforce.datastore.BasicDataStore;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.record.Schema;
@@ -41,6 +41,7 @@ import org.talend.sdk.component.api.service.schema.DiscoverSchema;
 import com.sforce.soap.partner.DescribeGlobalSObjectResult;
 import com.sforce.soap.partner.DescribeSObjectResult;
 import com.sforce.soap.partner.Field;
+import com.sforce.soap.partner.FieldType;
 import com.sforce.soap.partner.PartnerConnection;
 import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.ws.ConnectionException;
@@ -98,7 +99,7 @@ public class UiActionService {
     }
 
     @DiscoverSchema("addColumns")
-    public Schema addColumns(@Option("dataSet") final QueryDataSet dataSet, final RecordBuilderFactory factory) {
+    public Schema addColumns(@Option("dataSet") final ModuleQueryDataSet dataSet, final RecordBuilderFactory factory) {
         final Schema.Entry.Builder entryBuilder = factory.newEntryBuilder();
         final Schema.Builder schemaBuilder = factory.newSchemaBuilder(Type.RECORD);
         final String selectedColumn = dataSet.getSelectedColumn();
@@ -144,6 +145,14 @@ public class UiActionService {
             final PartnerConnection connection = this.service.connect(dataStore, localConfiguration);
             DescribeSObjectResult module = connection.describeSObject(moduleName);
             for (Field field : module.getFields()) {
+                // filter the invalid compound columns for salesforce bulk query api
+                if (field.getType() == FieldType.address || // no address
+                        field.getType() == FieldType.location || // no location
+                        // no picklist that has a parent
+                        (field.getType() == FieldType.picklist && field.getCompoundFieldName() != null
+                                && !field.getCompoundFieldName().trim().isEmpty())) {
+                    continue;
+                }
                 if (selectColumnIds == null || !selectColumnIds.contains(field.getName())) {
                     items.add(new SuggestionValues.Item(field.getName(), field.getName()));
                 }
