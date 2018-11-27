@@ -14,6 +14,7 @@ package org.talend.components.marketo.input;
 
 import static java.util.stream.Collectors.joining;
 import static org.slf4j.LoggerFactory.getLogger;
+import static org.talend.components.marketo.MarketoApiConstants.ATTR_DEDUPE_FIELDS;
 import static org.talend.components.marketo.MarketoApiConstants.HEADER_CONTENT_TYPE_APPLICATION_JSON;
 import static org.talend.components.marketo.MarketoApiConstants.REQUEST_PARAM_QUERY_METHOD_GET;
 
@@ -62,9 +63,7 @@ public class OpportunitySource extends MarketoSource {
         String fields = dataSet.getFields() == null ? null : dataSet.getFields().stream().collect(joining(","));
         if (isOpportunityRole) {
             if (dataSet.getUseCompoundKey()) {
-
-                JsonObject payload = generateCompoundKeyPayload(filterType, fields);
-
+                JsonObject payload = generateCompoundKeyPayload(ATTR_DEDUPE_FIELDS, fields);
                 return handleResponse(opportunityClient.getOpportunityRolesWithCompoundKey(HEADER_CONTENT_TYPE_APPLICATION_JSON,
                         REQUEST_PARAM_QUERY_METHOD_GET, accessToken, payload));
             } else {

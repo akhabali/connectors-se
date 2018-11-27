@@ -14,6 +14,7 @@ package org.talend.components.marketo.input;
 
 import static java.util.stream.Collectors.joining;
 import static org.slf4j.LoggerFactory.getLogger;
+import static org.talend.components.marketo.MarketoApiConstants.ATTR_DEDUPE_FIELDS;
 import static org.talend.components.marketo.MarketoApiConstants.HEADER_CONTENT_TYPE_APPLICATION_JSON;
 import static org.talend.components.marketo.MarketoApiConstants.REQUEST_PARAM_QUERY_METHOD_GET;
 
@@ -66,7 +67,7 @@ public class CustomObjectSource extends MarketoSource {
         String filterValues = dataSet.getFilterValues();
         String fields = dataSet.getFields() == null ? null : dataSet.getFields().stream().collect(joining(","));
         if (dataSet.getUseCompoundKey()) {
-            JsonObject payload = generateCompoundKeyPayload(filterType, fields);
+            JsonObject payload = generateCompoundKeyPayload(ATTR_DEDUPE_FIELDS, fields);
             return handleResponse(customObjectClient.getCustomObjectsWithCompoundKey(HEADER_CONTENT_TYPE_APPLICATION_JSON, name,
                     REQUEST_PARAM_QUERY_METHOD_GET, accessToken, nextPageToken, payload));
 
