@@ -135,7 +135,7 @@ class UiActionServiceTest {
     @Test
     @HttpApiName("${class}_${method}")
     @DisplayName("Retrive module column names")
-    void retriveColumnsName() {
+    public void retriveColumnsName() {
         final String moduleName = "Account";
         final ModuleQueryDataSet dataSet = new ModuleQueryDataSet();
         final BasicDataStore datasore = new BasicDataStore();
@@ -161,7 +161,7 @@ class UiActionServiceTest {
     @Test
     @HttpApiName("${class}_${method}")
     @DisplayName("add selected column")
-    void addColumnsName() {
+    public void addColumnsName() {
         final ModuleQueryDataSet dataSet = new ModuleQueryDataSet();
         final BasicDataStore datasore = new BasicDataStore();
         datasore.setEndpoint(URL);
@@ -192,7 +192,7 @@ class UiActionServiceTest {
     @Test
     @HttpApiName("${class}_${method}")
     @DisplayName("check retrieved field type")
-    void testFieldType() {
+    public void testFieldType() {
         final String moduleName = "Account";
         final ModuleQueryDataSet dataSet = new ModuleQueryDataSet();
         final BasicDataStore datasore = new BasicDataStore();
