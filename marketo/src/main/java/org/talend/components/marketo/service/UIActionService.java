@@ -193,7 +193,7 @@ public class UIActionService extends MarketoService {
             List<Item> listNames = new ArrayList<>();
             for (JsonObject l : parseResultFromResponse(listClient.getLists(aToken, null, null, "", "", ""))
                     .getValuesAs(JsonObject.class)) {
-                listNames.add(new SuggestionValues.Item(String.valueOf(l.getString(ATTR_NAME)), l.getString(ATTR_NAME)));
+                listNames.add(new SuggestionValues.Item(String.valueOf(l.getInt(ATTR_ID)), l.getString(ATTR_NAME)));
             }
             return new SuggestionValues(true, listNames);
         } catch (Exception e) {

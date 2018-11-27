@@ -149,7 +149,7 @@ public class MarketoInputDataSet extends MarketoDataSet {
     private String workspaceName;
 
     @Option
-    @ActiveIf(target = "entity", value = { "Lead", "List" })
+    @ActiveIf(target = "entity", value = { "Lead" })
     @ActiveIf(target = "leadAction", value = { "getLeadChanges", "getLeadActivity" })
     @Documentation("Static List Id")
     private Integer listId;
@@ -165,7 +165,7 @@ public class MarketoInputDataSet extends MarketoDataSet {
     private String sinceDateTime;
 
     @Option
-    @ActiveIf(target = "entity", value = { "Lead" })
+    @ActiveIf(target = "entity", value = { "Lead", "List" })
     @ActiveIf(target = "leadAction", value = { "getLeadChanges", "getLeadActivity" })
     @Documentation("Lead Ids (Comma-separated Lead Ids)")
     private String leadIds;

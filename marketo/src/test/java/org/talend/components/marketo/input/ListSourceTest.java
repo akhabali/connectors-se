@@ -46,6 +46,7 @@ class ListSourceTest extends SourceBaseTest {
     protected void setUp() {
         super.setUp();
         inputDataSet.setEntity(MarketoEntity.List);
+        inputDataSet.setListName(String.valueOf(LIST_ID));
     }
 
     @Test

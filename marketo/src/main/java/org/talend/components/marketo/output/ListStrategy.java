@@ -66,8 +66,6 @@ public class ListStrategy extends OutputComponentStrategy implements ProcessorSt
         switch (dataSet.getListAction()) {
         case addTo:
             return addToList(payload);
-        case isMemberOf:
-            return isMemberOfList(payload);
         case removeFrom:
             return removeFromList(payload);
         }

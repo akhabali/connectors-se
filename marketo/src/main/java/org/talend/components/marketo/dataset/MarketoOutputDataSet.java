@@ -54,7 +54,6 @@ public class MarketoOutputDataSet extends MarketoDataSet {
 
     public enum ListAction {
         addTo,
-        isMemberOf,
         removeFrom
     }
 

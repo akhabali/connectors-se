@@ -54,13 +54,13 @@ public class ListSource extends MarketoSource {
     }
 
     private JsonObject getLeadsByListId() {
-        Integer listId = dataSet.getListId();
+        Integer listId = Integer.parseInt(dataSet.getListName());
         String fields = dataSet.getFields() == null ? null : dataSet.getFields().stream().collect(joining(","));
         return handleResponse(listClient.getLeadsByListId(accessToken, nextPageToken, listId, fields));
     }
 
     private JsonObject isMemberOfList() {
-        Integer listId = dataSet.getListId();
+        Integer listId = Integer.parseInt(dataSet.getListName());
         String leadIds = dataSet.getLeadIds();
         return handleResponse(listClient.isMemberOfList(accessToken, listId, leadIds));
     }
@@ -71,8 +71,8 @@ public class ListSource extends MarketoSource {
     }
 
     private JsonObject getLists() {
-        Integer id = dataSet.getListId();
-        String name = dataSet.getListName();
+        Integer id = null;
+        String name = "";
         String workspaceName = dataSet.getWorkspaceName();
         String programName = dataSet.getProgramName();
         return handleResponse(listClient.getLists(accessToken, nextPageToken, id, name, programName, workspaceName));
