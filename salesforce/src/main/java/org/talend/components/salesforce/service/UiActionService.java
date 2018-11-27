@@ -111,8 +111,7 @@ public class UiActionService {
             }
             Map<String, Field> fieldMap = service.getFieldMap(dataSet.getDataStore(), moduleName, localConfiguration);
             if (isAddAllColumns) {
-                service.guessSchema(fieldMap, schemaBuilder, entryBuilder);
-                return schemaBuilder.build();
+                return service.guessSchema(fieldMap, schemaBuilder, entryBuilder);
             } else {
                 List<String> selectedColumnsSet = dataSet.getSelectColumnIds();
                 if (selectedColumnsSet == null) {

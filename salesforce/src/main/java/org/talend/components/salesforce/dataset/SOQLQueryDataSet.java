@@ -17,7 +17,6 @@ package org.talend.components.salesforce.dataset;
 
 import org.talend.components.salesforce.datastore.BasicDataStore;
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Code;

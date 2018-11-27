@@ -20,6 +20,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.xml.namespace.QName;
 
@@ -197,9 +198,8 @@ public class SalesforceService {
         try {
             PartnerConnection connection = connect(dataStore, localConfiguration);
             DescribeSObjectResult module = connection.describeSObject(moduleName);
-            Map<String, Field> fieldMap = new HashMap<>();
+            Map<String, Field> fieldMap = new TreeMap<>();
             for (Field field : module.getFields()) {
-
                 fieldMap.put(field.getName(), field);
             }
             return fieldMap;
