@@ -122,6 +122,7 @@
                 <artifactId>docker-maven-plugin</artifactId>
                 <version>${docker-maven-plugin.version}</version>
                 <configuration>
+                    <skip>${skipTests}</skip>
                     <images>
                         <image>
                             <alias>amqtest</alias>
@@ -146,7 +147,6 @@
                             <goal>start</goal>
                         </goals>
                         <configuration>
-                            <skip>${really.skip.tests}</skip>
                             <images>
                                 <image>
                                     <name>vizotenko/activemq:1.0.0</name>
@@ -174,9 +174,6 @@
                         <goals>
                             <goal>stop</goal>
                         </goals>
-                        <configuration>
-                            <skip>${really.skip.tests}</skip>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
