@@ -15,16 +15,16 @@
 
 package org.talend.components.salesforce.dataset;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.talend.components.salesforce.datastore.BasicDataStore;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Suggestable;
-import org.talend.sdk.component.api.configuration.condition.ActiveIf;
-import org.talend.sdk.component.api.configuration.constraint.Uniques;
+import org.talend.sdk.component.api.configuration.action.Updatable;
 import org.talend.sdk.component.api.configuration.type.DataSet;
+import org.talend.sdk.component.api.configuration.ui.DefaultValue;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
-import org.talend.sdk.component.api.configuration.ui.widget.Structure;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import lombok.Data;
@@ -32,7 +32,7 @@ import lombok.Data;
 @Data
 @DataSet("ModuleQuery")
 @GridLayout(value = { @GridLayout.Row("dataStore"), @GridLayout.Row("moduleName"), @GridLayout.Row("condition"),
-        @GridLayout.Row("selectColumnIds"), @GridLayout.Row({ "addAllColumns", "selectedColumn" }), })
+        @GridLayout.Row("columnSelectionConfig") })
 @Documentation("")
 public class ModuleQueryDataSet implements QueryDataSet {
 
@@ -50,19 +50,17 @@ public class ModuleQueryDataSet implements QueryDataSet {
     private String condition;
 
     @Option
-    @Documentation("")
-    @Structure(type = Structure.Type.OUT, discoverSchema = "addColumns")
-    @Uniques
-    private List<String> selectColumnIds;
+    @Documentation("Column seelection")
+    @Updatable(value = "defaultColumns", parameters = { "dataStore", "moduleName" })
+    private ColumnSelectionConfig columnSelectionConfig;
 
-    @Option
-    @Documentation("")
-    private boolean addAllColumns = true;
+    @Data
+    @GridLayout({ @GridLayout.Row({ "selectColumnNames" }) })
+    public static class ColumnSelectionConfig implements Serializable {
 
-    @Option
-    @Documentation("")
-    @ActiveIf(target = "addAllColumns", value = { "false" })
-    @Suggestable(value = "retrieveColumns", parameters = { "dataStore", "moduleName", "selectColumnIds" })
-    private String selectedColumn;
+        @Option
+        @Documentation("")
+        private List<String> selectColumnNames;
+    }
 
 }

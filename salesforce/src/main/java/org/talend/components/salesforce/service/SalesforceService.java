@@ -17,8 +17,9 @@ package org.talend.components.salesforce.service;
 import java.net.Proxy;
 import java.net.ProxySelector;
 import java.net.URI;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -203,6 +204,27 @@ public class SalesforceService {
                 fieldMap.put(field.getName(), field);
             }
             return fieldMap;
+
+        } catch (ConnectionException e) {
+            throw handleConnectionException(e);
+        }
+    }
+
+    /**
+     * Retrieve module field map, filed name with filed
+     */
+    public List<String> getFieldNameList(BasicDataStore dataStore, String moduleName,
+            final LocalConfiguration localConfiguration) {
+        try {
+            PartnerConnection connection = connect(dataStore, localConfiguration);
+            DescribeSObjectResult module = connection.describeSObject(moduleName);
+            List<String> fieldNameList = new ArrayList<>();
+            for (Field field : module.getFields()) {
+                if (isSuppotedType(field)) {
+                    fieldNameList.add(field.getName());
+                }
+            }
+            return fieldNameList;
 
         } catch (ConnectionException e) {
             throw handleConnectionException(e);

@@ -69,7 +69,7 @@ public class ModuleQueryEmitter extends AbstractQueryEmitter implements Serializ
         }
 
         List<String> queryFields;
-        List<String> selectedColumns = ((ModuleQueryDataSet) dataset).getSelectColumnIds();
+        List<String> selectedColumns = ((ModuleQueryDataSet) dataset).getColumnSelectionConfig().getSelectColumnNames();
         if (selectedColumns == null || selectedColumns.isEmpty()) {
             queryFields = allModuleFields;
         } else if (!allModuleFields.containsAll(selectedColumns)) { // ensure requested fields exist
