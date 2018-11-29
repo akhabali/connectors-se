@@ -16,6 +16,34 @@
 #  limitations under the License.
 #
 
-. "$(dirname $0)/common.sh" $1
-. "$(dirname $0)/repository.sh"
-. "$(dirname $0)/server.sh"
+scriptBase="$(dirname $0)"
+
+. "$scriptBase/common.sh" $1
+export DOCKER_HTML="$BASEDIR/target/docker.html"
+
+mkdir -p $(dirname "$DOCKER_HTML")
+echo "<!DOCTYPE html>" > "$DOCKER_HTML"
+echo "<html>" >> "$DOCKER_HTML"
+echo "  <head>" >> "$DOCKER_HTML"
+echo "    <style>" >> "$DOCKER_HTML"
+echo "    table, th, td { border: 1px solid black; border-collapse: collapse; }" >> "$DOCKER_HTML"
+echo "    </style>" >> "$DOCKER_HTML"
+echo "  </head>" >> "$DOCKER_HTML"
+echo "  </body>" >> "$DOCKER_HTML"
+echo "    <h2>Docker Images</h2>" >> "$DOCKER_HTML"
+echo "    <table>" >> "$DOCKER_HTML"
+echo "      <tr>" >> "$DOCKER_HTML"
+echo "        <th>Repository</th>" >> "$DOCKER_HTML"
+echo "        <th>Image</th>" >> "$DOCKER_HTML"
+echo "        <th>Version</th>" >> "$DOCKER_HTML"
+echo "        <th>Tag</th>" >> "$DOCKER_HTML"
+echo "      </tr>" >> "$DOCKER_HTML"
+
+cat $DOCKER_HTML
+
+. "$scriptBase/repository.sh"
+. "$scriptBase/server.sh"
+
+echo "    </table>" >> "$DOCKER_HTML"
+echo "  </body>" >> "$DOCKER_HTML"
+echo "</html>" >> "$DOCKER_HTML"

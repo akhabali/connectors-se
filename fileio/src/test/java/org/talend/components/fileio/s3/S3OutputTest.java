@@ -27,8 +27,8 @@ class S3OutputTest {
     @Injected
     private ComponentsHandler handler;
 
-    @Service
-    private S3ConfigurationService configurationService;
+    // @Service
+    // private S3ConfigurationService configurationService;
 
     @Test
     void output() throws IOException {

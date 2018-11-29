@@ -13,26 +13,60 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="
-         http://maven.apache.org/POM/4.0.0
-          http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.talend.components</groupId>
   <artifactId>connectors-se</artifactId>
   <version>1.0.0-SNAPSHOT</version>
-  <name>Components</name>
   <packaging>pom</packaging>
+
+  <name>Components</name>
   <description>SE connectors using Talend Component Kit.</description>
   <url>https://talend.github.com/connectors-se</url>
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://github.com/talend/connectors-se/blob/master/LICENSE</url>
+      <distribution>may be downloaded from the Maven repository</distribution>
+    </license>
+  </licenses>
+
+  <modules>
+    <module>fileio</module>
+    <module>bigquery</module>
+    <module>elasticsearch</module>
+    <module>processing-tck</module>
+    <module>jdbc</module>
+    <module>salesforce</module>
+  </modules>
+
+  <scm>
+    <connection>scm:git:https://github.com/talend/connectors-se.git</connection>
+    <developerConnection>scm:git:https://github.com/talend/connectors-se.git</developerConnection>
+    <url>https://github.com/talend/connectors-se</url>
+    <tag>HEAD</tag>
+  </scm>
+  <distributionManagement>
+    <snapshotRepository>
+      <id>talend.snapshots</id>
+      <url>https://artifacts-oss.talend.com/nexus/content/repositories/TalendOpenSourceSnapshot</url>
+    </snapshotRepository>
+    <repository>
+      <id>talend.releases</id>
+      <url>https://artifacts-oss.talend.com/nexus/content/repositories/TalendOpenSourceRelease</url>
+    </repository>
+    <site>
+      <id>documentation.website</id>
+      <url>https://talend.github.com/connectors-se</url>
+    </site>
+  </distributionManagement>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <component-api.version>1.1.1</component-api.version>
-    <component-runtime.version>1.1.2-SNAPSHOT</component-runtime.version>
+    <component-runtime.version>1.1.3-SNAPSHOT</component-runtime.version>
     <slf4j.version>1.7.25</slf4j.version>
 
     <beam.version>2.6.0</beam.version>
@@ -52,72 +86,6 @@
 
     <validation.model>true</validation.model>
   </properties>
-
-  <modules>
-    <module>localio</module>
-    <module>fileio</module>
-    <module>bigquery</module>
-    <module>elasticsearch</module>
-    <module>processing-beam</module>
-    <module>processing-tck</module>
-    <module>jdbc</module>
-    <module>salesforce</module>
-  </modules>
-
-  <profiles>
-    <profile>
-      <id>docker</id>
-      <modules>
-        <module>connectors-se-docker</module>
-      </modules>
-    </profile>
-  </profiles>
-
-  <dependencies>
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <version>1.16.20</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.talend.sdk.component</groupId>
-      <artifactId>component-api</artifactId>
-      <version>${component-api.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>${slf4j.version}</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.talend.sdk.component</groupId>
-      <artifactId>component-runtime-junit</artifactId>
-      <version>${component-runtime.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-      <version>${junit5.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-      <version>${junit5.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <version>1.7.25</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
 
   <dependencyManagement>
     <dependencies> <!-- mainly to make beam* provided -->
@@ -226,24 +194,101 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.16.20</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.talend.sdk.component</groupId>
+      <artifactId>component-api</artifactId>
+      <version>${component-api.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+      <scope>provided</scope>
+    </dependency>
 
-  <distributionManagement>
-    <snapshotRepository>
-      <id>talend.snapshots</id>
-      <url>https://artifacts-oss.talend.com/nexus/content/repositories/TalendOpenSourceSnapshot</url>
-    </snapshotRepository>
+    <dependency>
+      <groupId>org.talend.sdk.component</groupId>
+      <artifactId>component-runtime-junit</artifactId>
+      <version>${component-runtime.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>${junit5.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>${junit5.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.7.25</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <repositories>
     <repository>
-      <id>talend.releases</id>
-      <url>https://artifacts-oss.talend.com/nexus/content/repositories/TalendOpenSourceRelease</url>
+      <id>TalendOpenSourceRelease</id>
+      <url>https://artifacts-zl.talend.com/nexus/content/repositories/TalendOpenSourceRelease/</url>
     </repository>
-    <site>
-      <id>documentation.website</id>
-      <url>https://talend.github.com/connectors-se</url>
-    </site>
-  </distributionManagement>
+    <repository>
+      <id>SonatypeSnapshotsOSS</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>TalendOpenSourceRelease</id>
+      <url>https://artifacts-zl.talend.com/nexus/content/repositories/TalendOpenSourceRelease/</url>
+    </pluginRepository>
+    <pluginRepository>
+      <id>SonatypeSnapshotsOSS</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </pluginRepository>
+  </pluginRepositories>
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>tidy-maven-plugin</artifactId>
+        <version>1.1.0</version>
+        <executions>
+          <execution>
+            <id>tidy-pom</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>pom</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <!--
       <plugin>
         <groupId>org.talend.tools</groupId>
@@ -311,6 +356,9 @@
             <goals>
               <goal>icon-report</goal>
             </goals>
+            <configuration>
+              <skip>${talend.icon-report.skip}</skip>
+            </configuration>
           </execution>
           <execution>
             <id>talend-component-bundle</id>
@@ -399,7 +447,7 @@
           </moduleExcludes>
         </configuration>
         <dependencies>
-          <dependency> <!-- bug on windows with default version -->
+          <dependency><!-- bug on windows with default version -->
             <groupId>org.jruby</groupId>
             <artifactId>jruby-complete</artifactId>
             <version>9.1.14.0</version>
@@ -495,51 +543,12 @@
     </plugins>
   </reporting>
 
-  <licenses>
-    <license>
-      <name>Apache License, Version 2.0</name>
-      <url>https://github.com/talend/connectors-se/blob/master/LICENSE</url>
-      <distribution>may be downloaded from the Maven repository</distribution>
-    </license>
-  </licenses>
-
-  <repositories>
-    <repository>
-      <id>TalendOpenSourceRelease</id>
-      <url>https://artifacts-zl.talend.com/nexus/content/repositories/TalendOpenSourceRelease/</url>
-    </repository>
-    <repository>
-      <id>SonatypeSnapshotsOSS</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>TalendOpenSourceRelease</id>
-      <url>https://artifacts-zl.talend.com/nexus/content/repositories/TalendOpenSourceRelease/</url>
-    </pluginRepository>
-    <pluginRepository>
-      <id>SonatypeSnapshotsOSS</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </pluginRepository>
-  </pluginRepositories>
-
-  <scm>
-    <connection>scm:git:https://github.com/talend/connectors-se.git</connection>
-    <developerConnection>scm:git:https://github.com/talend/connectors-se.git</developerConnection>
-    <url>https://github.com/talend/connectors-se</url>
-    <tag>HEAD</tag>
-  </scm>
+  <profiles>
+    <profile>
+      <id>docker</id>
+      <modules>
+        <module>connectors-se-docker</module>
+      </modules>
+    </profile>
+  </profiles>
 </project>
