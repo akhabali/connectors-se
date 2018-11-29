@@ -21,17 +21,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.talend.components.salesforce.service.SalesforceService.URL;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.Assert;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.talend.components.salesforce.SfHeaderFilter;
-import org.talend.components.salesforce.dataset.ModuleQueryDataSet;
+import org.talend.components.salesforce.dataset.ModuleDataSet;
 import org.talend.components.salesforce.datastore.BasicDataStore;
 import org.talend.sdk.component.api.DecryptedServer;
-import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
@@ -137,142 +133,15 @@ class UiActionServiceTest {
     @DisplayName("Retrive module column names")
     public void retriveColumnsName() {
         final String moduleName = "Account";
-        final ModuleQueryDataSet dataSet = new ModuleQueryDataSet();
         final BasicDataStore datasore = new BasicDataStore();
         datasore.setEndpoint(URL);
         datasore.setUserId(serverWithPassword.getUsername());
         datasore.setPassword(serverWithPassword.getPassword());
         datasore.setSecurityKey(serverWithSecuritykey.getPassword());
-        dataSet.setDataStore(datasore);
-        dataSet.setModuleName(moduleName);
-        Schema schema = service.addColumns(dataSet, factory);
-        assertNotNull(schema);
-        List<Schema.Entry> columns = schema.getEntries();
-        assertNotNull(columns);
-        assertEquals(54, columns.size());
-
-        List<String> selectedColumns = new ArrayList<>();
-        selectedColumns.add("Id");
-        selectedColumns.add("Name");
-        SuggestionValues values = service.retrieveColumns(datasore, moduleName, selectedColumns);
-        assertEquals(52, values.getItems().size());
-    }
-
-    @Test
-    @HttpApiName("${class}_${method}")
-    @DisplayName("add selected column")
-    public void addColumnsName() {
-        final ModuleQueryDataSet dataSet = new ModuleQueryDataSet();
-        final BasicDataStore datasore = new BasicDataStore();
-        datasore.setEndpoint(URL);
-        datasore.setUserId(serverWithPassword.getUsername());
-        datasore.setPassword(serverWithPassword.getPassword());
-        datasore.setSecurityKey(serverWithSecuritykey.getPassword());
-        dataSet.setDataStore(datasore);
-        dataSet.setModuleName("Account");
-        // 1. add selected column "Id" to "selectColumnIds"
-        dataSet.setSelectedColumn("Id");
-        dataSet.setAddAllColumns(false);
-        Schema schema = service.addColumns(dataSet, factory);
-        assertEquals(1, schema.getEntries().size());
-        // 2. can't add duplicate column to "selectColumnIds"
-        List<String> selectedColumns = new ArrayList<>();
-        selectedColumns.add("Id");
-        selectedColumns.add("Name");
-        dataSet.setSelectColumnIds(selectedColumns);
-        dataSet.setSelectedColumn("Name");
-        schema = service.addColumns(dataSet, factory);
-        assertEquals(2, schema.getEntries().size());
-        // 3. add new columns to "selectColumnIds"
-        dataSet.setSelectedColumn("IsDeleted");
-        schema = service.addColumns(dataSet, factory);
-        assertEquals(3, schema.getEntries().size());
-    }
-
-    @Test
-    @HttpApiName("${class}_${method}")
-    @DisplayName("check retrieved field type")
-    public void testFieldType() {
-        final String moduleName = "Account";
-        final ModuleQueryDataSet dataSet = new ModuleQueryDataSet();
-        final BasicDataStore datasore = new BasicDataStore();
-        datasore.setEndpoint(URL);
-        datasore.setUserId(serverWithPassword.getUsername());
-        datasore.setPassword(serverWithPassword.getPassword());
-        datasore.setSecurityKey(serverWithSecuritykey.getPassword());
-        dataSet.setDataStore(datasore);
-        dataSet.setModuleName(moduleName);
-        // check add all field to schema
-        Schema schema = service.addColumns(dataSet, factory);
-        assertNotNull(schema);
-        List<Schema.Entry> columns = schema.getEntries();
-        assertNotNull(columns);
-        assertEquals(54, columns.size());
-        for (Schema.Entry column : columns) {
-            if ("Id".equals(column.getName())) {
-                assertEquals(Schema.Type.STRING, column.getType());
-            }
-            if ("IsDeleted".equals(column.getName())) {
-                assertEquals(Schema.Type.BOOLEAN, column.getType());
-            }
-            if ("BillingLatitude".equals(column.getName())) {
-                assertEquals(Schema.Type.DOUBLE, column.getType());
-            }
-            if ("AnnualRevenue".equals(column.getName())) {
-                assertEquals(Schema.Type.DOUBLE, column.getType());
-            }
-            if ("NumberOfEmployees".equals(column.getName())) {
-                assertEquals(Schema.Type.INT, column.getType());
-            }
-            if ("LastActivityDate".equals(column.getName())) {
-                assertEquals(Schema.Type.DATETIME, column.getType());
-            }
-            if ("LastViewedDate".equals(column.getName())) {
-                assertEquals(Schema.Type.DATETIME, column.getType());
-            }
-        }
-
-        // check add field one by one
-        List<String> selectedColumns = new ArrayList<>();
-        selectedColumns.add("Id");
-        selectedColumns.add("IsDeleted");
-        selectedColumns.add("BillingLatitude");
-        selectedColumns.add("AnnualRevenue");
-        selectedColumns.add("NumberOfEmployees");
-        selectedColumns.add("LastActivityDate");
-
-        dataSet.setSelectColumnIds(null);
-        dataSet.setAddAllColumns(false);
-        dataSet.setSelectColumnIds(selectedColumns);
-        dataSet.setSelectedColumn("LastViewedDate");
-        schema = service.addColumns(dataSet, factory);
-        assertEquals(7, schema.getEntries().size());
-        for (Schema.Entry column : columns) {
-            if ("Id".equals(column.getName())) {
-                assertEquals(Schema.Type.STRING, column.getType());
-            }
-            if ("IsDeleted".equals(column.getName())) {
-                assertEquals(Schema.Type.BOOLEAN, column.getType());
-            }
-            if ("BillingLatitude".equals(column.getName())) {
-                assertEquals(Schema.Type.DOUBLE, column.getType());
-            }
-            if ("AnnualRevenue".equals(column.getName())) {
-                assertEquals(Schema.Type.DOUBLE, column.getType());
-            }
-            if ("NumberOfEmployees".equals(column.getName())) {
-                assertEquals(Schema.Type.INT, column.getType());
-            }
-            if ("LastActivityDate".equals(column.getName())) {
-                assertEquals(Schema.Type.DATETIME, column.getType());
-            }
-            if ("LastViewedDate".equals(column.getName())) {
-                assertEquals(Schema.Type.DATETIME, column.getType());
-            }
-        }
-
-        SuggestionValues values = service.retrieveColumns(datasore, moduleName, dataSet.getSelectColumnIds());
-        assertEquals(47, values.getItems().size());
+        ModuleDataSet.ColumnSelectionConfig filedNameList = service.defaultColumns(datasore, moduleName);
+        assertNotNull(filedNameList);
+        assertNotNull(filedNameList.getSelectColumnNames());
+        assertEquals(54, filedNameList.getSelectColumnNames().size());
 
     }
 

@@ -20,7 +20,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.talend.components.salesforce.dataset.ModuleQueryDataSet;
+import org.talend.components.salesforce.dataset.ModuleDataSet;
 import org.talend.components.salesforce.service.Messages;
 import org.talend.components.salesforce.service.SalesforceService;
 import org.talend.sdk.component.api.component.Icon;
@@ -41,15 +41,14 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Version
-@Icon(value = Icon.IconType.CUSTOM, custom = "SalesforceInput")
+@Icon(value = Icon.IconType.FILE_SALESFORCE)
 @Emitter(name = "ModuleQueryInput")
 @Documentation("Salesforce module query input ")
 public class ModuleQueryEmitter extends AbstractQueryEmitter implements Serializable {
 
-    public ModuleQueryEmitter(@Option("configuration") final ModuleQueryDataSet moduleQueryDataSet,
-            final SalesforceService service, LocalConfiguration configuration, final RecordBuilderFactory recordBuilderFactory,
-            final Messages messages) {
-        super(moduleQueryDataSet, service, configuration, recordBuilderFactory, messages);
+    public ModuleQueryEmitter(@Option("configuration") final ModuleDataSet moduleDataSet, final SalesforceService service,
+            LocalConfiguration configuration, final RecordBuilderFactory recordBuilderFactory, final Messages messages) {
+        super(moduleDataSet, service, configuration, recordBuilderFactory, messages);
     }
 
     public String getQuery() {
@@ -69,7 +68,7 @@ public class ModuleQueryEmitter extends AbstractQueryEmitter implements Serializ
         }
 
         List<String> queryFields;
-        List<String> selectedColumns = ((ModuleQueryDataSet) dataset).getColumnSelectionConfig().getSelectColumnNames();
+        List<String> selectedColumns = ((ModuleDataSet) dataset).getColumnSelectionConfig().getSelectColumnNames();
         if (selectedColumns == null || selectedColumns.isEmpty()) {
             queryFields = allModuleFields;
         } else if (!allModuleFields.containsAll(selectedColumns)) { // ensure requested fields exist
@@ -91,16 +90,16 @@ public class ModuleQueryEmitter extends AbstractQueryEmitter implements Serializ
         }
         sb.append(" from ");
         sb.append(getModuleName());
-        if (((ModuleQueryDataSet) dataset).getCondition() != null && !((ModuleQueryDataSet) dataset).getCondition().isEmpty()) {
+        if (((ModuleDataSet) dataset).getCondition() != null && !((ModuleDataSet) dataset).getCondition().isEmpty()) {
             sb.append(" where ");
-            sb.append(((ModuleQueryDataSet) dataset).getCondition());
+            sb.append(((ModuleDataSet) dataset).getCondition());
         }
         return sb.toString();
     }
 
     @Override
     String getModuleName() {
-        return ((ModuleQueryDataSet) dataset).getModuleName();
+        return ((ModuleDataSet) dataset).getModuleName();
     }
 
     private List<String> getColumnNames(DescribeSObjectResult in) {

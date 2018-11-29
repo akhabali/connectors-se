@@ -15,50 +15,35 @@
 package org.talend.components.salesforce.output;
 
 import java.io.Serializable;
-import java.util.List;
 
-import org.talend.components.salesforce.datastore.BasicDataStore;
+import org.talend.components.salesforce.dataset.ModuleDataSet;
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
-import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.DefaultValue;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
-import org.talend.sdk.component.api.configuration.ui.widget.Structure;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import lombok.Data;
 
 @Data
-@DataSet("salesforceOutput")
 @GridLayout({
         // the generated layout put one configuration entry per line,
         // customize it as much as needed
-        @GridLayout.Row({ "dataStore" }), @GridLayout.Row({ "moduleName" }), @GridLayout.Row({ "schema" }),
-        @GridLayout.Row({ "outputAction" }), @GridLayout.Row({ "batchMode" }), @GridLayout.Row("commitLevel"),
-        @GridLayout.Row("exceptionForErrors") })
+        @GridLayout.Row({ "moduleDataSet" }), @GridLayout.Row({ "outputAction" }), @GridLayout.Row({ "upsertKeyColumn" }),
+        @GridLayout.Row({ "batchMode" }), @GridLayout.Row("commitLevel"), @GridLayout.Row("exceptionForErrors") })
 @Documentation("TODO fill the documentation for this configuration")
 public class OutputConfiguration implements Serializable {
 
     @Option
     @Documentation("")
-    private BasicDataStore dataStore;
-
-    @Option
-    @Suggestable(value = "loadSalesforceModules", parameters = { "dataStore" })
-    @Documentation("module name")
-    private String moduleName;
-
-    @Option
-    @Structure(type = Structure.Type.IN, discoverSchema = "addColumns")
-    @Documentation("schem of the module")
-    private List<String> schema;
+    private ModuleDataSet moduleDataSet;
 
     @Option
     @Documentation("write operation")
     private OutputAction outputAction = OutputAction.INSERT;
 
     @Option
+    @ActiveIf(target = "outputAction", value = "UPSERT")
     @Documentation("key column for upsert")
     private String upsertKeyColumn;
 

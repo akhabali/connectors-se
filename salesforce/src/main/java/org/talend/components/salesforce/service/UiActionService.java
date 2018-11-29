@@ -23,7 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.talend.components.salesforce.dataset.ModuleQueryDataSet;
+import org.talend.components.salesforce.dataset.ModuleDataSet;
 import org.talend.components.salesforce.datastore.BasicDataStore;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.service.Service;
@@ -75,7 +75,7 @@ public class UiActionService {
     }
 
     @Suggestions("loadSalesforceModules")
-    public SuggestionValues loadSalesforceModules(@Option("dataStore") final BasicDataStore dataStore) {
+    public SuggestionValues loadSalesforceModules(@Option("moduleDataSet") final BasicDataStore dataStore) {
         try {
             List<SuggestionValues.Item> items = new ArrayList<>();
             final PartnerConnection connection = this.service.connect(dataStore, localConfiguration);
@@ -92,10 +92,10 @@ public class UiActionService {
     }
 
     @Update("defaultColumns")
-    public ModuleQueryDataSet.ColumnSelectionConfig defaultColumns(@Option("dataStore") final BasicDataStore dataStore,
+    public ModuleDataSet.ColumnSelectionConfig defaultColumns(@Option("moduleDataSet") final BasicDataStore dataStore,
             @Option("moduleName") final String moduleName) {
         try {
-            final ModuleQueryDataSet.ColumnSelectionConfig config = new ModuleQueryDataSet.ColumnSelectionConfig();
+            final ModuleDataSet.ColumnSelectionConfig config = new ModuleDataSet.ColumnSelectionConfig();
 
             if (moduleName == null || moduleName.isEmpty()) {
                 config.setSelectColumnNames(new ArrayList<>());

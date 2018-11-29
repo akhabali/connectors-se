@@ -416,9 +416,9 @@ public class BulkQueryService {
             return null;
         }
         Record.Builder recordBuilder = recordBuilderFactory.newRecordBuilder();
-        for (Map.Entry entry : result.entrySet()) {
-            if (entry.getValue() != null) {
-                addField(recordBuilder, fieldMap.get(entry.getKey()), result.get(entry.getKey()));
+        for (String fieldName : result.keySet()) {
+            if (fieldName != null) {
+                addField(recordBuilder, fieldMap.get(fieldName), result.get(fieldName));
             }
         }
         return recordBuilder.build();
@@ -432,7 +432,7 @@ public class BulkQueryService {
      * Add field to record
      */
     private void addField(final Record.Builder builder, Field field, final String value) throws IOException {
-        if (value == null || field == null) {
+        if (field == null || value == null || value.isEmpty()) {
             return;
         }
         try {
@@ -442,19 +442,16 @@ public class BulkQueryService {
                 break;
             case _double:
             case percent:
+            case currency:
                 builder.withDouble(field.getName(), Double.parseDouble(value));
                 break;
             case _int:
                 builder.withInt(field.getName(), Integer.valueOf(value));
                 break;
-            case currency:
-                builder.withDouble(field.getName(), Double.parseDouble(value));
-                break;
             case date:
                 builder.withDateTime(field.getName(), DATE_FORMAT.parse(value));
                 break;
             case datetime:
-                builder.withTimestamp(field.getName(), DATETIME_FORMAT.parse(value).getTime());
                 break;
             case time:
                 builder.withTimestamp(field.getName(), TIME_FORMAT.parse(value).getTime());

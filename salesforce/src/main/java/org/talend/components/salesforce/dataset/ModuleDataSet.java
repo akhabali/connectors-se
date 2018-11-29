@@ -23,18 +23,17 @@ import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.action.Updatable;
 import org.talend.sdk.component.api.configuration.type.DataSet;
-import org.talend.sdk.component.api.configuration.ui.DefaultValue;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import lombok.Data;
 
 @Data
-@DataSet("ModuleQuery")
+@DataSet("ModuleSelection")
 @GridLayout(value = { @GridLayout.Row("dataStore"), @GridLayout.Row("moduleName"), @GridLayout.Row("condition"),
         @GridLayout.Row("columnSelectionConfig") })
 @Documentation("")
-public class ModuleQueryDataSet implements QueryDataSet {
+public class ModuleDataSet implements QueryDataSet {
 
     @Option
     @Documentation("")

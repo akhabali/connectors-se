@@ -45,7 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Version
-@Icon(value = Icon.IconType.CUSTOM, custom = "SalesforceOutput")
+@Icon(value = Icon.IconType.FILE_SALESFORCE)
 @Processor(name = "SalesforceOutput", family = "Salesforce")
 @Documentation("Salesforce output")
 public class SalesforceOutput implements Serializable {
@@ -74,29 +74,20 @@ public class SalesforceOutput implements Serializable {
     @PostConstruct
     public void init() {
         try {
-            final PartnerConnection connection = service.connect(outputConfig.getDataStore(), localConfiguration);
-            outputService = new SalesforceOutputService(outputConfig, connection, recordBuilderFactory, messages);
-            Map<String, Field> fieldMap = service.getFieldMap(outputConfig.getDataStore(), outputConfig.getModuleName(),
+            final PartnerConnection connection = service.connect(outputConfig.getModuleDataSet().getDataStore(),
                     localConfiguration);
+            outputService = new SalesforceOutputService(outputConfig, connection, recordBuilderFactory, messages);
+            Map<String, Field> fieldMap = service.getFieldMap(outputConfig.getModuleDataSet().getDataStore(),
+                    outputConfig.getModuleDataSet().getModuleName(), localConfiguration);
             outputService.setFieldMap(fieldMap);
         } catch (ConnectionException e) {
             throw service.handleConnectionException(e);
         }
     }
 
-    @BeforeGroup
-    public void beforeGroup() {
-    }
-
     @ElementListener
     public void onNext(@Input final Record record) throws IOException {
         outputService.write(record);
-    }
-
-    @AfterGroup
-    public void afterGroup() {
-        // symmetric method of the beforeGroup() executed after the chunk processing
-        // Note: if you don't need it you can delete it
     }
 
     @PreDestroy

@@ -24,8 +24,11 @@ import java.util.stream.StreamSupport;
 
 import org.apache.beam.sdk.PipelineResult;
 import org.apache.beam.sdk.testing.PAssert;
+import org.apache.beam.sdk.testing.TestPipeline;
 import org.apache.beam.sdk.values.PCollection;
 import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -36,8 +39,12 @@ import org.talend.sdk.component.runtime.beam.TalendIO;
 import org.talend.sdk.component.runtime.input.Mapper;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
+@Ignore("TODO need account on server side")
 @DisplayName("Suite of test for the Salesforce Input with beam")
 public class SalesforceInputSOQLBeamTest extends SalesforceBaseTest {
+
+    @Rule
+    public transient final TestPipeline pipeline = TestPipeline.create();
 
     @Test
     @DisplayName("Soql query selection [valid]")
@@ -99,14 +106,8 @@ public class SalesforceInputSOQLBeamTest extends SalesforceBaseTest {
         soqlQueryDataSet.setDataStore(dataStore);
         final String config = configurationByExample().forInstance(soqlQueryDataSet).configured().toQueryString();
         IllegalStateException ex = assertThrows(IllegalStateException.class,
-                () -> Job
-                        .components()
-                        .component("salesforce-input", "Salesforce://SOQLQueryInput?" + config)
-                        .component("collector", "test://collector")
-                        .connections()
-                        .from("salesforce-input")
-                        .to("collector")
-                        .build()
+                () -> Job.components().component("salesforce-input", "Salesforce://SOQLQueryInput?" + config)
+                        .component("collector", "test://collector").connections().from("salesforce-input").to("collector").build()
                         .run());
     }
 

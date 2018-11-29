@@ -26,9 +26,6 @@ public class SalesforceBaseTest implements Serializable {
 
     public static String SECURITY_KEY;
 
-    @Rule
-    public transient final TestPipeline pipeline = TestPipeline.create();
-
     protected BasicDataStore dataStore;
 
     static {

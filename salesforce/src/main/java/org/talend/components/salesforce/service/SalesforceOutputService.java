@@ -99,7 +99,7 @@ public class SalesforceOutputService implements Serializable {
             final RecordBuilderFactory factory, Messages messages) {
         this.connection = connection;
         this.outputAction = outputConfig.getOutputAction();
-        this.moduleName = outputConfig.getModuleName();
+        this.moduleName = outputConfig.getModuleDataSet().getModuleName();
         this.messages = messages;
         this.factory = factory;
         if (outputConfig.isBatchMode()) {
