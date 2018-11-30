@@ -6,9 +6,9 @@ public class RabbitMQTestConstants {
 
     public static final String PORT = System.getProperty("amqp.port") != null ? System.getProperty("amqp.port") : "5671";
 
-    public static final String USER_NAME = "guest";
+    public static final String USER_NAME = "user";
 
-    public static final String PASSWORD = "guest";
+    public static final String PASSWORD = "bitnami";
 
     public static final String QUEUE_NAME = "test";
 
