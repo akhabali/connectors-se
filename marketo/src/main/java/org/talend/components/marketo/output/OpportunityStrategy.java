@@ -21,6 +21,7 @@ import static org.talend.components.marketo.MarketoApiConstants.HEADER_CONTENT_T
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 import org.slf4j.Logger;
 import org.talend.components.marketo.dataset.MarketoDataSet.MarketoEntity;
@@ -51,18 +52,18 @@ public class OpportunityStrategy extends OutputComponentStrategy {
     public JsonObject getPayload(JsonObject incomingData) {
         JsonObject data = incomingData;
         JsonArray input = jsonFactory.createArrayBuilder().add(data).build();
+        JsonObjectBuilder builder = jsonFactory.createObjectBuilder();
         if (OutputAction.sync.equals(dataSet.getAction())) {
-            return jsonFactory.createObjectBuilder() //
-                    .add(ATTR_ACTION, dataSet.getSyncMethod().name()) //
-                    .add(ATTR_DEDUPE_BY, dataSet.getDedupeBy()) //
-                    .add(ATTR_INPUT, input) //
-                    .build();
+            builder.add(ATTR_ACTION, dataSet.getSyncMethod().name());
+            if (dataSet.getDedupeBy() != null) {
+                builder.add(ATTR_DEDUPE_BY, dataSet.getDedupeBy());
+            }
         } else {
-            return jsonFactory.createObjectBuilder() //
-                    .add(ATTR_DELETE_BY, dataSet.getDeleteBy().name()) //
-                    .add(ATTR_INPUT, input) //
-                    .build();
+            builder.add(ATTR_DELETE_BY, dataSet.getDeleteBy().name());
         }
+        builder.add(ATTR_INPUT, input);
+
+        return builder.build();
     }
 
     @Override
