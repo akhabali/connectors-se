@@ -12,9 +12,8 @@
  */
 package org.talend.components.jdbc.input;
 
-import java.io.Serializable;
-
-import org.talend.components.jdbc.dataset.SqlQueryDataset;
+import lombok.extern.slf4j.Slf4j;
+import org.talend.components.jdbc.configuration.InputQueryConfig;
 import org.talend.components.jdbc.service.I18nMessage;
 import org.talend.components.jdbc.service.JdbcService;
 import org.talend.sdk.component.api.component.Icon;
@@ -24,7 +23,7 @@ import org.talend.sdk.component.api.input.Emitter;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-import lombok.extern.slf4j.Slf4j;
+import java.io.Serializable;
 
 @Slf4j
 @Version
@@ -33,9 +32,10 @@ import lombok.extern.slf4j.Slf4j;
 @Documentation("JDBC query input")
 public class QueryInputEmitter extends AbstractInputEmitter implements Serializable {
 
-    public QueryInputEmitter(@Option("configuration") final SqlQueryDataset queryDataSet, final JdbcService jdbcDriversService,
-            final RecordBuilderFactory recordBuilderFactory, final I18nMessage i18nMessage) {
-        super(queryDataSet, jdbcDriversService, recordBuilderFactory, i18nMessage);
+    public QueryInputEmitter(@Option("configuration") final InputQueryConfig inputQueryConfig,
+            final JdbcService jdbcDriversService, final RecordBuilderFactory recordBuilderFactory,
+            final I18nMessage i18nMessage) {
+        super(inputQueryConfig, jdbcDriversService, recordBuilderFactory, i18nMessage);
     }
 
 }

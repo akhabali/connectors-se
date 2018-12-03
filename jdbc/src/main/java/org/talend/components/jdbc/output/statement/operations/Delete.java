@@ -12,9 +12,8 @@
  */
 package org.talend.components.jdbc.output.statement.operations;
 
-import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
-import org.talend.components.jdbc.configuration.OutputConfiguration;
+import org.talend.components.jdbc.configuration.OutputConfig;
 import org.talend.components.jdbc.output.platforms.Platform;
 import org.talend.components.jdbc.service.I18nMessage;
 import org.talend.components.jdbc.service.JdbcService;
@@ -39,7 +38,7 @@ public class Delete extends JdbcAction {
 
     private boolean namedParamsResolved;
 
-    public Delete(final Platform platform, final OutputConfiguration configuration, final I18nMessage i18n,
+    public Delete(final Platform platform, final OutputConfig configuration, final I18nMessage i18n,
             final JdbcService.JdbcDatasource dataSource) {
         super(platform, configuration, i18n, dataSource);
         this.keys = new ArrayList<>(ofNullable(configuration.getKeys()).orElse(emptyList()));

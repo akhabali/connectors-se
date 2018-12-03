@@ -3,7 +3,9 @@ package org.talend.components.jdbc;
 import lombok.Data;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
-import org.talend.components.jdbc.configuration.OutputConfiguration;
+import org.talend.components.jdbc.configuration.InputQueryConfig;
+import org.talend.components.jdbc.configuration.InputTableNameConfig;
+import org.talend.components.jdbc.configuration.OutputConfig;
 import org.talend.components.jdbc.containers.JdbcTestContainer;
 import org.talend.components.jdbc.dataset.SqlQueryDataset;
 import org.talend.components.jdbc.dataset.TableNameDataset;
@@ -62,7 +64,7 @@ public abstract class BaseJdbcTest {
         uiActionService.getTableFromDatabase(datastore).getItems().stream()
                 .filter(item -> item.getId().equalsIgnoreCase(testTable)).findFirst().ifPresent(item -> {
                     final Platform platform = PlatformFactory.get(datastore);
-                    try (final Connection connection = jdbcService.createDataSource(datastore, false, false).getConnection()) {
+                    try (final Connection connection = jdbcService.createDataSource(datastore, false).getConnection()) {
                         try (final PreparedStatement stm = connection
                                 .prepareStatement("DROP TABLE " + platform.identifier(testTable))) {
                             stm.executeUpdate();
@@ -78,8 +80,9 @@ public abstract class BaseJdbcTest {
     }
 
     public List<Record> readAll(final String table, final JdbcTestContainer container) {
-        final TableNameDataset dataset = newTableNameDataset(table, container);
-        final String inConfig = configurationByExample().forInstance(dataset).configured().toQueryString();
+        final InputTableNameConfig config = new InputTableNameConfig();
+        config.setDataSet(newTableNameDataset(table, container));
+        final String inConfig = configurationByExample().forInstance(config).configured().toQueryString();
         Job.components().component("jdbcInput", "Jdbc://TableNameInput?" + inConfig).component("collector", "test://collector")
                 .connections().from("jdbcInput").to("collector").build().run();
         final List<Record> data = new ArrayList<>(getComponentsHandler().getCollectedData(Record.class));
@@ -92,7 +95,9 @@ public abstract class BaseJdbcTest {
         dataset.setConnection(newConnection(container));
         final String total = "total";
         dataset.setSqlQuery("select count(*) as " + total + " from " + table);
-        final String inConfig = configurationByExample().forInstance(dataset).configured().toQueryString();
+        final InputQueryConfig config = new InputQueryConfig();
+        config.setDataSet(dataset);
+        final String inConfig = configurationByExample().forInstance(config).configured().toQueryString();
         Job.components().component("jdbcInput", "Jdbc://QueryInput?" + inConfig).component("collector", "test://collector")
                 .connections().from("jdbcInput").to("collector").build().run();
         final Record data = getComponentsHandler().getCollectedData(Record.class).iterator().next();
@@ -106,9 +111,9 @@ public abstract class BaseJdbcTest {
 
     public static void insertRows(final String table, final JdbcTestContainer container, final long rowCount,
             final boolean withNullValues, final int withMissingIdEvery, final String stringPrefix) {
-        final OutputConfiguration configuration = new OutputConfiguration();
+        final OutputConfig configuration = new OutputConfig();
         configuration.setDataset(newTableNameDataset(table, container));
-        configuration.setActionOnData(OutputConfiguration.ActionOnData.INSERT);
+        configuration.setActionOnData(OutputConfig.ActionOnData.INSERT);
         configuration.setCreateTableIfNotExists(true);
         configuration.setKeys(asList("id"));
         final String config = configurationByExample().forInstance(configuration).configured().toQueryString();

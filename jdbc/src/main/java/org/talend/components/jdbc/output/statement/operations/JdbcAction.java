@@ -14,7 +14,7 @@ package org.talend.components.jdbc.output.statement.operations;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.talend.components.jdbc.configuration.OutputConfiguration;
+import org.talend.components.jdbc.configuration.OutputConfig;
 import org.talend.components.jdbc.output.Reject;
 import org.talend.components.jdbc.output.platforms.Platform;
 import org.talend.components.jdbc.output.statement.RecordToSQLTypeConverter;
@@ -39,7 +39,7 @@ public abstract class JdbcAction {
 
     private final Platform platform;
 
-    private final OutputConfiguration configuration;
+    private final OutputConfig configuration;
 
     private final I18nMessage i18n;
 

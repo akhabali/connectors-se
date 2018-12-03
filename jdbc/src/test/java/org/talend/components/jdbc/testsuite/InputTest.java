@@ -12,7 +12,6 @@
  */
 package org.talend.components.jdbc.testsuite;
 
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.TestTemplate;
@@ -21,11 +20,12 @@ import org.talend.components.jdbc.BaseJdbcTest;
 import org.talend.components.jdbc.Disabled;
 import org.talend.components.jdbc.DisabledDatabases;
 import org.talend.components.jdbc.JdbcInvocationContextProvider;
-import org.talend.components.jdbc.configuration.OutputConfiguration;
+import org.talend.components.jdbc.configuration.InputAdvancedCommonConfig;
+import org.talend.components.jdbc.configuration.InputQueryConfig;
+import org.talend.components.jdbc.configuration.InputTableNameConfig;
 import org.talend.components.jdbc.containers.JdbcTestContainer;
 import org.talend.components.jdbc.dataset.SqlQueryDataset;
 import org.talend.components.jdbc.dataset.TableNameDataset;
-import org.talend.components.jdbc.datastore.JdbcConnection;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.junit.environment.Environment;
 import org.talend.sdk.component.junit.environment.builtin.ContextualEnvironment;
@@ -35,7 +35,6 @@ import org.talend.sdk.component.runtime.manager.chain.Job;
 
 import java.util.List;
 
-import static org.apache.derby.vti.XmlVTI.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.talend.components.jdbc.Database.SNOWFLAKE;
@@ -46,7 +45,7 @@ import static org.talend.sdk.component.junit.SimpleFactory.configurationByExampl
 @Environment(ContextualEnvironment.class)
 @Environment(DirectRunnerEnvironment.class)
 @WithComponents("org.talend.components.jdbc")
-@DisabledDatabases({ @Disabled(value = SNOWFLAKE, reason = "need to be setup on ci") })
+@DisabledDatabases({ @Disabled(value = SNOWFLAKE, reason = "Snowflake credentials need to be setup on ci") })
 class InputTest extends BaseJdbcTest {
 
     @TestTemplate
@@ -55,48 +54,15 @@ class InputTest extends BaseJdbcTest {
         final int rowCount = getRandomRowCount();
         final String testTableName = getTestTableName(testInfo);
         insertRows(testTableName, container, rowCount, false, 0, null);
-        final SqlQueryDataset dataset = new SqlQueryDataset();
-        dataset.setConnection(newConnection(container));
-        dataset.setSqlQuery("select * from " + testTableName);
-        final String config = configurationByExample().forInstance(dataset).configured().toQueryString();
-        Job.components().component("jdbcInput", "Jdbc://QueryInput?" + config).component("collector", "test://collector")
-                .connections().from("jdbcInput").to("collector").build().run();
-
-        final List<Record> collectedData = getComponentsHandler().getCollectedData(Record.class);
-        assertEquals(rowCount, collectedData.size());
-    }
-
-    @Test
-    @DisplayName("redshift - valid query")
-    void redshift(final TestInfo testInfo) {
-        final int rowCount = 2;
-        final String testTableName = getTestTableName(testInfo);
-
-        final JdbcConnection connection = new JdbcConnection();
-        connection.setDbType("Redshift");
-        connection.setUserId("talend");
-        connection.setPassword("Talend2018!!");
-        connection.setJdbcUrl("jdbc:redshift://redshift-cluster-jdbc.cmdij9hodzia.us-east-2.redshift.amazonaws.com:5439/dev");
-
-        final TableNameDataset tableNameDataSet = new TableNameDataset();
-        tableNameDataSet.setConnection(connection);
-        tableNameDataSet.setTableName(testTableName);
-
-        final OutputConfiguration configuration = new OutputConfiguration();
-        configuration.setDataset(tableNameDataSet);
-        configuration.setActionOnData(OutputConfiguration.ActionOnData.INSERT);
-        configuration.setCreateTableIfNotExists(true);
-        configuration.setKeys(asList("id"));
-        final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
-        Job.components().component("rowGenerator", "jdbcTest://RowGenerator?" + rowGeneratorConfig(rowCount, false, 0, null))
-                .component("jdbcOutput", "Jdbc://Output?" + config).connections().from("rowGenerator").to("jdbcOutput").build()
-                .run();
-
-        final SqlQueryDataset dataset = new SqlQueryDataset();
-        dataset.setConnection(connection);
-        dataset.setSqlQuery("select * from " + testTableName);
-        final String inConfig = configurationByExample().forInstance(dataset).configured().toQueryString();
-        Job.components().component("jdbcInput", "Jdbc://QueryInput?" + inConfig).component("collector", "test://collector")
+        final SqlQueryDataset sqlQueryDataset = new SqlQueryDataset();
+        sqlQueryDataset.setConnection(newConnection(container));
+        sqlQueryDataset.setSqlQuery("select * from " + testTableName);
+        final InputQueryConfig config = new InputQueryConfig();
+        config.setAdvancedCommonConfig(new InputAdvancedCommonConfig());
+        config.setFetchSize(rowCount / 3);
+        config.setDataSet(sqlQueryDataset);
+        final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
+        Job.components().component("jdbcInput", "Jdbc://QueryInput?" + configURI).component("collector", "test://collector")
                 .connections().from("jdbcInput").to("collector").build().run();
 
         final List<Record> collectedData = getComponentsHandler().getCollectedData(Record.class);
@@ -106,11 +72,13 @@ class InputTest extends BaseJdbcTest {
     @TestTemplate
     @DisplayName("Query - unvalid query ")
     void invalidQuery(final TestInfo testInfo, final JdbcTestContainer container) {
-        final SqlQueryDataset dataset = new SqlQueryDataset();
-        dataset.setConnection(newConnection(container));
-        dataset.setSqlQuery("select fromm " + getTestTableName(testInfo));
-        final String config = configurationByExample().forInstance(dataset).configured().toQueryString();
-        assertThrows(IllegalStateException.class, () -> Job.components().component("jdbcInput", "Jdbc://QueryInput?" + config)
+        final SqlQueryDataset sqlQueryDataset = new SqlQueryDataset();
+        sqlQueryDataset.setConnection(newConnection(container));
+        sqlQueryDataset.setSqlQuery("select fromm " + getTestTableName(testInfo));
+        final InputQueryConfig config = new InputQueryConfig();
+        config.setDataSet(sqlQueryDataset);
+        final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
+        assertThrows(IllegalStateException.class, () -> Job.components().component("jdbcInput", "Jdbc://QueryInput?" + configURI)
                 .component("collector", "test://collector").connections().from("jdbcInput").to("collector").build().run());
     }
 
@@ -120,9 +88,13 @@ class InputTest extends BaseJdbcTest {
         final SqlQueryDataset dataset = new SqlQueryDataset();
         dataset.setConnection(newConnection(container));
         dataset.setSqlQuery("drop table abc");
-        final String config = configurationByExample().forInstance(dataset).configured().toQueryString();
-        assertThrows(IllegalArgumentException.class, () -> Job.components().component("jdbcInput", "Jdbc://QueryInput?" + config)
-                .component("collector", "test://collector").connections().from("jdbcInput").to("collector").build().run());
+        final InputQueryConfig config = new InputQueryConfig();
+        config.setDataSet(dataset);
+        final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
+        assertThrows(IllegalArgumentException.class,
+                () -> Job.components().component("jdbcInput", "Jdbc://QueryInput?" + configURI)
+                        .component("collector", "test://collector").connections().from("jdbcInput").to("collector").build()
+                        .run());
     }
 
     @TestTemplate
@@ -131,9 +103,13 @@ class InputTest extends BaseJdbcTest {
         final SqlQueryDataset dataset = new SqlQueryDataset();
         dataset.setConnection(newConnection(container));
         dataset.setSqlQuery("INSERT INTO users(id, name) VALUES (1, 'user1')");
-        final String config = configurationByExample().forInstance(dataset).configured().toQueryString();
-        assertThrows(IllegalArgumentException.class, () -> Job.components().component("jdbcInput", "Jdbc://QueryInput?" + config)
-                .component("collector", "test://collector").connections().from("jdbcInput").to("collector").build().run());
+        final InputQueryConfig config = new InputQueryConfig();
+        config.setDataSet(dataset);
+        final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
+        assertThrows(IllegalArgumentException.class,
+                () -> Job.components().component("jdbcInput", "Jdbc://QueryInput?" + configURI)
+                        .component("collector", "test://collector").connections().from("jdbcInput").to("collector").build()
+                        .run());
     }
 
     @TestTemplate
@@ -142,9 +118,10 @@ class InputTest extends BaseJdbcTest {
         final int rowCount = getRandomRowCount();
         final String testTableName = getTestTableName(testInfo);
         insertRows(testTableName, container, rowCount, false, 0, null);
-        final String config = configurationByExample().forInstance(newTableNameDataset(testTableName, container)).configured()
-                .toQueryString();
-        Job.components().component("jdbcInput", "Jdbc://TableNameInput?" + config).component("collector", "test://collector")
+        final InputTableNameConfig config = new InputTableNameConfig();
+        config.setDataSet(newTableNameDataset(testTableName, container));
+        final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
+        Job.components().component("jdbcInput", "Jdbc://TableNameInput?" + configURI).component("collector", "test://collector")
                 .connections().from("jdbcInput").to("collector").build().run();
 
         final List<Record> collectedData = getComponentsHandler().getCollectedData(Record.class);
@@ -154,11 +131,16 @@ class InputTest extends BaseJdbcTest {
     @TestTemplate
     @DisplayName("TableName - invalid table name")
     void invalidTableName(final JdbcTestContainer container) {
+
         final TableNameDataset dataset = new TableNameDataset();
         dataset.setConnection(newConnection(container));
         dataset.setTableName("xxx");
-        final String config = configurationByExample().forInstance(dataset).configured().toQueryString();
-        assertThrows(IllegalStateException.class, () -> Job.components().component("jdbcInput", "Jdbc://TableNameInput?" + config)
-                .component("collector", "test://collector").connections().from("jdbcInput").to("collector").build().run());
+        final InputTableNameConfig config = new InputTableNameConfig();
+        config.setDataSet(dataset);
+        final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
+        assertThrows(IllegalStateException.class,
+                () -> Job.components().component("jdbcInput", "Jdbc://TableNameInput?" + configURI)
+                        .component("collector", "test://collector").connections().from("jdbcInput").to("collector").build()
+                        .run());
     }
 }

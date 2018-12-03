@@ -20,7 +20,7 @@ import org.talend.components.jdbc.BaseJdbcTest;
 import org.talend.components.jdbc.Disabled;
 import org.talend.components.jdbc.DisabledDatabases;
 import org.talend.components.jdbc.JdbcInvocationContextProvider;
-import org.talend.components.jdbc.configuration.OutputConfiguration;
+import org.talend.components.jdbc.configuration.OutputConfig;
 import org.talend.components.jdbc.containers.JdbcTestContainer;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.junit.environment.Environment;
@@ -45,16 +45,16 @@ import static org.talend.sdk.component.junit.SimpleFactory.configurationByExampl
 @ExtendWith({ JdbcInvocationContextProvider.class })
 @Environment(ContextualEnvironment.class)
 @Environment(DirectRunnerEnvironment.class)
-@DisabledDatabases({ @Disabled(value = SNOWFLAKE, reason = "need to be setup on ci") })
+@DisabledDatabases({ @Disabled(value = SNOWFLAKE, reason = "Snowflake credentials need to be setup on ci") })
 class OutputTest extends BaseJdbcTest {
 
     @TestTemplate
     @DisplayName("Insert - valid use case")
     void insert(final TestInfo testInfo, final JdbcTestContainer container) {
-        final OutputConfiguration configuration = new OutputConfiguration();
+        final OutputConfig configuration = new OutputConfig();
         final String testTableName = getTestTableName(testInfo);
         configuration.setDataset(newTableNameDataset(testTableName, container));
-        configuration.setActionOnData(OutputConfiguration.ActionOnData.INSERT);
+        configuration.setActionOnData(OutputConfig.ActionOnData.INSERT);
         configuration.setCreateTableIfNotExists(true);
         configuration.setKeys(asList("id"));
         final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
@@ -68,10 +68,10 @@ class OutputTest extends BaseJdbcTest {
     @TestTemplate
     @DisplayName("Insert - with null values")
     void insertWithNullValues(final TestInfo testInfo, final JdbcTestContainer container) {
-        final OutputConfiguration configuration = new OutputConfiguration();
+        final OutputConfig configuration = new OutputConfig();
         final String testTableName = getTestTableName(testInfo);
         configuration.setDataset(newTableNameDataset(testTableName, container));
-        configuration.setActionOnData(OutputConfiguration.ActionOnData.INSERT);
+        configuration.setActionOnData(OutputConfig.ActionOnData.INSERT);
         configuration.setCreateTableIfNotExists(true);
         configuration.setKeys(asList("id"));
         final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
@@ -102,9 +102,9 @@ class OutputTest extends BaseJdbcTest {
         final String testTableName = getTestTableName(testInfo);
         insertRows(testTableName, container, rowCount, false, 0, null);
         // delete the inserted data data
-        final OutputConfiguration deleteConfig = new OutputConfiguration();
+        final OutputConfig deleteConfig = new OutputConfig();
         deleteConfig.setDataset(newTableNameDataset(testTableName, container));
-        deleteConfig.setActionOnData(OutputConfiguration.ActionOnData.DELETE);
+        deleteConfig.setActionOnData(OutputConfig.ActionOnData.DELETE);
         deleteConfig.setKeys(singletonList("id"));
         final String updateConfig = configurationByExample().forInstance(deleteConfig).configured().toQueryString();
         Job.components().component("userGenerator", "jdbcTest://RowGenerator?" + rowGeneratorConfig(rowCount, false, 0, null))
@@ -122,9 +122,9 @@ class OutputTest extends BaseJdbcTest {
         final String testTableName = getTestTableName(testInfo);
         insertRows(testTableName, container, rowCount, false, 0, null);
         final Exception error = assertThrows(Exception.class, () -> {
-            final OutputConfiguration deleteConfig = new OutputConfiguration();
+            final OutputConfig deleteConfig = new OutputConfig();
             deleteConfig.setDataset(newTableNameDataset(testTableName, container));
-            deleteConfig.setActionOnData(OutputConfiguration.ActionOnData.DELETE);
+            deleteConfig.setActionOnData(OutputConfig.ActionOnData.DELETE);
             final String updateConfig = configurationByExample().forInstance(deleteConfig).configured().toQueryString();
             Job.components().component("userGenerator", "jdbcTest://RowGenerator?" + rowGeneratorConfig(rowCount, false, 0, null))
                     .component("jdbcOutput", "Jdbc://Output?" + updateConfig).connections().from("userGenerator").to("jdbcOutput")
@@ -142,9 +142,9 @@ class OutputTest extends BaseJdbcTest {
         final String testTableName = getTestTableName(testInfo);
         insertRows(testTableName, container, rowCount, false, 0, null);
         // 2) perform delete test with some record with missing delete key (id)
-        final OutputConfiguration deleteConfig = new OutputConfiguration();
+        final OutputConfig deleteConfig = new OutputConfig();
         deleteConfig.setDataset(newTableNameDataset(testTableName, container));
-        deleteConfig.setActionOnData(OutputConfiguration.ActionOnData.DELETE);
+        deleteConfig.setActionOnData(OutputConfig.ActionOnData.DELETE);
         deleteConfig.setKeys(singletonList("id"));
         final String updateConfig = configurationByExample().forInstance(deleteConfig).configured().toQueryString();
         final int missingKeyEvery = 2;
@@ -167,9 +167,9 @@ class OutputTest extends BaseJdbcTest {
         final String testTableName = getTestTableName(testInfo);
         insertRows(testTableName, container, rowCount, false, 0, null);
         // update the inserted data data
-        final OutputConfiguration configuration = new OutputConfiguration();
+        final OutputConfig configuration = new OutputConfig();
         configuration.setDataset(newTableNameDataset(testTableName, container));
-        configuration.setActionOnData(OutputConfiguration.ActionOnData.UPDATE);
+        configuration.setActionOnData(OutputConfig.ActionOnData.UPDATE);
         configuration.setKeys(singletonList("id"));
         final String updateConfig = configurationByExample().forInstance(configuration).configured().toQueryString();
         Job.components()
@@ -188,9 +188,9 @@ class OutputTest extends BaseJdbcTest {
     @DisplayName("Update - no keys")
     void updateWithNoKeys(final TestInfo testInfo, final JdbcTestContainer container) {
         final Exception error = assertThrows(Exception.class, () -> {
-            final OutputConfiguration updateConfiguration = new OutputConfiguration();
+            final OutputConfig updateConfiguration = new OutputConfig();
             updateConfiguration.setDataset(newTableNameDataset(getTestTableName(testInfo), container));
-            updateConfiguration.setActionOnData(OutputConfiguration.ActionOnData.UPDATE);
+            updateConfiguration.setActionOnData(OutputConfig.ActionOnData.UPDATE);
             final String updateConfig = configurationByExample().forInstance(updateConfiguration).configured().toQueryString();
             Job.components().component("userGenerator", "jdbcTest://RowGenerator?" + rowGeneratorConfig(1, false, 0, "updated"))
                     .component("jdbcOutput", "Jdbc://Output?" + updateConfig).connections().from("userGenerator").to("jdbcOutput")
@@ -207,9 +207,9 @@ class OutputTest extends BaseJdbcTest {
         final String testTableName = getTestTableName(testInfo);
         insertRows(testTableName, container, existingRecords, false, 0, null);
         // update the inserted data data
-        final OutputConfiguration configuration = new OutputConfiguration();
+        final OutputConfig configuration = new OutputConfig();
         configuration.setDataset(newTableNameDataset(testTableName, container));
-        configuration.setActionOnData(OutputConfiguration.ActionOnData.UPSERT);
+        configuration.setActionOnData(OutputConfig.ActionOnData.UPSERT);
         configuration.setKeys(singletonList("id"));
         final String updateConfig = configurationByExample().forInstance(configuration).configured().toQueryString();
         final int newRecords = existingRecords * 2;

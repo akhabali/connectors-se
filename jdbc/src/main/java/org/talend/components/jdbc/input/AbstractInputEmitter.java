@@ -1,7 +1,7 @@
 package org.talend.components.jdbc.input;
 
 import lombok.extern.slf4j.Slf4j;
-import org.talend.components.jdbc.dataset.BaseDataSet;
+import org.talend.components.jdbc.configuration.InputConfig;
 import org.talend.components.jdbc.service.I18nMessage;
 import org.talend.components.jdbc.service.JdbcService;
 import org.talend.sdk.component.api.input.Producer;
@@ -18,7 +18,7 @@ import java.util.Date;
 @Slf4j
 public abstract class AbstractInputEmitter implements Serializable {
 
-    private final BaseDataSet dataSet;
+    private final InputConfig inputConfig;
 
     private RecordBuilderFactory recordBuilderFactory;
 
@@ -34,9 +34,9 @@ public abstract class AbstractInputEmitter implements Serializable {
 
     private JdbcService.JdbcDatasource dataSource;
 
-    public AbstractInputEmitter(final BaseDataSet queryDataSet, final JdbcService jdbcDriversService,
+    AbstractInputEmitter(final InputConfig inputConfig, final JdbcService jdbcDriversService,
             final RecordBuilderFactory recordBuilderFactory, final I18nMessage i18nMessage) {
-        this.dataSet = queryDataSet;
+        this.inputConfig = inputConfig;
         this.recordBuilderFactory = recordBuilderFactory;
         this.jdbcDriversService = jdbcDriversService;
         this.i18n = i18nMessage;
@@ -44,35 +44,19 @@ public abstract class AbstractInputEmitter implements Serializable {
 
     @PostConstruct
     public void init() {
-        if (dataSet.getQuery() == null || dataSet.getQuery().trim().isEmpty()) {
+        if (inputConfig.getDataSet().getQuery() == null || inputConfig.getDataSet().getQuery().trim().isEmpty()) {
             throw new IllegalArgumentException(i18n.errorEmptyQuery());
         }
-
-        if (jdbcDriversService.isNotReadOnlySQLQuery(dataSet.getQuery())) {
+        if (jdbcDriversService.isNotReadOnlySQLQuery(inputConfig.getDataSet().getQuery())) {
             throw new IllegalArgumentException(i18n.errorUnauthorizedQuery());
         }
 
         try {
-            dataSource = jdbcDriversService.createDataSource(dataSet.getConnection());
+            dataSource = jdbcDriversService.createDataSource(inputConfig.getDataSet().getConnection());
             connection = dataSource.getConnection();
-            /*
-             * Add some optimization for mysql by activating read only and enabling streaming
-             * todo move this to org.talend.components.jdbc.output.platforms.Platform
-             */
-            if (connection.getMetaData().getDriverName().toLowerCase().contains("mysql")) {
-                statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-                final Class<?> clazz = statement.getClass();
-                try {
-                    Method method = clazz.getMethod("enableStreamingResults");
-                    if (method != null) { // have to use reflect here
-                        method.invoke(statement);
-                    }
-                } catch (Exception e) { // ignore anything
-                }
-            } else {
-                statement = connection.createStatement();
-            }
-            resultSet = statement.executeQuery(dataSet.getQuery());
+            statement = connection.createStatement();
+            statement.setFetchSize(inputConfig.getFetchSize());
+            resultSet = statement.executeQuery(inputConfig.getDataSet().getQuery());
         } catch (final SQLException e) {
             throw new IllegalStateException(e);
         }
@@ -81,21 +65,21 @@ public abstract class AbstractInputEmitter implements Serializable {
     @Producer
     public Record next() {
         try {
-            final boolean hasNext = resultSet.next();
-            if (!hasNext) {
+            if (!resultSet.next()) {
                 return null;
             }
 
             final Record.Builder recordBuilder = recordBuilderFactory.newRecordBuilder();
-            for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
-                final String name = resultSet.getMetaData().getColumnName(i);
-                final int sqlType = resultSet.getMetaData().getColumnType(i);
-                final String javaType = resultSet.getMetaData().getColumnClassName(i);
+            final ResultSetMetaData metaData = resultSet.getMetaData();
+            for (int i = 1; i <= metaData.getColumnCount(); i++) {
+                final String name = metaData.getColumnName(i);
+                final int sqlType = metaData.getColumnType(i);
+                final String javaType = metaData.getColumnClassName(i);
                 final Object value = resultSet.getObject(i);
                 addColumn(recordBuilder, name, sqlType, value);
             }
             return recordBuilder.build();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -153,7 +137,7 @@ public abstract class AbstractInputEmitter implements Serializable {
     }
 
     @PreDestroy
-    public void preDestroy() {
+    public void release() {
         if (resultSet != null) {
             try {
                 resultSet.close();
@@ -169,6 +153,16 @@ public abstract class AbstractInputEmitter implements Serializable {
             }
         }
         if (connection != null) {
+            try {
+                connection.commit();
+            } catch (final SQLException e) {
+                log.error(i18n.errorSQL(e.getErrorCode(), e.getMessage()), e);
+                try {
+                    connection.rollback();
+                } catch (final SQLException rollbackError) {
+                    log.error(i18n.errorSQL(rollbackError.getErrorCode(), rollbackError.getMessage()), rollbackError);
+                }
+            }
             try {
                 connection.close();
             } catch (SQLException e) {

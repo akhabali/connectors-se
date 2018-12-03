@@ -14,6 +14,7 @@ package org.talend.components.jdbc.input;
 
 import java.io.Serializable;
 
+import org.talend.components.jdbc.configuration.InputTableNameConfig;
 import org.talend.components.jdbc.dataset.TableNameDataset;
 import org.talend.components.jdbc.service.I18nMessage;
 import org.talend.components.jdbc.service.JdbcService;
@@ -33,10 +34,9 @@ import lombok.extern.slf4j.Slf4j;
 @Documentation("JDBC input using table name")
 public class TableNameInputEmitter extends AbstractInputEmitter implements Serializable {
 
-    public TableNameInputEmitter(@Option("configuration") final TableNameDataset tableNameDataset,
-            final JdbcService jdbcDriversService, final RecordBuilderFactory recordBuilderFactory,
-            final I18nMessage i18nMessage) {
-        super(tableNameDataset, jdbcDriversService, recordBuilderFactory, i18nMessage);
+    public TableNameInputEmitter(@Option("configuration") final InputTableNameConfig config, final JdbcService jdbcDriversService,
+            final RecordBuilderFactory recordBuilderFactory, final I18nMessage i18nMessage) {
+        super(config, jdbcDriversService, recordBuilderFactory, i18nMessage);
     }
 
 }

@@ -1,7 +1,7 @@
 package org.talend.components.jdbc.output.statement;
 
 import lombok.Data;
-import org.talend.components.jdbc.configuration.OutputConfiguration;
+import org.talend.components.jdbc.configuration.OutputConfig;
 import org.talend.components.jdbc.output.platforms.*;
 import org.talend.components.jdbc.output.statement.operations.*;
 import org.talend.components.jdbc.service.I18nMessage;
@@ -16,7 +16,7 @@ public class JdbcActionFactory {
 
     private final JdbcService.JdbcDatasource dataSource;
 
-    private final OutputConfiguration configuration;
+    private final OutputConfig configuration;
 
     public JdbcAction createAction() {
         final JdbcAction action;

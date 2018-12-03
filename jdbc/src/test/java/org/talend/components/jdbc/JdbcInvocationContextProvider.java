@@ -11,11 +11,17 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static java.lang.Boolean.getBoolean;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
+import static java.util.Locale.ROOT;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.empty;
+import static org.junit.jupiter.api.extension.ConditionEvaluationResult.disabled;
+import static org.talend.components.jdbc.Database.ALL;
+import static org.talend.components.jdbc.Database.DERBY;
 
 public class JdbcInvocationContextProvider implements TestTemplateInvocationContextProvider, BeforeAllCallback, AfterAllCallback {
 
@@ -26,8 +32,8 @@ public class JdbcInvocationContextProvider implements TestTemplateInvocationCont
 
     @Override
     public Stream<TestTemplateInvocationContext> provideTestTemplateInvocationContexts(ExtensionContext ctx) {
-        return getTestDatabase(ctx).flatMap(it -> new EnvironmentsConfigurationParser(ctx.getRequiredTestClass()).stream()
-                .map(e -> invocationContext(it, e)));
+        return Database.getActiveDatabases().flatMap(it -> new EnvironmentsConfigurationParser(ctx.getRequiredTestClass())
+                .stream().map(e -> invocationContext(it, e)));
     }
 
     private TestTemplateInvocationContext invocationContext(final Database database, final EnvironmentProvider provider) {
@@ -68,15 +74,29 @@ public class JdbcInvocationContextProvider implements TestTemplateInvocationCont
     @Data
     private static class DatabaseExecutionCondition implements ExecutionCondition {
 
+        private static final String ENV_PREFIX = "talend.jdbc.it";
+
         private static final ConditionEvaluationResult ENABLED = ConditionEvaluationResult.enabled("");
 
         private final Database database;
 
         @Override
         public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
-            return getDisableConditions(context).stream()
-                    .filter(d -> d.value().equals(Database.ALL) || d.value().equals(database)).findFirst()
-                    .map(disabled -> ConditionEvaluationResult.disabled(disabled.reason())).orElse(ENABLED);
+            if (getBoolean(ENV_PREFIX + "." + ALL.name().toLowerCase(ROOT) + ".skip")) {
+                return disabled("All test disabled by env var '-D" + ENV_PREFIX + "." + ALL.name().toLowerCase(ROOT) + ".skip'");
+            }
+
+            if (!getBoolean(ENV_PREFIX) && !database.equals(DERBY)) {
+                return disabled(
+                        "Integration test disabled. Only Derby will be used for tests. to activate integration test set env var '-Dtalend.jdbc.it'");
+            }
+
+            if (getBoolean(ENV_PREFIX + "." + database.name().toLowerCase(ROOT) + ".skip")) {
+                return disabled("Test disabled by env var '-D" + ENV_PREFIX + "." + database.name().toLowerCase(ROOT) + ".skip'");
+            }
+
+            return getDisableConditions(context).stream().filter(d -> d.value().equals(ALL) || d.value().equals(database))
+                    .findFirst().map(disabled -> disabled(disabled.reason())).orElse(ENABLED);
         }
     }
 
@@ -123,21 +143,21 @@ public class JdbcInvocationContextProvider implements TestTemplateInvocationCont
 
     @Override
     public void beforeAll(final ExtensionContext ctx) {
+        final List<Disabled> disabled = getDisableConditions(ctx);
+        if (disabled.stream().anyMatch(d -> ALL.equals(d.value()))) {
+            return;
+        }
         final ExtensionContext.Store store = getStore(ctx);
-        getTestDatabase(ctx).forEach(database -> store.put(database, getContainerInstance(database)));
-    }
-
-    private static Stream<Database> getTestDatabase(final ExtensionContext ctx) {
-        final List<Database> disables = getDisableConditions(ctx).stream().map(Disabled::value).collect(toList());
-        return disables.contains(Database.ALL) ? empty() : Database.getActiveDatabases().filter(d -> !disables.contains(d));
+        Database.getActiveDatabases().filter(database -> disabled.stream().noneMatch(d -> d.value().equals(database)))
+                .forEach(database -> store.put(database, getContainerInstance(database)));
     }
 
     private static List<Disabled> getDisableConditions(ExtensionContext ctx) {
-        List<Disabled> disables = ctx.getTestClass().map(clazz -> clazz.getAnnotation(DisabledDatabases.class))
-                .map(annotation -> stream(annotation.value())).orElse(empty()).collect(toList());
-        disables.addAll(ctx.getTestMethod().map(method -> method.getAnnotation(DisabledDatabases.class))
-                .map(annotation -> stream(annotation.value())).orElse(empty()).collect(toList()));
-        return disables;
+        return concat(
+                ctx.getTestClass().map(clazz -> clazz.getAnnotation(DisabledDatabases.class))
+                        .map(annotation -> stream(annotation.value())).orElse(empty()),
+                ctx.getTestMethod().map(method -> method.getAnnotation(DisabledDatabases.class))
+                        .map(annotation -> stream(annotation.value())).orElse(empty())).collect(toList());
     }
 
     private static JdbcTestContainer getContainerInstance(final Database name) {
@@ -173,7 +193,7 @@ public class JdbcInvocationContextProvider implements TestTemplateInvocationCont
     @Override
     public void afterAll(ExtensionContext extensionContext) {
         final ExtensionContext.Store store = getStore(extensionContext);
-        Stream.of(Database.values()).map(db -> store.remove(db, JdbcTestContainer.class)).filter(Objects::nonNull)
+        Stream.of(Database.values()).map(database -> store.remove(database, JdbcTestContainer.class)).filter(Objects::nonNull)
                 .forEach(JdbcTestContainer::stop);
     }
 

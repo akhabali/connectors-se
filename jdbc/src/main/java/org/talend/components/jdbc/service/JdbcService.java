@@ -93,13 +93,13 @@ public class JdbcService {
     }
 
     public JdbcDatasource createDataSource(final JdbcConnection connection) {
-        return createDataSource(connection, true, false);
+        final JdbcConfiguration.Driver driver = getDriver(connection);
+        return new JdbcDatasource(connection, getDriverFiles(driver), driver, false, false);
     }
 
-    public JdbcDatasource createDataSource(final JdbcConnection connection, final boolean isAutoCommit,
-            final boolean rewriteBatchedStatements) {
+    public JdbcDatasource createDataSource(final JdbcConnection connection, final boolean rewriteBatchedStatements) {
         final JdbcConfiguration.Driver driver = getDriver(connection);
-        return new JdbcDatasource(connection, getDriverFiles(driver), driver, isAutoCommit, rewriteBatchedStatements);
+        return new JdbcDatasource(connection, getDriverFiles(driver), driver, false, rewriteBatchedStatements);
     }
 
     public static class JdbcDatasource implements AutoCloseable {

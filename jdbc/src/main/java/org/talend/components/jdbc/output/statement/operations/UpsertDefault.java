@@ -1,7 +1,7 @@
 package org.talend.components.jdbc.output.statement.operations;
 
 import lombok.extern.slf4j.Slf4j;
-import org.talend.components.jdbc.configuration.OutputConfiguration;
+import org.talend.components.jdbc.configuration.OutputConfig;
 import org.talend.components.jdbc.output.Reject;
 import org.talend.components.jdbc.output.platforms.Platform;
 import org.talend.components.jdbc.output.statement.RecordToSQLTypeConverter;
@@ -32,7 +32,7 @@ public class UpsertDefault extends JdbcAction {
 
     private Map<Integer, Schema.Entry> queryParams;
 
-    public UpsertDefault(final Platform platform, final OutputConfiguration configuration, final I18nMessage i18n,
+    public UpsertDefault(final Platform platform, final OutputConfig configuration, final I18nMessage i18n,
             final JdbcService.JdbcDatasource dataSource) {
         super(platform, configuration, i18n, dataSource);
         this.keys = new ArrayList<>(ofNullable(configuration.getKeys()).orElse(emptyList()));

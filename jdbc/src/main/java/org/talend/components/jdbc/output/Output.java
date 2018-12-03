@@ -13,7 +13,7 @@
 package org.talend.components.jdbc.output;
 
 import lombok.extern.slf4j.Slf4j;
-import org.talend.components.jdbc.configuration.OutputConfiguration;
+import org.talend.components.jdbc.configuration.OutputConfig;
 import org.talend.components.jdbc.output.platforms.Platform;
 import org.talend.components.jdbc.output.platforms.PlatformFactory;
 import org.talend.components.jdbc.output.statement.JdbcActionFactory;
@@ -42,7 +42,7 @@ import java.util.List;
 @Documentation("JDBC Output component")
 public class Output implements Serializable {
 
-    private final OutputConfiguration configuration;
+    private final OutputConfig configuration;
 
     private final JdbcService jdbcService;
 
@@ -58,9 +58,9 @@ public class Output implements Serializable {
 
     private boolean tableCreated;
 
-    public Output(@Option("configuration") final OutputConfiguration outputConfiguration, final JdbcService jdbcService,
+    public Output(@Option("configuration") final OutputConfig outputConfig, final JdbcService jdbcService,
             final I18nMessage i18nMessage) {
-        this.configuration = outputConfiguration;
+        this.configuration = outputConfig;
         this.jdbcService = jdbcService;
         this.i18n = i18nMessage;
     }
@@ -68,7 +68,7 @@ public class Output implements Serializable {
     @PostConstruct
     public void init() {
         platform = PlatformFactory.get(configuration.getDataset().getConnection());
-        dataSource = jdbcService.createDataSource(configuration.getDataset().getConnection(), false,
+        dataSource = jdbcService.createDataSource(configuration.getDataset().getConnection(),
                 configuration.isRewriteBatchedStatements());
         final JdbcActionFactory jdbcActionFactory = new JdbcActionFactory(platform, i18n, dataSource, configuration);
         this.jdbcAction = jdbcActionFactory.createAction();

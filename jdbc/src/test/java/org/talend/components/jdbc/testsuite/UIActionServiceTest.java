@@ -48,7 +48,7 @@ import static org.talend.components.jdbc.Database.SNOWFLAKE;
 @WithComponents("org.talend.components.jdbc")
 @ExtendWith({ JdbcInvocationContextProvider.class })
 @Environment(ContextualEnvironment.class)
-@DisabledDatabases({ @Disabled(value = SNOWFLAKE, reason = "need to be setup on ci") })
+@DisabledDatabases({ @Disabled(value = SNOWFLAKE, reason = "Snowflake credentials need to be setup on ci") })
 class UIActionServiceTest extends BaseJdbcTest {
 
     @Service
@@ -117,7 +117,7 @@ class UIActionServiceTest extends BaseJdbcTest {
     }
 
     private void createTestTable(String testTableName, JdbcConnection datastore) throws SQLException {
-        try (JdbcService.JdbcDatasource dataSource = getJdbcService().createDataSource(datastore, false, false)) {
+        try (JdbcService.JdbcDatasource dataSource = getJdbcService().createDataSource(datastore, false)) {
             try (final Connection connection = dataSource.getConnection()) {
                 PlatformFactory.get(datastore).createTableIfNotExist(connection, testTableName, singletonList("id"),
                         singletonList(recordBuilderFactory.newRecordBuilder().withInt("id", 1).build()));

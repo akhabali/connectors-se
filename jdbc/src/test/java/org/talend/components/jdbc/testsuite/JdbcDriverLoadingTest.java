@@ -2,6 +2,7 @@ package org.talend.components.jdbc.testsuite;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.talend.components.jdbc.configuration.InputQueryConfig;
 import org.talend.components.jdbc.dataset.SqlQueryDataset;
 import org.talend.components.jdbc.datastore.JdbcConnection;
 import org.talend.sdk.component.junit5.WithComponents;
@@ -25,8 +26,11 @@ class JdbcDriverLoadingTest {
         final SqlQueryDataset dataset = new SqlQueryDataset();
         dataset.setConnection(connection);
         dataset.setSqlQuery("select * from users");
-        final String config = configurationByExample().forInstance(dataset).configured().toQueryString();
-        assertThrows(IllegalStateException.class, () -> Job.components().component("jdbcInput", "Jdbc://QueryInput?" + config)
+
+        final InputQueryConfig config = new InputQueryConfig();
+        config.setDataSet(dataset);
+        final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
+        assertThrows(IllegalStateException.class, () -> Job.components().component("jdbcInput", "Jdbc://QueryInput?" + configURI)
                 .component("collector", "test://collector").connections().from("jdbcInput").to("collector").build().run());
     }
 
@@ -41,9 +45,12 @@ class JdbcDriverLoadingTest {
         final SqlQueryDataset dataset = new SqlQueryDataset();
         dataset.setConnection(connection);
         dataset.setSqlQuery("select * from users");
-        final String config = configurationByExample().forInstance(dataset).configured().toQueryString();
+
+        final InputQueryConfig config = new InputQueryConfig();
+        config.setDataSet(dataset);
+        final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
         assertThrows(IllegalStateException.class,
-                () -> Job.components().component("jdbcInput", "Jdbc://QueryInput?" + config)
+                () -> Job.components().component("jdbcInput", "Jdbc://QueryInput?" + configURI)
                         .component("collector", "jdbcTest://DataCollector").connections().from("jdbcInput").to("collector")
                         .build().run());
     }
