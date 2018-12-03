@@ -99,7 +99,7 @@
                         <include>**/*IT.java</include>
                     </includes>
                     <systemPropertyVariables>
-                        <jms.port>${amqp.port}</jms.port>
+                        <amqp.port>${amqp.port}</amqp.port>
                         <javax.net.ssl.keyStore>src/test/resources/client_key.p12</javax.net.ssl.keyStore>
                         <javax.net.ssl.keyStorePassword>password</javax.net.ssl.keyStorePassword>
                         <javax.net.ssl.trustStore>src/test/resources/rabbitstore</javax.net.ssl.trustStore>

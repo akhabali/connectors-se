@@ -8,9 +8,7 @@ import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.junit5.WithComponents;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.PASSWORD;
-import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.USER_NAME;
+import static org.talend.components.rabbitmq.testutils.RabbitMQTestConstants.*;
 
 @WithComponents("org.talend.components.rabbitmq")
 class ActionServiceTestIT {
@@ -22,7 +20,7 @@ class ActionServiceTestIT {
     public void testSuccessfulConnection() {
         RabbitMQDataStore dataStore = new RabbitMQDataStore();
         dataStore.setHostname(RabbitMQTestConstants.HOSTNAME);
-        dataStore.setPort(5671);
+        dataStore.setPort(Integer.valueOf(PORT));
         dataStore.setUserName(USER_NAME);
         dataStore.setPassword(PASSWORD);
         dataStore.setTLS(true);
