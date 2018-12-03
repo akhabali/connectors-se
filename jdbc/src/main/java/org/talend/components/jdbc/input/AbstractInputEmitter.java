@@ -1,6 +1,5 @@
 package org.talend.components.jdbc.input;
 
-import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.dataset.BaseDataSet;
 import org.talend.components.jdbc.service.I18nMessage;
@@ -33,7 +32,7 @@ public abstract class AbstractInputEmitter implements Serializable {
 
     private ResultSet resultSet;
 
-    private HikariDataSource dataSource;
+    private JdbcService.JdbcDatasource dataSource;
 
     public AbstractInputEmitter(final BaseDataSet queryDataSet, final JdbcService jdbcDriversService,
             final RecordBuilderFactory recordBuilderFactory, final I18nMessage i18nMessage) {
@@ -54,10 +53,11 @@ public abstract class AbstractInputEmitter implements Serializable {
         }
 
         try {
-            dataSource = jdbcDriversService.createDataSourceReadOnly(dataSet.getConnection());
+            dataSource = jdbcDriversService.createDataSource(dataSet.getConnection());
             connection = dataSource.getConnection();
             /*
              * Add some optimization for mysql by activating read only and enabling streaming
+             * todo move this to org.talend.components.jdbc.output.platforms.Platform
              */
             if (connection.getMetaData().getDriverName().toLowerCase().contains("mysql")) {
                 statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -73,7 +73,7 @@ public abstract class AbstractInputEmitter implements Serializable {
                 statement = connection.createStatement();
             }
             resultSet = statement.executeQuery(dataSet.getQuery());
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -82,18 +82,19 @@ public abstract class AbstractInputEmitter implements Serializable {
     public Record next() {
         try {
             final boolean hasNext = resultSet.next();
-            if (hasNext) {
-                Record.Builder recordBuilder = recordBuilderFactory.newRecordBuilder();
-                for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
-                    final String name = resultSet.getMetaData().getColumnName(i);
-                    final int type = resultSet.getMetaData().getColumnType(i);
-                    final Object value = resultSet.getObject(i);
-                    addColumn(recordBuilder, name, type, value);
-                }
-                return recordBuilder.build();
+            if (!hasNext) {
+                return null;
             }
 
-            return null;
+            final Record.Builder recordBuilder = recordBuilderFactory.newRecordBuilder();
+            for (int i = 1; i <= resultSet.getMetaData().getColumnCount(); i++) {
+                final String name = resultSet.getMetaData().getColumnName(i);
+                final int sqlType = resultSet.getMetaData().getColumnType(i);
+                final String javaType = resultSet.getMetaData().getColumnClassName(i);
+                final Object value = resultSet.getObject(i);
+                addColumn(recordBuilder, name, sqlType, value);
+            }
+            return recordBuilder.build();
         } catch (SQLException e) {
             throw new IllegalStateException(e);
         }
@@ -109,7 +110,6 @@ public abstract class AbstractInputEmitter implements Serializable {
             builder.withInt(name, (Integer) value);
             break;
         case java.sql.Types.INTEGER:
-        case java.sql.Types.BIGINT:
             if (value instanceof Integer) { // mysql INT can be a java Long
                 builder.withInt(name, (Integer) value);
             } else {
@@ -140,6 +140,7 @@ public abstract class AbstractInputEmitter implements Serializable {
         case Types.LONGVARBINARY:
             builder.withBytes(name, (byte[]) value);
             break;
+        case java.sql.Types.BIGINT:
         case java.sql.Types.DECIMAL:
         case java.sql.Types.NUMERIC:
         case java.sql.Types.VARCHAR:

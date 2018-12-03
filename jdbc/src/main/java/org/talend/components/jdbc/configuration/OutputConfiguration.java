@@ -15,7 +15,6 @@ package org.talend.components.jdbc.configuration;
 import lombok.Data;
 import org.talend.components.jdbc.dataset.TableNameDataset;
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.condition.ActiveIfs;
 import org.talend.sdk.component.api.configuration.constraint.Required;
@@ -23,15 +22,15 @@ import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.talend.components.jdbc.service.UIActionService.ACTION_SUGGESTION_TABLE_COLUMNS_NAMES;
 import static org.talend.sdk.component.api.configuration.condition.ActiveIf.EvaluationStrategy.CONTAINS;
 import static org.talend.sdk.component.api.configuration.condition.ActiveIfs.Operator.OR;
 
 @Data
-@GridLayout(value = { @GridLayout.Row("dataset"), @GridLayout.Row({ "actionOnData" }), @GridLayout.Row("keys"),
-        @GridLayout.Row("ignoreUpdate") })
+@GridLayout(value = { @GridLayout.Row("dataset"), @GridLayout.Row("createTableIfNotExists"), @GridLayout.Row({ "actionOnData" }),
+        @GridLayout.Row("keys"), @GridLayout.Row("ignoreUpdate") })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row("rewriteBatchedStatements") })
 @Documentation("Those properties define an output data set for the JDBC output component")
 public class OutputConfiguration implements Serializable {
@@ -42,20 +41,29 @@ public class OutputConfiguration implements Serializable {
     private TableNameDataset dataset;
 
     @Option
+    @Required
+    @ActiveIf(target = "actionOnData", value = { "INSERT", "UPSERT" })
+    @Documentation("Create table if don't exists")
+    private boolean createTableIfNotExists = false;
+
+    @Option
     @Documentation("The action to be performed")
     private ActionOnData actionOnData = ActionOnData.INSERT;
 
     @Option
-    @ActiveIf(target = "actionOnData", negate = true, value = { "INSERT" })
-    @Suggestable(value = ACTION_SUGGESTION_TABLE_COLUMNS_NAMES, parameters = { "dataset" })
+    @ActiveIfs(operator = OR, value = { @ActiveIf(target = "actionOnData", negate = true, value = { "INSERT" }),
+            @ActiveIf(target = "createTableIfNotExists", value = { "true" }), })
+    // fixme activate when https://jira.talendforge.org/browse/TFD-5995 is fixed
+    // @Suggestable(value = ACTION_SUGGESTION_TABLE_COLUMNS_NAMES, parameters = { "../dataset" })
     @Documentation("List of columns to be used as keys for this operation")
-    private List<String> keys;
+    private List<String> keys = new ArrayList<>();
 
     @Option
-    @Suggestable(value = ACTION_SUGGESTION_TABLE_COLUMNS_NAMES, parameters = { "dataset" })
+    // fixme activate when https://jira.talendforge.org/browse/TFD-5995 is fixed
+    // @Suggestable(value = ACTION_SUGGESTION_TABLE_COLUMNS_NAMES, parameters = { "../dataset" })
     @ActiveIf(target = "actionOnData", value = { "UPDATE", "UPSERT" })
     @Documentation("List of columns to be ignored from update")
-    private List<String> ignoreUpdate;
+    private List<String> ignoreUpdate = new ArrayList<>();
 
     @Option
     @ActiveIfs(operator = OR, value = { @ActiveIf(target = "../dataset.connection.dbType", value = { "MySQL" }),
