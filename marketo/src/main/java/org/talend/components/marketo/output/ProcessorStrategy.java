@@ -30,7 +30,7 @@ public interface ProcessorStrategy {
     JsonObject getPayload(JsonObject incomingData);
 
     /**
-     * Execute the processor's action according dataSet parameters
+     * Execute the processor's action according configuration parameters
      *
      * @param payload
      * @return

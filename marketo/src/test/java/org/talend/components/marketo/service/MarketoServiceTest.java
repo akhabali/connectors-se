@@ -25,7 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.talend.components.marketo.MarketoBaseTest;
 import org.talend.components.marketo.dataset.MarketoDataSet.MarketoEntity;
-import org.talend.components.marketo.dataset.MarketoInputDataSet.LeadAction;
+import org.talend.components.marketo.dataset.MarketoInputConfiguration.LeadAction;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.junit.http.junit5.HttpApi;
 import org.talend.sdk.component.junit5.WithComponents;

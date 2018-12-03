@@ -20,7 +20,7 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.talend.components.marketo.dataset.MarketoInputDataSet;
+import org.talend.components.marketo.dataset.MarketoInputConfiguration;
 import org.talend.components.marketo.service.AuthorizationClient;
 import org.talend.components.marketo.service.MarketoService;
 
@@ -40,7 +40,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 @Documentation("Marketo Input Component")
 public class MarketoInputMapper implements Serializable {
 
-    private MarketoInputDataSet dataset;
+    private MarketoInputConfiguration configuration;
 
     private MarketoService service;
 
@@ -48,13 +48,13 @@ public class MarketoInputMapper implements Serializable {
 
     private transient static final Logger LOG = LoggerFactory.getLogger(MarketoInputMapper.class);
 
-    public MarketoInputMapper(@Option("configuration") final MarketoInputDataSet dataset, //
+    public MarketoInputMapper(@Option("configuration") final MarketoInputConfiguration configuration, //
             final MarketoService service) {
-        this.dataset = dataset;
+        this.configuration = configuration;
         this.service = service;
         authorizationClient = service.getAuthorizationClient();
-        LOG.debug("[MarketoInputMapper] {}", dataset);
-        authorizationClient.base(dataset.getDataStore().getEndpoint());
+        LOG.debug("[MarketoInputMapper] {}", configuration);
+        authorizationClient.base(configuration.getDataSet().getDataStore().getEndpoint());
     }
 
     @PostConstruct
@@ -74,18 +74,18 @@ public class MarketoInputMapper implements Serializable {
 
     @Emitter
     public MarketoSource createWorker() {
-        switch (dataset.getEntity()) {
+        switch (configuration.getDataSet().getEntity()) {
         case Lead:
-            return new LeadSource(dataset, service);
+            return new LeadSource(configuration, service);
         case List:
-            return new ListSource(dataset, service);
+            return new ListSource(configuration, service);
         case CustomObject:
-            return new CustomObjectSource(dataset, service);
+            return new CustomObjectSource(configuration, service);
         case Company:
-            return new CompanySource(dataset, service);
+            return new CompanySource(configuration, service);
         case Opportunity:
         case OpportunityRole:
-            return new OpportunitySource(dataset, service);
+            return new OpportunitySource(configuration, service);
         }
         throw new IllegalArgumentException(service.getI18n().invalidOperation());
     }

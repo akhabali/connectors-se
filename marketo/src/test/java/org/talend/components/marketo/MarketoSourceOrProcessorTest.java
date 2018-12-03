@@ -34,7 +34,7 @@ class MarketoSourceOrProcessorTest extends MarketoBaseTest {
     @BeforeEach
     protected void setUp() {
         super.setUp();
-        sop = new LeadSource(inputDataSet, service);
+        sop = new LeadSource(inputConfiguration, service);
         json = jsonFactory.createObjectBuilder().add("id", 9876).build();
     }
 

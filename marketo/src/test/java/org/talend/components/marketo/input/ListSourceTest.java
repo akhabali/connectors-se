@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.talend.components.marketo.dataset.MarketoDataSet.MarketoEntity;
-import org.talend.components.marketo.dataset.MarketoInputDataSet.ListAction;
+import org.talend.components.marketo.dataset.MarketoInputConfiguration.ListAction;
 import org.talend.sdk.component.junit.http.junit5.HttpApi;
 import org.talend.sdk.component.junit5.WithComponents;
 
@@ -45,18 +45,18 @@ class ListSourceTest extends SourceBaseTest {
     @BeforeEach
     protected void setUp() {
         super.setUp();
-        inputDataSet.setEntity(MarketoEntity.List);
-        inputDataSet.setListName(String.valueOf(LIST_ID));
+        inputConfiguration.getDataSet().setEntity(MarketoEntity.List);
+        inputConfiguration.setListName(String.valueOf(LIST_ID));
     }
 
     @Test
     void testGetLists() {
-        inputDataSet.setListAction(ListAction.list);
-        inputDataSet.setLeadIds("");
-        inputDataSet.setListName("");
-        inputDataSet.setProgramName("");
-        inputDataSet.setWorkspaceName("");
-        source = new ListSource(inputDataSet, service);
+        inputConfiguration.setListAction(ListAction.list);
+        inputConfiguration.setLeadIds("");
+        inputConfiguration.setListName("");
+        inputConfiguration.setProgramName("");
+        inputConfiguration.setWorkspaceName("");
+        source = new ListSource(inputConfiguration, service);
         source.init();
         while ((result = source.next()) != null) {
             assertNotNull(result);
@@ -66,9 +66,9 @@ class ListSourceTest extends SourceBaseTest {
 
     @Test
     void testGetListById() {
-        inputDataSet.setListAction(ListAction.get);
-        inputDataSet.setListId(LIST_ID);
-        source = new ListSource(inputDataSet, service);
+        inputConfiguration.setListAction(ListAction.get);
+        inputConfiguration.setListId(LIST_ID);
+        source = new ListSource(inputConfiguration, service);
         source.init();
         result = source.next();
         assertNotNull(result);
@@ -80,11 +80,11 @@ class ListSourceTest extends SourceBaseTest {
 
     @Test()
     void testGetLeadsByListId() {
-        inputDataSet.setListAction(ListAction.getLeads);
-        inputDataSet.setListId(LIST_ID);
-        inputDataSet.setLeadIds(LEAD_IDS);
-        inputDataSet.setFields(asList(fields.split(",")));
-        source = new ListSource(inputDataSet, service);
+        inputConfiguration.setListAction(ListAction.getLeads);
+        inputConfiguration.setListId(LIST_ID);
+        inputConfiguration.setLeadIds(LEAD_IDS);
+        inputConfiguration.setFields(asList(fields.split(",")));
+        source = new ListSource(inputConfiguration, service);
         source.init();
         while ((result = source.next()) != null) {
             assertNotNull(result);
@@ -93,10 +93,10 @@ class ListSourceTest extends SourceBaseTest {
 
     @Test
     void testIsMemberOfList() {
-        inputDataSet.setListAction(ListAction.isMemberOf);
-        inputDataSet.setListId(LIST_ID);
-        inputDataSet.setLeadIds(LEAD_IDS);
-        source = new ListSource(inputDataSet, service);
+        inputConfiguration.setListAction(ListAction.isMemberOf);
+        inputConfiguration.setListId(LIST_ID);
+        inputConfiguration.setLeadIds(LEAD_IDS);
+        source = new ListSource(inputConfiguration, service);
         source.init();
         while ((result = source.next()) != null) {
             assertNotNull(result);

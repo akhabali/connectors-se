@@ -18,7 +18,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 import javax.json.JsonObject;
 
 import org.slf4j.Logger;
-import org.talend.components.marketo.dataset.MarketoInputDataSet;
+import org.talend.components.marketo.dataset.MarketoInputConfiguration;
 import org.talend.components.marketo.service.CompanyClient;
 import org.talend.components.marketo.service.MarketoService;
 
@@ -28,18 +28,18 @@ public class CompanySource extends MarketoSource {
 
     private final CompanyClient companyClient;
 
-    public CompanySource(@Option("configuration") MarketoInputDataSet dataSet, //
+    public CompanySource(@Option("configuration") MarketoInputConfiguration dataSet, //
             final MarketoService service) {
         super(dataSet, service);
         this.companyClient = service.getCompanyClient();
-        this.companyClient.base(this.dataSet.getDataStore().getEndpoint());
+        this.companyClient.base(this.configuration.getDataSet().getDataStore().getEndpoint());
     }
 
     private transient static final Logger LOG = getLogger(CompanySource.class);
 
     @Override
     public JsonObject runAction() {
-        switch (dataSet.getOtherAction()) {
+        switch (configuration.getOtherAction()) {
         case describe:
             return describeCompany();
         case list:
@@ -55,9 +55,9 @@ public class CompanySource extends MarketoSource {
     }
 
     private JsonObject getCompanies() {
-        String filterType = dataSet.getFilterType();
-        String filterValues = dataSet.getFilterValues();
-        String fields = dataSet.getFields() == null ? null : dataSet.getFields().stream().collect(joining(","));
+        String filterType = configuration.getFilterType();
+        String filterValues = configuration.getFilterValues();
+        String fields = configuration.getFields() == null ? null : configuration.getFields().stream().collect(joining(","));
         return handleResponse(companyClient.getCompanies(accessToken, filterType, filterValues, fields, nextPageToken));
     }
 

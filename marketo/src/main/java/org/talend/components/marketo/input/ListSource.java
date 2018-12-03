@@ -18,7 +18,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 import javax.json.JsonObject;
 
 import org.slf4j.Logger;
-import org.talend.components.marketo.dataset.MarketoInputDataSet;
+import org.talend.components.marketo.dataset.MarketoInputConfiguration;
 import org.talend.components.marketo.service.ListClient;
 import org.talend.components.marketo.service.MarketoService;
 
@@ -30,16 +30,16 @@ public class ListSource extends MarketoSource {
 
     private transient static final Logger LOG = getLogger(ListClient.class);
 
-    public ListSource(@Option("configuration") final MarketoInputDataSet dataSet, //
+    public ListSource(@Option("configuration") final MarketoInputConfiguration configuration, //
             final MarketoService service) {
-        super(dataSet, service);
+        super(configuration, service);
         this.listClient = service.getListClient();
-        this.listClient.base(this.dataSet.getDataStore().getEndpoint());
+        this.listClient.base(this.configuration.getDataSet().getDataStore().getEndpoint());
     }
 
     @Override
     public JsonObject runAction() {
-        switch (dataSet.getListAction()) {
+        switch (configuration.getListAction()) {
         case list:
             return getLists();
         case get:
@@ -54,27 +54,27 @@ public class ListSource extends MarketoSource {
     }
 
     private JsonObject getLeadsByListId() {
-        Integer listId = Integer.parseInt(dataSet.getListName());
-        String fields = dataSet.getFields() == null ? null : dataSet.getFields().stream().collect(joining(","));
+        Integer listId = Integer.parseInt(configuration.getListName());
+        String fields = configuration.getFields() == null ? null : configuration.getFields().stream().collect(joining(","));
         return handleResponse(listClient.getLeadsByListId(accessToken, nextPageToken, listId, fields));
     }
 
     private JsonObject isMemberOfList() {
-        Integer listId = Integer.parseInt(dataSet.getListName());
-        String leadIds = dataSet.getLeadIds();
+        Integer listId = Integer.parseInt(configuration.getListName());
+        String leadIds = configuration.getLeadIds();
         return handleResponse(listClient.isMemberOfList(accessToken, listId, leadIds));
     }
 
     private JsonObject getListById() {
-        Integer listId = dataSet.getListId();
+        Integer listId = configuration.getListId();
         return handleResponse(listClient.getListbyId(accessToken, listId));
     }
 
     private JsonObject getLists() {
         Integer id = null;
         String name = "";
-        String workspaceName = dataSet.getWorkspaceName();
-        String programName = dataSet.getProgramName();
+        String workspaceName = configuration.getWorkspaceName();
+        String programName = configuration.getProgramName();
         return handleResponse(listClient.getLists(accessToken, nextPageToken, id, name, programName, workspaceName));
     }
 }

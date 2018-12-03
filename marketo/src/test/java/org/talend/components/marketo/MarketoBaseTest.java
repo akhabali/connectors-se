@@ -22,8 +22,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.talend.components.marketo.component.DataCollector;
-import org.talend.components.marketo.dataset.MarketoInputDataSet;
-import org.talend.components.marketo.dataset.MarketoOutputDataSet;
+import org.talend.components.marketo.dataset.MarketoDataSet;
+import org.talend.components.marketo.dataset.MarketoInputConfiguration;
+import org.talend.components.marketo.dataset.MarketoOutputConfiguration;
 import org.talend.components.marketo.datastore.MarketoDataStore;
 import org.talend.components.marketo.output.MarketoProcessor;
 import org.talend.components.marketo.service.AuthorizationClient;
@@ -120,9 +121,11 @@ public class MarketoBaseTest {
 
     protected MarketoDataStore dataStoreWithCRM;
 
-    protected MarketoInputDataSet inputDataSet = new MarketoInputDataSet();
+    protected MarketoDataSet dataSet;
 
-    protected MarketoOutputDataSet outputDataSet = new MarketoOutputDataSet();
+    protected MarketoInputConfiguration inputConfiguration = new MarketoInputConfiguration();
+
+    protected MarketoOutputConfiguration outputConfiguration = new MarketoOutputConfiguration();
 
     protected Boolean isProxyMode = Boolean.FALSE;
 
@@ -168,8 +171,10 @@ public class MarketoBaseTest {
         dataStore.setEndpoint(endpoint);
         dataStore.setClientId(clientId);
         dataStore.setClientSecret(clientSecret);
-        inputDataSet.setDataStore(dataStore);
-        outputDataSet.setDataStore(dataStore);
+        dataSet = new MarketoDataSet();
+        dataSet.setDataStore(dataStore);
+        inputConfiguration.setDataSet(dataSet);
+        outputConfiguration.setDataSet(dataSet);
         //
         DataCollector.reset();
     }

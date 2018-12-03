@@ -18,6 +18,7 @@ import org.talend.components.marketo.datastore.MarketoDataStore;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.DefaultValue;
+import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import lombok.Data;
@@ -25,8 +26,11 @@ import lombok.ToString;
 
 @Data
 @DataSet
-@Documentation("Marketo Base Dataset")
+@Documentation("Marketo Dataset")
 @ToString
+@GridLayout({ @GridLayout.Row("dataStore"), //
+        @GridLayout.Row("entity"), //
+})
 public class MarketoDataSet implements Serializable {
 
     public enum MarketoEntity {

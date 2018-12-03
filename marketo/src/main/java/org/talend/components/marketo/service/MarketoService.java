@@ -52,8 +52,8 @@ import javax.json.JsonWriterFactory;
 
 import org.slf4j.Logger;
 import org.talend.components.marketo.dataset.MarketoDataSet.MarketoEntity;
-import org.talend.components.marketo.dataset.MarketoInputDataSet;
-import org.talend.components.marketo.dataset.MarketoInputDataSet.ListAction;
+import org.talend.components.marketo.dataset.MarketoInputConfiguration;
+import org.talend.components.marketo.dataset.MarketoInputConfiguration.ListAction;
 import org.talend.components.marketo.datastore.MarketoDataStore;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
@@ -149,10 +149,11 @@ public class MarketoService {
         throw new IllegalArgumentException(i18n.invalidOperation());
     }
 
-    public Schema getEntitySchema(final MarketoInputDataSet dataSet) {
-        LOG.debug("[getEntitySchema] {} ", dataSet);
-        return getEntitySchema(dataSet.getDataStore(), dataSet.getEntity().name(), dataSet.getCustomObjectName(),
-                dataSet.getListAction() == null ? "" : dataSet.getListAction().name());
+    public Schema getEntitySchema(final MarketoInputConfiguration configuration) {
+        LOG.debug("[getEntitySchema] {} ", configuration);
+        return getEntitySchema(configuration.getDataSet().getDataStore(), configuration.getDataSet().getEntity().name(),
+                configuration.getCustomObjectName(),
+                configuration.getListAction() == null ? "" : configuration.getListAction().name());
     }
 
     public Schema getEntitySchema(final MarketoDataStore dataStore, final String entity, final String customObjectName,

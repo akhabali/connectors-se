@@ -30,7 +30,7 @@ import lombok.NoArgsConstructor;
 public class ActivityType implements Serializable, CharSequence {
 
     @Option
-    @Suggestable(value = ACTIVITIES_LIST, parameters = { "../../dataStore" })
+    @Suggestable(value = ACTIVITIES_LIST, parameters = { "../../dataSet/dataStore" })
     @Documentation("Activity")
     private String activity;
 

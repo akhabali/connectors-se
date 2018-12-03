@@ -27,7 +27,7 @@ import java.util.List;
 import javax.json.JsonObject;
 
 import org.slf4j.Logger;
-import org.talend.components.marketo.dataset.MarketoInputDataSet;
+import org.talend.components.marketo.dataset.MarketoInputConfiguration;
 import org.talend.components.marketo.datastore.MarketoDataStore;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.record.Schema;
@@ -88,7 +88,7 @@ public class UIActionService extends MarketoService {
     }
 
     @Suggestions(LEAD_KEY_NAME_LIST)
-    public SuggestionValues getLeadKeyNames(@Option final MarketoInputDataSet dataSet) {
+    public SuggestionValues getLeadKeyNames(@Option final MarketoInputConfiguration dataSet) {
         LOG.debug("[getLeadKeyNames] {}", dataSet);
         return new SuggestionValues(true, Arrays.asList( //
                 new SuggestionValues.Item("id", "id"), //

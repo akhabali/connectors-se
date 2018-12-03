@@ -18,54 +18,50 @@ import static org.talend.components.marketo.service.UIActionService.FIELD_NAMES;
 import static org.talend.components.marketo.service.UIActionService.LEAD_KEY_NAME_LIST;
 import static org.talend.components.marketo.service.UIActionService.LIST_NAMES;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
-import org.talend.sdk.component.api.configuration.type.DataSet;
+import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.ui.DefaultValue;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
-import org.talend.sdk.component.api.configuration.ui.layout.GridLayouts;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import lombok.Data;
 import lombok.ToString;
 
 @Data
-@DataSet(MarketoInputDataSet.NAME)
-@GridLayouts({ //
-        @GridLayout({ //
-                @GridLayout.Row({ "dataStore" }), //
-                @GridLayout.Row({ "entity" }), //
-                @GridLayout.Row({ "leadAction" }), //
-                @GridLayout.Row({ "otherAction" }), //
-                @GridLayout.Row({ "listAction" }), //
-                @GridLayout.Row({ "leadKeyName" }), //
-                @GridLayout.Row({ "leadKeyValues" }), //
-                @GridLayout.Row({ "leadId", }), //
-                @GridLayout.Row({ "leadIds" }), //
-                @GridLayout.Row({ "assetIds" }), //
-                @GridLayout.Row({ "listId" }), //
-                @GridLayout.Row({ "customObjectName" }), //
-                @GridLayout.Row({ "activityTypeIds" }), //
-                @GridLayout.Row({ "filterType" }), //
-                @GridLayout.Row({ "filterValues" }), //
-                @GridLayout.Row({ "useCompoundKey" }), //
-                @GridLayout.Row({ "compoundKey" }), //
-                @GridLayout.Row({ "sinceDateTime" }), //
-                @GridLayout.Row({ "listIds" }), //
-                @GridLayout.Row({ "listName" }), //
-                @GridLayout.Row({ "programName" }), //
-                @GridLayout.Row({ "workspaceName" }), //
-                @GridLayout.Row({ "fields" }), //
-        }), //
-})
-@Documentation("Marketo Source DataSet")
+@GridLayout({ //
+        @GridLayout.Row({ "dataSet" }), //
+        @GridLayout.Row({ "leadAction" }), //
+        @GridLayout.Row({ "otherAction" }), //
+        @GridLayout.Row({ "listAction" }), //
+        @GridLayout.Row({ "leadKeyName" }), //
+        @GridLayout.Row({ "leadKeyValues" }), //
+        @GridLayout.Row({ "leadId", }), //
+        @GridLayout.Row({ "leadIds" }), //
+        @GridLayout.Row({ "assetIds" }), //
+        @GridLayout.Row({ "listId" }), //
+        @GridLayout.Row({ "customObjectName" }), //
+        @GridLayout.Row({ "activityTypeIds" }), //
+        @GridLayout.Row({ "filterType" }), //
+        @GridLayout.Row({ "filterValues" }), //
+        @GridLayout.Row({ "useCompoundKey" }), //
+        @GridLayout.Row({ "compoundKey" }), //
+        @GridLayout.Row({ "sinceDateTime" }), //
+        @GridLayout.Row({ "listIds" }), //
+        @GridLayout.Row({ "listName" }), //
+        @GridLayout.Row({ "programName" }), //
+        @GridLayout.Row({ "workspaceName" }), //
+        @GridLayout.Row({ "fields" }), //
+}) //
+@Documentation("Marketo Source Configuration")
 @ToString(callSuper = true)
-public class MarketoInputDataSet extends MarketoDataSet {
+public class MarketoInputConfiguration implements Serializable {
 
-    public static final String NAME = "MarketoInputDataSet";
+    public static final String NAME = "MarketoInputConfiguration";
 
     public enum LeadAction {
         getLead,
@@ -87,6 +83,14 @@ public class MarketoInputDataSet extends MarketoDataSet {
         list,
         get
     }
+
+    /*
+     * DataSet
+     */
+    @Option
+    @Required
+    @Documentation("Marketo DataSet")
+    private MarketoDataSet dataSet;
 
     /*
      * Lead DataSet parameters
@@ -128,7 +132,7 @@ public class MarketoInputDataSet extends MarketoDataSet {
 
     @Option
     @ActiveIf(target = "entity", value = { "List" })
-    @Suggestable(value = LIST_NAMES, parameters = { "dataStore" })
+    @Suggestable(value = LIST_NAMES, parameters = { "../dataSet/dataStore" })
     @Documentation("List Name : Comma-separated list of static list names to return.")
     private String listName;
 
@@ -179,7 +183,7 @@ public class MarketoInputDataSet extends MarketoDataSet {
     @Option
     @ActiveIf(target = "entity", value = { "Lead" })
     @ActiveIf(target = "leadAction", value = "getLeadActivity")
-    @Suggestable(value = ACTIVITIES_LIST, parameters = { "dataStore" })
+    @Suggestable(value = ACTIVITIES_LIST, parameters = { "../dataSet/dataStore" })
     @Documentation("Activity Type Ids (10 max supported")
     private List<String> activityTypeIds;
 
@@ -196,14 +200,15 @@ public class MarketoInputDataSet extends MarketoDataSet {
     @Option
     @ActiveIf(target = "entity", value = { "CustomObject" })
     @ActiveIf(target = "otherAction", value = { "get", "describe" })
-    @Suggestable(value = CUSTOM_OBJECT_NAMES, parameters = { "dataStore" })
+    @Suggestable(value = CUSTOM_OBJECT_NAMES, parameters = { "../dataSet/dataStore" })
     @Documentation("Custom Object Name")
     private String customObjectName;
 
     @Option
     @ActiveIf(target = "entity", value = { "CustomObject", "Company", "Opportunity", "OpportunityRole" })
     @ActiveIf(target = "otherAction", value = { "get" })
-    @Suggestable(value = FIELD_NAMES, parameters = { "dataStore", "entity", "customObjectName" })
+    @Suggestable(value = FIELD_NAMES, parameters = { "../dataSet/dataStore", "../dataSet/entity",
+            "customObjectName" })
     @Documentation("Filter Type")
     private String filterType;
 
@@ -228,7 +233,8 @@ public class MarketoInputDataSet extends MarketoDataSet {
 
     @Option
     @ActiveIf(target = "entity", value = { "Lead", "CustomObject", "Company", "Opportunity", "OpportunityRole" })
-    @Suggestable(value = FIELD_NAMES, parameters = { "dataStore", "entity", "customObjectName" })
+    @Suggestable(value = FIELD_NAMES, parameters = { "../dataSet/dataStore", "../dataSet/entity",
+            "customObjectName" })
     @Documentation("Fields")
     private List<String> fields;
 

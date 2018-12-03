@@ -33,7 +33,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.talend.components.marketo.component.DataCollector;
 import org.talend.components.marketo.dataset.MarketoDataSet.MarketoEntity;
-import org.talend.components.marketo.dataset.MarketoInputDataSet.OtherEntityAction;
+import org.talend.components.marketo.dataset.MarketoInputConfiguration.OtherEntityAction;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.junit.http.junit5.HttpApi;
 import org.talend.sdk.component.junit5.WithComponents;
@@ -53,13 +53,13 @@ class CompanySourceTest extends SourceBaseTest {
     @BeforeEach
     protected void setUp() {
         super.setUp();
-        inputDataSet.setEntity(MarketoEntity.Company);
+        inputConfiguration.getDataSet().setEntity(MarketoEntity.Company);
     }
 
     @Test
     void testDescribeCompanies() {
-        inputDataSet.setOtherAction(OtherEntityAction.describe);
-        source = new CompanySource(inputDataSet, service);
+        inputConfiguration.setOtherAction(OtherEntityAction.describe);
+        source = new CompanySource(inputConfiguration, service);
         source.init();
         result = source.next();
         assertNotNull(result);
@@ -69,11 +69,11 @@ class CompanySourceTest extends SourceBaseTest {
 
     @Test
     void testGetCompanies() {
-        inputDataSet.setOtherAction(OtherEntityAction.get);
-        inputDataSet.setFilterType("externalCompanyId");
-        inputDataSet.setFilterValues("google01,google02,google03,google04,google05,google06");
-        inputDataSet.setFields(asList("mainPhone", "company", "website"));
-        source = new CompanySource(inputDataSet, service);
+        inputConfiguration.setOtherAction(OtherEntityAction.get);
+        inputConfiguration.setFilterType("externalCompanyId");
+        inputConfiguration.setFilterValues("google01,google02,google03,google04,google05,google06");
+        inputConfiguration.setFields(asList("mainPhone", "company", "website"));
+        source = new CompanySource(inputConfiguration, service);
         source.init();
         while ((result = source.next()) != null) {
             assertNotNull(result);
@@ -83,11 +83,11 @@ class CompanySourceTest extends SourceBaseTest {
 
     @Test
     void testGetCompaniesFails() {
-        inputDataSet.setOtherAction(OtherEntityAction.get);
-        inputDataSet.setFilterType("billingCountry");
-        inputDataSet.setFilterValues("France");
-        inputDataSet.setFields(asList("mainPhone", "company", "website"));
-        source = new CompanySource(inputDataSet, service);
+        inputConfiguration.setOtherAction(OtherEntityAction.get);
+        inputConfiguration.setFilterType("billingCountry");
+        inputConfiguration.setFilterValues("France");
+        inputConfiguration.setFields(asList("mainPhone", "company", "website"));
+        source = new CompanySource(inputConfiguration, service);
         try {
             source.init();
         } catch (RuntimeException e) {
@@ -97,8 +97,8 @@ class CompanySourceTest extends SourceBaseTest {
 
     @Test
     public void testDescribeCompaniesWithCreateMapper() {
-        inputDataSet.setOtherAction(OtherEntityAction.describe);
-        final Mapper mapper = component.createMapper(MarketoInputMapper.class, inputDataSet);
+        inputConfiguration.setOtherAction(OtherEntityAction.describe);
+        final Mapper mapper = component.createMapper(MarketoInputMapper.class, inputConfiguration);
         List<Record> res = component.collectAsList(Record.class, mapper);
         assertNotNull(res);
         assertEquals(1, res.size());
@@ -106,11 +106,11 @@ class CompanySourceTest extends SourceBaseTest {
 
     @Test
     void testGetCompaniesWithCreateMapper() {
-        inputDataSet.setOtherAction(OtherEntityAction.get);
-        inputDataSet.setFilterType("externalCompanyId");
-        inputDataSet.setFilterValues("google01,google02,google03,google04,google05,google06");
-        inputDataSet.setFields(asList(fields.split(",")));
-        final Mapper mapper = component.createMapper(MarketoInputMapper.class, inputDataSet);
+        inputConfiguration.setOtherAction(OtherEntityAction.get);
+        inputConfiguration.setFilterType("externalCompanyId");
+        inputConfiguration.setFilterValues("google01,google02,google03,google04,google05,google06");
+        inputConfiguration.setFields(asList(fields.split(",")));
+        final Mapper mapper = component.createMapper(MarketoInputMapper.class, inputConfiguration);
         List<Record> res = component.collectAsList(Record.class, mapper);
         assertEquals(4, res.size());
         Record record = res.get(0);
@@ -120,11 +120,11 @@ class CompanySourceTest extends SourceBaseTest {
 
     @Test
     void testGetErrors() {
-        inputDataSet.setOtherAction(OtherEntityAction.list);
-        inputDataSet.setFilterType("");
-        inputDataSet.setFilterValues("google01,google02,google03,google04,google05,google06");
-        inputDataSet.setFields(asList(fields.split(".")));
-        source = new CompanySource(inputDataSet, service);
+        inputConfiguration.setOtherAction(OtherEntityAction.list);
+        inputConfiguration.setFilterType("");
+        inputConfiguration.setFilterValues("google01,google02,google03,google04,google05,google06");
+        inputConfiguration.setFields(asList(fields.split(".")));
+        source = new CompanySource(inputConfiguration, service);
         try {
             source.init();
         } catch (RuntimeException e) {
@@ -134,8 +134,8 @@ class CompanySourceTest extends SourceBaseTest {
 
     @Test
     void testInvalidAccessToken() {
-        inputDataSet.getDataStore().setEndpoint(MARKETO_ENDPOINT + "/bzh");
-        source = new CompanySource(inputDataSet, service);
+        inputConfiguration.getDataSet().getDataStore().setEndpoint(MARKETO_ENDPOINT + "/bzh");
+        source = new CompanySource(inputConfiguration, service);
         try {
             source.init();
             fail("Should have a 403 error. Should not be here");
@@ -146,11 +146,11 @@ class CompanySourceTest extends SourceBaseTest {
 
     @Test
     void getCompanies() {
-        inputDataSet.setOtherAction(OtherEntityAction.get);
-        inputDataSet.setFilterType("externalCompanyId");
-        inputDataSet.setFilterValues("google01,google02,google03,google04,google05,google06");
-        inputDataSet.setFields(asList("mainPhone", "company", "website", "createdAt", "updatedAt"));
-        final String config = configurationByExample().forInstance(inputDataSet).configured().toQueryString();
+        inputConfiguration.setOtherAction(OtherEntityAction.get);
+        inputConfiguration.setFilterType("externalCompanyId");
+        inputConfiguration.setFilterValues("google01,google02,google03,google04,google05,google06");
+        inputConfiguration.setFields(asList("mainPhone", "company", "website", "createdAt", "updatedAt"));
+        final String config = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
         LOG.debug("[getCompanies] config: {}", config);
         runInputPipeline(config);
         final Queue<Record> records = DataCollector.getData();
@@ -183,10 +183,10 @@ class CompanySourceTest extends SourceBaseTest {
                 .withString("mainPhone", "33688828052").withString("company", "Google").build();
 
         // Setup your component configuration for the test here
-        inputDataSet.setOtherAction(OtherEntityAction.get);
-        inputDataSet.setFilterType("externalCompanyId");
-        inputDataSet.setFilterValues("google01,google02,google03,google04,google05,google06");
-        inputDataSet.setFields(asList("mainPhone", "company", "website"));
+        inputConfiguration.setOtherAction(OtherEntityAction.get);
+        inputConfiguration.setFilterType("externalCompanyId");
+        inputConfiguration.setFilterValues("google01,google02,google03,google04,google05,google06");
+        inputConfiguration.setFields(asList("mainPhone", "company", "website"));
         //
 
     }

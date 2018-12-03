@@ -21,9 +21,8 @@ import javax.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.talend.components.marketo.MarketoSourceOrProcessor;
-import org.talend.components.marketo.dataset.MarketoOutputDataSet;
+import org.talend.components.marketo.dataset.MarketoOutputConfiguration;
 import org.talend.components.marketo.service.MarketoService;
-
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
@@ -39,33 +38,33 @@ import org.talend.sdk.component.api.record.Record;
 @Documentation("Marketo Output Component")
 public class MarketoProcessor extends MarketoSourceOrProcessor {
 
-    protected final MarketoOutputDataSet dataSet;
+    protected final MarketoOutputConfiguration dataSet;
 
     private ProcessorStrategy strategy;
 
     private transient static final Logger LOG = LoggerFactory.getLogger(MarketoProcessor.class);
 
-    public MarketoProcessor(@Option("configuration") final MarketoOutputDataSet dataSet, //
+    public MarketoProcessor(@Option("configuration") final MarketoOutputConfiguration configuration, //
             final MarketoService service) {
-        super(dataSet, service);
-        this.dataSet = dataSet;
+        super(configuration.getDataSet(), service);
+        this.dataSet = configuration;
 
-        switch (dataSet.getEntity()) {
+        switch (configuration.getDataSet().getEntity()) {
         case Lead:
-            strategy = new LeadStrategy(dataSet, service);
+            strategy = new LeadStrategy(configuration, service);
             break;
         case List:
-            strategy = new ListStrategy(dataSet, service);
+            strategy = new ListStrategy(configuration, service);
             break;
         case CustomObject:
-            strategy = new CustomObjectStrategy(dataSet, service);
+            strategy = new CustomObjectStrategy(configuration, service);
             break;
         case Company:
-            strategy = new CompanyStrategy(dataSet, service);
+            strategy = new CompanyStrategy(configuration, service);
             break;
         case Opportunity:
         case OpportunityRole:
-            strategy = new OpportunityStrategy(dataSet, service);
+            strategy = new OpportunityStrategy(configuration, service);
             break;
         }
     }

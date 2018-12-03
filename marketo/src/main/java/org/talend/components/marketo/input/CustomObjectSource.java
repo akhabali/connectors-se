@@ -21,7 +21,7 @@ import static org.talend.components.marketo.MarketoApiConstants.REQUEST_PARAM_QU
 import javax.json.JsonObject;
 
 import org.slf4j.Logger;
-import org.talend.components.marketo.dataset.MarketoInputDataSet;
+import org.talend.components.marketo.dataset.MarketoInputConfiguration;
 import org.talend.components.marketo.service.CustomObjectClient;
 import org.talend.components.marketo.service.MarketoService;
 
@@ -29,16 +29,16 @@ public class CustomObjectSource extends MarketoSource {
 
     private final CustomObjectClient customObjectClient;
 
-    public CustomObjectSource(MarketoInputDataSet dataSet, //
+    public CustomObjectSource(MarketoInputConfiguration dataSet, //
             final MarketoService service) {
         super(dataSet, service);
         this.customObjectClient = service.getCustomObjectClient();
-        this.customObjectClient.base(this.dataSet.getDataStore().getEndpoint());
+        this.customObjectClient.base(this.configuration.getDataSet().getDataStore().getEndpoint());
     }
 
     @Override
     public JsonObject runAction() {
-        switch (dataSet.getOtherAction()) {
+        switch (configuration.getOtherAction()) {
         case describe:
             return describeCustomObjects();
         case list:
@@ -50,23 +50,23 @@ public class CustomObjectSource extends MarketoSource {
     }
 
     private JsonObject listCustomObjects() {
-        String names = dataSet.getFilterValues();
+        String names = configuration.getFilterValues();
         return handleResponse(customObjectClient.listCustomObjects(accessToken, names));
     }
 
     private JsonObject describeCustomObjects() {
-        String name = dataSet.getCustomObjectName();
+        String name = configuration.getCustomObjectName();
         return handleResponse(customObjectClient.describeCustomObjects(accessToken, name));
     }
 
     private transient static final Logger LOG = getLogger(CustomObjectSource.class);
 
     private JsonObject getCustomObjects() {
-        String name = dataSet.getCustomObjectName();
-        String filterType = dataSet.getFilterType();
-        String filterValues = dataSet.getFilterValues();
-        String fields = dataSet.getFields() == null ? null : dataSet.getFields().stream().collect(joining(","));
-        if (dataSet.getUseCompoundKey()) {
+        String name = configuration.getCustomObjectName();
+        String filterType = configuration.getFilterType();
+        String filterValues = configuration.getFilterValues();
+        String fields = configuration.getFields() == null ? null : configuration.getFields().stream().collect(joining(","));
+        if (configuration.getUseCompoundKey()) {
             JsonObject payload = generateCompoundKeyPayload(ATTR_DEDUPE_FIELDS, fields);
             return handleResponse(customObjectClient.getCustomObjectsWithCompoundKey(HEADER_CONTENT_TYPE_APPLICATION_JSON, name,
                     REQUEST_PARAM_QUERY_METHOD_GET, accessToken, nextPageToken, payload));

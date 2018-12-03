@@ -25,7 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.talend.components.marketo.dataset.CompoundKey;
 import org.talend.components.marketo.dataset.MarketoDataSet.MarketoEntity;
-import org.talend.components.marketo.dataset.MarketoInputDataSet.OtherEntityAction;
+import org.talend.components.marketo.dataset.MarketoInputConfiguration.OtherEntityAction;
 import org.talend.sdk.component.junit.http.junit5.HttpApi;
 import org.talend.sdk.component.junit5.WithComponents;
 
@@ -43,19 +43,19 @@ public class CustomObjectsSourceTest extends SourceBaseTest {
     @BeforeEach
     protected void setUp() {
         super.setUp();
-        inputDataSet.setEntity(MarketoEntity.CustomObject);
-        inputDataSet.setFields(asList(fields.split(",")));
-        inputDataSet.setUseCompoundKey(false);
+        inputConfiguration.getDataSet().setEntity(MarketoEntity.CustomObject);
+        inputConfiguration.setFields(asList(fields.split(",")));
+        inputConfiguration.setUseCompoundKey(false);
     }
 
     void initSource() {
-        source = new CustomObjectSource(inputDataSet, service);
+        source = new CustomObjectSource(inputConfiguration, service);
         source.init();
     }
 
     @Test
     void testListCustomObjects() {
-        inputDataSet.setOtherAction(OtherEntityAction.list);
+        inputConfiguration.setOtherAction(OtherEntityAction.list);
         initSource();
         while ((result = source.next()) != null) {
             assertNotNull(result);
@@ -65,8 +65,8 @@ public class CustomObjectsSourceTest extends SourceBaseTest {
 
     @Test
     void testDescribeCustomObjects() {
-        inputDataSet.setOtherAction(OtherEntityAction.describe);
-        inputDataSet.setCustomObjectName(CUSTOM_OBJECT_NAME);
+        inputConfiguration.setOtherAction(OtherEntityAction.describe);
+        inputConfiguration.setCustomObjectName(CUSTOM_OBJECT_NAME);
         initSource();
         result = source.next();
         assertNotNull(result);
@@ -78,10 +78,10 @@ public class CustomObjectsSourceTest extends SourceBaseTest {
 
     @Test
     void testGetCustomObjects() {
-        inputDataSet.setOtherAction(OtherEntityAction.get);
-        inputDataSet.setCustomObjectName(CUSTOM_OBJECT_NAME);
-        inputDataSet.setFilterType("marketoGUID");
-        inputDataSet.setFilterValues("a215bdf6-3fed-42e5-9042-3c4258768afb");
+        inputConfiguration.setOtherAction(OtherEntityAction.get);
+        inputConfiguration.setCustomObjectName(CUSTOM_OBJECT_NAME);
+        inputConfiguration.setFilterType("marketoGUID");
+        inputConfiguration.setFilterValues("a215bdf6-3fed-42e5-9042-3c4258768afb");
         initSource();
         while ((result = source.next()) != null) {
             assertNotNull(result);
@@ -90,14 +90,14 @@ public class CustomObjectsSourceTest extends SourceBaseTest {
 
     @Test
     void testGetCustomObjectsWithCompoundKey() {
-        inputDataSet.setOtherAction(OtherEntityAction.get);
-        inputDataSet.setCustomObjectName(CUSTOM_OBJECT_NAME);
-        inputDataSet.setFilterType("dedupeFields");
-        inputDataSet.setUseCompoundKey(true);
+        inputConfiguration.setOtherAction(OtherEntityAction.get);
+        inputConfiguration.setCustomObjectName(CUSTOM_OBJECT_NAME);
+        inputConfiguration.setFilterType("dedupeFields");
+        inputConfiguration.setUseCompoundKey(true);
         List<CompoundKey> compoundKey = new ArrayList<>();
         compoundKey.add(new CompoundKey("customerId", "5"));
         compoundKey.add(new CompoundKey("VIN", "ABC-DEF-12345-GIN"));
-        inputDataSet.setCompoundKey(compoundKey);
+        inputConfiguration.setCompoundKey(compoundKey);
         initSource();
         while ((result = source.next()) != null) {
             assertNotNull(result);
@@ -106,10 +106,10 @@ public class CustomObjectsSourceTest extends SourceBaseTest {
 
     @Test
     void testGetCustomObjectsFails() {
-        inputDataSet.setOtherAction(OtherEntityAction.get);
-        inputDataSet.setCustomObjectName(CUSTOM_OBJECT_NAME);
-        inputDataSet.setFilterType("billingCountry");
-        inputDataSet.setFilterValues("France");
+        inputConfiguration.setOtherAction(OtherEntityAction.get);
+        inputConfiguration.setCustomObjectName(CUSTOM_OBJECT_NAME);
+        inputConfiguration.setFilterType("billingCountry");
+        inputConfiguration.setFilterValues("France");
         try {
             initSource();
         } catch (RuntimeException e) {

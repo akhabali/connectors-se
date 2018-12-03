@@ -14,14 +14,11 @@ package org.talend.components.marketo.input;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.talend.components.marketo.MarketoBaseTest;
-import org.talend.components.marketo.dataset.MarketoInputDataSet;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.junit5.WithComponents;
 
 @WithComponents("org.talend.components.marketo")
 public class SourceBaseTest extends MarketoBaseTest {
-
-    MarketoInputDataSet dataset;
 
     protected Record result;
 
@@ -29,8 +26,6 @@ public class SourceBaseTest extends MarketoBaseTest {
     @BeforeEach
     protected void setUp() {
         super.setUp();
-        dataset = new MarketoInputDataSet();
-        dataset.setDataStore(dataStore);
     }
 
 }

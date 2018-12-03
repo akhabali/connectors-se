@@ -22,8 +22,8 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
-import org.talend.components.marketo.dataset.MarketoOutputDataSet;
-import org.talend.components.marketo.dataset.MarketoOutputDataSet.OutputAction;
+import org.talend.components.marketo.dataset.MarketoOutputConfiguration;
+import org.talend.components.marketo.dataset.MarketoOutputConfiguration.OutputAction;
 import org.talend.components.marketo.service.CustomObjectClient;
 import org.talend.components.marketo.service.MarketoService;
 import org.talend.sdk.component.api.configuration.Option;
@@ -34,17 +34,17 @@ public class CustomObjectStrategy extends OutputComponentStrategy {
 
     private String customObjectName;
 
-    public CustomObjectStrategy(@Option("configuration") final MarketoOutputDataSet dataSet, //
+    public CustomObjectStrategy(@Option("configuration") final MarketoOutputConfiguration configuration, //
             final MarketoService service) {
-        super(dataSet, service);
+        super(configuration, service);
         this.customObjectClient = service.getCustomObjectClient();
-        this.customObjectClient.base(dataSet.getDataStore().getEndpoint());
+        this.customObjectClient.base(configuration.getDataSet().getDataStore().getEndpoint());
     }
 
     @Override
     public JsonObject runAction(JsonObject payload) {
-        customObjectName = dataSet.getCustomObjectName();
-        switch (dataSet.getAction()) {
+        customObjectName = configuration.getCustomObjectName();
+        switch (configuration.getAction()) {
         case sync:
             return syncCustomObject(payload);
         case delete:
@@ -58,13 +58,13 @@ public class CustomObjectStrategy extends OutputComponentStrategy {
         JsonObject data = incomingData;
         JsonArray input = jsonFactory.createArrayBuilder().add(data).build();
         JsonObjectBuilder builder = jsonFactory.createObjectBuilder();
-        if (OutputAction.sync.equals(dataSet.getAction())) {
-            builder.add(ATTR_ACTION, dataSet.getSyncMethod().name());
-            if (dataSet.getDedupeBy() != null) {
-                builder.add(ATTR_DEDUPE_BY, dataSet.getDedupeBy());
+        if (OutputAction.sync.equals(configuration.getAction())) {
+            builder.add(ATTR_ACTION, configuration.getSyncMethod().name());
+            if (configuration.getDedupeBy() != null) {
+                builder.add(ATTR_DEDUPE_BY, configuration.getDedupeBy());
             }
         } else {
-            builder.add(ATTR_DELETE_BY, dataSet.getDeleteBy().name());
+            builder.add(ATTR_DELETE_BY, configuration.getDeleteBy().name());
         }
         builder.add(ATTR_INPUT, input);
 

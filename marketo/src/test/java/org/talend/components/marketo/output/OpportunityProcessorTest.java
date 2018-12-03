@@ -22,9 +22,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.talend.components.marketo.MarketoBaseTest;
 import org.talend.components.marketo.dataset.MarketoDataSet.MarketoEntity;
-import org.talend.components.marketo.dataset.MarketoOutputDataSet.DeleteBy;
-import org.talend.components.marketo.dataset.MarketoOutputDataSet.OutputAction;
-import org.talend.components.marketo.dataset.MarketoOutputDataSet.SyncMethod;
+import org.talend.components.marketo.dataset.MarketoOutputConfiguration.DeleteBy;
+import org.talend.components.marketo.dataset.MarketoOutputConfiguration.OutputAction;
+import org.talend.components.marketo.dataset.MarketoOutputConfiguration.SyncMethod;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.junit.http.junit5.HttpApi;
 import org.talend.sdk.component.junit5.WithComponents;
@@ -43,10 +43,10 @@ class OpportunityProcessorTest extends MarketoBaseTest {
     @BeforeEach
     protected void setUp() {
         super.setUp();
-        outputDataSet.setEntity(MarketoEntity.Opportunity);
-        outputDataSet.setSyncMethod(SyncMethod.createOrUpdate);
-        outputDataSet.setDedupeBy(ATTR_DEDUPE_FIELDS);
-        outputDataSet.setDeleteBy(DeleteBy.dedupeFields);
+        outputConfiguration.getDataSet().setEntity(MarketoEntity.Opportunity);
+        outputConfiguration.setSyncMethod(SyncMethod.createOrUpdate);
+        outputConfiguration.setDedupeBy(ATTR_DEDUPE_FIELDS);
+        outputConfiguration.setDeleteBy(DeleteBy.dedupeFields);
         // create our opportunity
         data = service.getRecordBuilder().newRecordBuilder().withString(ATTR_EXTERNAL_OPPORTUNITY_ID, OPPORTUNITY_101).build();
         // create our opportunityRole
@@ -64,39 +64,39 @@ class OpportunityProcessorTest extends MarketoBaseTest {
                 .withInt(ATTR_LEAD_ID, 4) //
                 .build();
         //
-        // outputDataSet.setAction(OutputAction.sync);
+        // outputConfiguration.setAction(OutputAction.sync);
         // initProcessor();
         // processor.map(data, main -> assertEquals(0, main.getInt(ATTR_SEQ)), reject -> fail(FAIL_REJECT));
-        // outputDataSet.setEntity(MarketoEntity.OpportunityRole);
-        // outputDataSet.setAction(OutputAction.sync);
+        // outputConfiguration.getDataSet().setEntity(MarketoEntity.OpportunityRole);
+        // outputConfiguration.setAction(OutputAction.sync);
         // initProcessor();
         // processor.map(dataOR, main -> assertEquals(0, main.getInt(ATTR_SEQ)), reject -> fail(FAIL_REJECT));
         // // be sure that those one do not exist
-        // outputDataSet.setEntity(MarketoEntity.OpportunityRole);
-        // outputDataSet.setAction(OutputAction.delete);
+        // outputConfiguration.getDataSet().setEntity(MarketoEntity.OpportunityRole);
+        // outputConfiguration.setAction(OutputAction.delete);
         // initProcessor();
         // processor.map(dataNotExistOR, main -> {
         // }, reject -> {
         // });
-        // outputDataSet.setEntity(MarketoEntity.Opportunity);
+        // outputConfiguration.getDataSet().setEntity(MarketoEntity.Opportunity);
         // initProcessor();
         // processor.map(dataNotExist, main -> {
         // }, reject -> {
         // });
         //
         //
-        outputDataSet.setEntity(MarketoEntity.Opportunity);
+        outputConfiguration.getDataSet().setEntity(MarketoEntity.Opportunity);
     }
 
     private void initProcessor() {
-        processor = new MarketoProcessor(outputDataSet, service);
+        processor = new MarketoProcessor(outputConfiguration, service);
         processor.init();
     }
 
     @Test
     void testSyncOpportunityRole() {
-        outputDataSet.setEntity(MarketoEntity.OpportunityRole);
-        outputDataSet.setAction(OutputAction.sync);
+        outputConfiguration.getDataSet().setEntity(MarketoEntity.OpportunityRole);
+        outputConfiguration.setAction(OutputAction.sync);
         initProcessor();
         processor.map(dataOR);
     }
@@ -104,9 +104,9 @@ class OpportunityProcessorTest extends MarketoBaseTest {
     @Test
     void testSyncOpportunityRoleFail() {
         Assertions.assertThrows(RuntimeException.class, () -> {
-            outputDataSet.setEntity(MarketoEntity.OpportunityRole);
-            outputDataSet.setAction(OutputAction.sync);
-            outputDataSet.setSyncMethod(SyncMethod.updateOnly);
+            outputConfiguration.getDataSet().setEntity(MarketoEntity.OpportunityRole);
+            outputConfiguration.setAction(OutputAction.sync);
+            outputConfiguration.setSyncMethod(SyncMethod.updateOnly);
             initProcessor();
             processor.map(dataNotExistOR);
 
@@ -115,8 +115,8 @@ class OpportunityProcessorTest extends MarketoBaseTest {
 
     @Test
     void testDeleteOpportunityRole() {
-        outputDataSet.setEntity(MarketoEntity.OpportunityRole);
-        outputDataSet.setAction(OutputAction.delete);
+        outputConfiguration.getDataSet().setEntity(MarketoEntity.OpportunityRole);
+        outputConfiguration.setAction(OutputAction.delete);
         initProcessor();
         processor.map(dataOR);
     }
@@ -124,8 +124,8 @@ class OpportunityProcessorTest extends MarketoBaseTest {
     @Test
     void testDeleteOpportunityRoleFail() {
         Assertions.assertThrows(RuntimeException.class, () -> {
-            outputDataSet.setEntity(MarketoEntity.OpportunityRole);
-            outputDataSet.setAction(OutputAction.delete);
+            outputConfiguration.getDataSet().setEntity(MarketoEntity.OpportunityRole);
+            outputConfiguration.setAction(OutputAction.delete);
             initProcessor();
             processor.map(dataNotExistOR);
         });

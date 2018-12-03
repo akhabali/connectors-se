@@ -23,7 +23,7 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 
 import org.slf4j.Logger;
-import org.talend.components.marketo.dataset.MarketoOutputDataSet;
+import org.talend.components.marketo.dataset.MarketoOutputConfiguration;
 import org.talend.components.marketo.service.ListClient;
 import org.talend.components.marketo.service.MarketoService;
 
@@ -42,11 +42,11 @@ public class ListStrategy extends OutputComponentStrategy implements ProcessorSt
 
     private transient Integer leadId;
 
-    public ListStrategy(@Option("configuration") final MarketoOutputDataSet dataSet, //
+    public ListStrategy(@Option("configuration") final MarketoOutputConfiguration configuration, //
             final MarketoService service) {
-        super(dataSet, service);
+        super(configuration, service);
         this.listClient = service.getListClient();
-        this.listClient.base(this.dataSet.getDataStore().getEndpoint());
+        this.listClient.base(this.configuration.getDataSet().getDataStore().getEndpoint());
     }
 
     @Override
@@ -63,7 +63,7 @@ public class ListStrategy extends OutputComponentStrategy implements ProcessorSt
 
     @Override
     public JsonObject runAction(JsonObject payload) {
-        switch (dataSet.getListAction()) {
+        switch (configuration.getListAction()) {
         case addTo:
             return addToList(payload);
         case removeFrom:

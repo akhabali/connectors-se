@@ -33,7 +33,7 @@ import javax.json.JsonValue;
 import org.slf4j.Logger;
 import org.talend.components.marketo.MarketoSourceOrProcessor;
 import org.talend.components.marketo.dataset.CompoundKey;
-import org.talend.components.marketo.dataset.MarketoInputDataSet;
+import org.talend.components.marketo.dataset.MarketoInputConfiguration;
 import org.talend.components.marketo.service.MarketoService;
 
 import org.talend.sdk.component.api.component.Icon;
@@ -50,7 +50,7 @@ import org.talend.sdk.component.api.record.Schema.Entry;
 @Documentation("Marketo Input Component")
 public abstract class MarketoSource extends MarketoSourceOrProcessor {
 
-    protected final MarketoInputDataSet dataSet;
+    protected final MarketoInputConfiguration configuration;
 
     protected Map<String, Schema.Entry> schema;
 
@@ -58,10 +58,10 @@ public abstract class MarketoSource extends MarketoSourceOrProcessor {
 
     private transient static final Logger LOG = getLogger(MarketoSource.class);
 
-    public MarketoSource(@Option("configuration") final MarketoInputDataSet dataSet, //
+    public MarketoSource(@Option("configuration") final MarketoInputConfiguration configuration, //
             final MarketoService service) {
-        super(dataSet, service);
-        this.dataSet = dataSet;
+        super(configuration.getDataSet(), service);
+        this.configuration = configuration;
     }
 
     private Map<String, Entry> buildSchemaMap(final Schema entitySchema) {
@@ -78,8 +78,8 @@ public abstract class MarketoSource extends MarketoSourceOrProcessor {
     @PostConstruct
     public void init() {
         super.init();
-        schema = buildSchemaMap(marketoService.getEntitySchema(dataSet));
-        LOG.debug("[init] dataSet {}. Master entity schema: {}.", dataSet, schema);
+        schema = buildSchemaMap(marketoService.getEntitySchema(configuration));
+        LOG.debug("[init] configuration {}. Master entity schema: {}.", configuration, schema);
         processBatch();
     }
     /*
@@ -125,7 +125,7 @@ public abstract class MarketoSource extends MarketoSourceOrProcessor {
 
     protected JsonObject generateCompoundKeyPayload(String filterType, String fields) {
         Map<String, Object> ck = new HashMap<>();
-        for (CompoundKey p : dataSet.getCompoundKey()) {
+        for (CompoundKey p : configuration.getCompoundKey()) {
             ck.put(p.getKey(), p.getValue());
         }
         JsonArray input = jsonFactory.createArrayBuilder().add(jsonFactory.createObjectBuilder(ck).build()).build();

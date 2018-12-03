@@ -22,8 +22,8 @@ import javax.json.JsonObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.talend.components.marketo.dataset.MarketoOutputDataSet;
-import org.talend.components.marketo.dataset.MarketoOutputDataSet.OutputAction;
+import org.talend.components.marketo.dataset.MarketoOutputConfiguration;
+import org.talend.components.marketo.dataset.MarketoOutputConfiguration.OutputAction;
 import org.talend.components.marketo.service.LeadClient;
 import org.talend.components.marketo.service.MarketoService;
 
@@ -35,11 +35,11 @@ public class LeadStrategy extends OutputComponentStrategy implements ProcessorSt
 
     private transient static final Logger LOG = LoggerFactory.getLogger(LeadStrategy.class);
 
-    public LeadStrategy(@Option("configuration") final MarketoOutputDataSet dataSet, //
+    public LeadStrategy(@Option("configuration") final MarketoOutputConfiguration dataSet, //
             final MarketoService service) {
         super(dataSet, service);
         this.leadClient = service.getLeadClient();
-        this.leadClient.base(this.dataSet.getDataStore().getEndpoint());
+        this.leadClient.base(this.configuration.getDataSet().getDataStore().getEndpoint());
     }
 
     @Override
@@ -48,10 +48,10 @@ public class LeadStrategy extends OutputComponentStrategy implements ProcessorSt
         JsonArray input = jsonFactory.createArrayBuilder().add(data).build();
         LOG.debug("[getPayload] data : {}", data);
         LOG.debug("[getPayload] input: {}", input);
-        if (OutputAction.sync.equals(dataSet.getAction())) {
+        if (OutputAction.sync.equals(configuration.getAction())) {
             return jsonFactory.createObjectBuilder() //
-                    .add(ATTR_ACTION, dataSet.getSyncMethod().name()) //
-                    .add(ATTR_LOOKUP_FIELD, dataSet.getLookupField()) //
+                    .add(ATTR_ACTION, configuration.getSyncMethod().name()) //
+                    .add(ATTR_LOOKUP_FIELD, configuration.getLookupField()) //
                     .add(ATTR_INPUT, input) //
                     .build();
         } else {
@@ -63,7 +63,7 @@ public class LeadStrategy extends OutputComponentStrategy implements ProcessorSt
 
     @Override
     public JsonObject runAction(JsonObject payload) {
-        switch (dataSet.getAction()) {
+        switch (configuration.getAction()) {
         case sync:
             return syncLeads(payload);
         case delete:

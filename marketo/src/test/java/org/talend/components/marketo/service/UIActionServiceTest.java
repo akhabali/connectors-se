@@ -25,7 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.talend.components.marketo.MarketoBaseTest;
 import org.talend.components.marketo.dataset.MarketoDataSet.MarketoEntity;
-import org.talend.components.marketo.dataset.MarketoInputDataSet.ListAction;
+import org.talend.components.marketo.dataset.MarketoInputConfiguration.ListAction;
 import org.talend.sdk.component.api.service.asyncvalidation.ValidationResult;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
@@ -40,9 +40,9 @@ class UIActionServiceTest extends MarketoBaseTest {
     @BeforeEach
     protected void setUp() {
         super.setUp();
-        inputDataSet.setCustomObjectName("car_c");
-        inputDataSet.setListAction(ListAction.getLeads);
-        outputDataSet.setEntity(MarketoEntity.CustomObject);
+        inputConfiguration.setCustomObjectName("car_c");
+        inputConfiguration.setListAction(ListAction.getLeads);
+        outputConfiguration.getDataSet().setEntity(MarketoEntity.CustomObject);
     }
 
     @Test
@@ -102,35 +102,36 @@ class UIActionServiceTest extends MarketoBaseTest {
 
     @Test
     void testGetActivities() {
-        SuggestionValues activities = uiActionService.getActivities(inputDataSet.getDataStore());
+        SuggestionValues activities = uiActionService.getActivities(inputConfiguration.getDataSet().getDataStore());
         assertNotNull(activities);
         assertTrue(activities.getItems().size() > 20);
-        inputDataSet.getDataStore().setEndpoint(null);
-        activities = uiActionService.getActivities(inputDataSet.getDataStore());
+        inputConfiguration.getDataSet().getDataStore().setEndpoint(null);
+        activities = uiActionService.getActivities(inputConfiguration.getDataSet().getDataStore());
         assertNotNull(activities);
         assertEquals(60, activities.getItems().size());
     }
 
     @Test
     void getListNames() {
-        inputDataSet.setEntity(MarketoEntity.List);
-        SuggestionValues listNames = uiActionService.getListNames(inputDataSet.getDataStore());
+        inputConfiguration.getDataSet().setEntity(MarketoEntity.List);
+        SuggestionValues listNames = uiActionService.getListNames(inputConfiguration.getDataSet().getDataStore());
         assertNotNull(listNames);
         listNames.getItems().stream().forEach(item -> assertNotNull(item.getId()));
     }
 
     @Test
     void getCustomObjectNames() {
-        inputDataSet.setEntity(MarketoEntity.CustomObject);
-        SuggestionValues customObjectNames = uiActionService.getCustomObjectNames(inputDataSet.getDataStore());
+        inputConfiguration.getDataSet().setEntity(MarketoEntity.CustomObject);
+        SuggestionValues customObjectNames = uiActionService.getCustomObjectNames(inputConfiguration.getDataSet().getDataStore());
         assertNotNull(customObjectNames);
         customObjectNames.getItems().stream().forEach(item -> assertNotNull(item.getId()));
     }
 
     @Test
     void getFieldNames() {
-        inputDataSet.setEntity(MarketoEntity.Lead);
-        SuggestionValues fieldNames = uiActionService.getFieldNames(inputDataSet.getDataStore(), MarketoEntity.Lead.name(), null);
+        inputConfiguration.getDataSet().setEntity(MarketoEntity.Lead);
+        SuggestionValues fieldNames = uiActionService.getFieldNames(inputConfiguration.getDataSet().getDataStore(),
+                MarketoEntity.Lead.name(), null);
         assertNotNull(fieldNames);
         assertThat(fieldNames.getItems().size(), is(greaterThan(100)));
         fieldNames.getItems().stream().forEach(item -> assertNotNull(item.getId()));

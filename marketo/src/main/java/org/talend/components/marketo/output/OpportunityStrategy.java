@@ -25,8 +25,8 @@ import javax.json.JsonObjectBuilder;
 
 import org.slf4j.Logger;
 import org.talend.components.marketo.dataset.MarketoDataSet.MarketoEntity;
-import org.talend.components.marketo.dataset.MarketoOutputDataSet;
-import org.talend.components.marketo.dataset.MarketoOutputDataSet.OutputAction;
+import org.talend.components.marketo.dataset.MarketoOutputConfiguration;
+import org.talend.components.marketo.dataset.MarketoOutputConfiguration.OutputAction;
 import org.talend.components.marketo.service.MarketoService;
 import org.talend.components.marketo.service.OpportunityClient;
 
@@ -40,12 +40,12 @@ public class OpportunityStrategy extends OutputComponentStrategy {
 
     private transient static final Logger LOG = getLogger(OpportunityStrategy.class);
 
-    public OpportunityStrategy(@Option("configuration") final MarketoOutputDataSet dataSet, //
+    public OpportunityStrategy(@Option("configuration") final MarketoOutputConfiguration configuration, //
             final MarketoService service) {
-        super(dataSet, service);
+        super(configuration, service);
         this.opportunityClient = service.getOpportunityClient();
-        this.opportunityClient.base(dataSet.getDataStore().getEndpoint());
-        isOpportunityRole = MarketoEntity.OpportunityRole.equals(dataSet.getEntity());
+        this.opportunityClient.base(configuration.getDataSet().getDataStore().getEndpoint());
+        isOpportunityRole = MarketoEntity.OpportunityRole.equals(configuration.getDataSet().getEntity());
     }
 
     @Override
@@ -53,13 +53,13 @@ public class OpportunityStrategy extends OutputComponentStrategy {
         JsonObject data = incomingData;
         JsonArray input = jsonFactory.createArrayBuilder().add(data).build();
         JsonObjectBuilder builder = jsonFactory.createObjectBuilder();
-        if (OutputAction.sync.equals(dataSet.getAction())) {
-            builder.add(ATTR_ACTION, dataSet.getSyncMethod().name());
-            if (dataSet.getDedupeBy() != null) {
-                builder.add(ATTR_DEDUPE_BY, dataSet.getDedupeBy());
+        if (OutputAction.sync.equals(configuration.getAction())) {
+            builder.add(ATTR_ACTION, configuration.getSyncMethod().name());
+            if (configuration.getDedupeBy() != null) {
+                builder.add(ATTR_DEDUPE_BY, configuration.getDedupeBy());
             }
         } else {
-            builder.add(ATTR_DELETE_BY, dataSet.getDeleteBy().name());
+            builder.add(ATTR_DELETE_BY, configuration.getDeleteBy().name());
         }
         builder.add(ATTR_INPUT, input);
 
@@ -69,7 +69,7 @@ public class OpportunityStrategy extends OutputComponentStrategy {
     @Override
     public JsonObject runAction(JsonObject payload) {
         LOG.debug("[runAction] payload: {}.", payload);
-        switch (dataSet.getAction()) {
+        switch (configuration.getAction()) {
         case sync:
             return syncOpportunity(payload);
         case delete:

@@ -12,10 +12,6 @@
 // ============================================================================
 package org.talend.components.marketo.dataset;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import static org.talend.components.marketo.service.UIActionService.FIELD_NAMES;
 
 import java.io.Serializable;
@@ -26,6 +22,10 @@ import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.ui.OptionsOrder;
 import org.talend.sdk.component.api.meta.Documentation;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -35,7 +35,8 @@ public class CompoundKey implements Serializable {
 
     @Option
     @Required
-    @Suggestable(value = FIELD_NAMES, parameters = { "../../dataStore", "../../entity", "../../customObjectName" })
+    @Suggestable(value = FIELD_NAMES, parameters = { "../../dataSet/dataStore", "../../dataSet/entity",
+            "../../customObjectName" })
     @Documentation("Key field")
     private String key;
 

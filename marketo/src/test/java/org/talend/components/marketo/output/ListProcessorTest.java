@@ -17,7 +17,7 @@ import static org.talend.components.marketo.MarketoApiConstants.ATTR_LEAD_ID;
 import static org.talend.components.marketo.MarketoApiConstants.ATTR_LIST_ID;
 import static org.talend.components.marketo.component.ListGeneratorSource.LEAD_ID_ADDREMOVE;
 import static org.talend.components.marketo.component.ListGeneratorSource.LIST_ID;
-import static org.talend.components.marketo.dataset.MarketoInputDataSet.ListAction.isMemberOf;
+import static org.talend.components.marketo.dataset.MarketoInputConfiguration.ListAction.isMemberOf;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.talend.components.marketo.MarketoBaseTest;
 import org.talend.components.marketo.component.DataCollector;
 import org.talend.components.marketo.dataset.MarketoDataSet.MarketoEntity;
-import org.talend.components.marketo.dataset.MarketoOutputDataSet.ListAction;
+import org.talend.components.marketo.dataset.MarketoOutputConfiguration.ListAction;
 import org.talend.sdk.component.junit.http.junit5.HttpApi;
 import org.talend.sdk.component.junit5.WithComponents;
 
@@ -37,54 +37,54 @@ public class ListProcessorTest extends MarketoBaseTest {
     @BeforeEach
     protected void setUp() {
         super.setUp();
-        outputDataSet.setEntity(MarketoEntity.List);
+        outputConfiguration.getDataSet().setEntity(MarketoEntity.List);
         data = service.getRecordBuilder().newRecordBuilder().withInt(ATTR_LIST_ID, LIST_ID)
                 .withInt(ATTR_LEAD_ID, LEAD_ID_ADDREMOVE).build();
-        outputDataSet.setListAction(ListAction.addTo);
+        outputConfiguration.setListAction(ListAction.addTo);
         initProcessor();
         processor.map(data);
 
-        inputDataSet.setEntity(MarketoEntity.List);
+        inputConfiguration.getDataSet().setEntity(MarketoEntity.List);
     }
 
     private void initProcessor() {
-        processor = new MarketoProcessor(outputDataSet, service);
+        processor = new MarketoProcessor(outputConfiguration, service);
         processor.init();
     }
 
     @Test
     void testAddToList() {
-        outputDataSet.setListAction(ListAction.removeFrom);
+        outputConfiguration.setListAction(ListAction.removeFrom);
         initProcessor();
         processor.map(data);
         //
-        outputDataSet.setListAction(ListAction.addTo);
-        final String config = configurationByExample().forInstance(outputDataSet).configured().toQueryString();
+        outputConfiguration.setListAction(ListAction.addTo);
+        final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
         final String inputConfig = "config.isInvalid=false";
         runOutputPipeline("ListGenerator", inputConfig, config);
         //
-        inputDataSet.setListAction(isMemberOf);
-        inputDataSet.setListName(String.valueOf(LIST_ID));
-        inputDataSet.setLeadIds(String.valueOf(LEAD_ID_ADDREMOVE));
-        runInputPipeline(configurationByExample().forInstance(inputDataSet).configured().toQueryString());
+        inputConfiguration.setListAction(isMemberOf);
+        inputConfiguration.setListName(String.valueOf(LIST_ID));
+        inputConfiguration.setLeadIds(String.valueOf(LEAD_ID_ADDREMOVE));
+        runInputPipeline(configurationByExample().forInstance(inputConfiguration).configured().toQueryString());
         assertEquals(1, DataCollector.getData().size());
         assertEquals("memberof", DataCollector.getData().poll().getString("status"));
     }
 
     @Test
     void testRemoveFromList() {
-        outputDataSet.setListAction(ListAction.addTo);
+        outputConfiguration.setListAction(ListAction.addTo);
         initProcessor();
         processor.map(data);
         //
-        outputDataSet.setListAction(ListAction.removeFrom);
-        final String config = configurationByExample().forInstance(outputDataSet).configured().toQueryString();
+        outputConfiguration.setListAction(ListAction.removeFrom);
+        final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
         final String inputConfig = "config.isInvalid=false";
         runOutputPipeline("ListGenerator", inputConfig, config);
-        inputDataSet.setListAction(isMemberOf);
-        inputDataSet.setListName(String.valueOf(LIST_ID));
-        inputDataSet.setLeadIds(String.valueOf(LEAD_ID_ADDREMOVE));
-        runInputPipeline(configurationByExample().forInstance(inputDataSet).configured().toQueryString());
+        inputConfiguration.setListAction(isMemberOf);
+        inputConfiguration.setListName(String.valueOf(LIST_ID));
+        inputConfiguration.setLeadIds(String.valueOf(LEAD_ID_ADDREMOVE));
+        runInputPipeline(configurationByExample().forInstance(inputConfiguration).configured().toQueryString());
         assertEquals(1, DataCollector.getData().size());
         assertEquals("notmemberof", DataCollector.getData().poll().getString("status"));
     }

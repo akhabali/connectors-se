@@ -13,17 +13,17 @@
 package org.talend.components.marketo.output;
 
 import org.talend.components.marketo.MarketoSourceOrProcessor;
-import org.talend.components.marketo.dataset.MarketoOutputDataSet;
+import org.talend.components.marketo.dataset.MarketoOutputConfiguration;
 import org.talend.components.marketo.service.MarketoService;
 
 public abstract class OutputComponentStrategy extends MarketoSourceOrProcessor implements ProcessorStrategy {
 
-    protected final MarketoOutputDataSet dataSet;
+    protected final MarketoOutputConfiguration configuration;
 
-    public OutputComponentStrategy(final MarketoOutputDataSet dataSet, //
+    public OutputComponentStrategy(final MarketoOutputConfiguration configuration, //
             final MarketoService service) {
-        super(dataSet, service);
-        this.dataSet = dataSet;
+        super(configuration.getDataSet(), service);
+        this.configuration = configuration;
     }
 
     @Override

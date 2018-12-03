@@ -20,11 +20,11 @@ import org.talend.components.marketo.MarketoBaseTest;
 import org.talend.components.marketo.component.DataCollector;
 import org.talend.components.marketo.dataset.CompoundKey;
 import org.talend.components.marketo.dataset.MarketoDataSet.MarketoEntity;
-import org.talend.components.marketo.dataset.MarketoInputDataSet.LeadAction;
-import org.talend.components.marketo.dataset.MarketoInputDataSet.OtherEntityAction;
-import org.talend.components.marketo.dataset.MarketoOutputDataSet.DeleteBy;
-import org.talend.components.marketo.dataset.MarketoOutputDataSet.OutputAction;
-import org.talend.components.marketo.dataset.MarketoOutputDataSet.SyncMethod;
+import org.talend.components.marketo.dataset.MarketoInputConfiguration.LeadAction;
+import org.talend.components.marketo.dataset.MarketoInputConfiguration.OtherEntityAction;
+import org.talend.components.marketo.dataset.MarketoOutputConfiguration.DeleteBy;
+import org.talend.components.marketo.dataset.MarketoOutputConfiguration.OutputAction;
+import org.talend.components.marketo.dataset.MarketoOutputConfiguration.SyncMethod;
 import org.talend.components.marketo.input.LeadSource;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.junit.http.junit5.HttpApi;
@@ -45,19 +45,19 @@ class ProcessorsTest extends MarketoBaseTest {
     String keyValue;
 
     void ensureLeadExist() {
-        outputDataSet.setAction(OutputAction.sync);
-        outputDataSet.setSyncMethod(SyncMethod.createOrUpdate);
-        outputDataSet.setLookupField(ATTR_EMAIL);
-        processor = new MarketoProcessor(outputDataSet, service);
+        outputConfiguration.setAction(OutputAction.sync);
+        outputConfiguration.setSyncMethod(SyncMethod.createOrUpdate);
+        outputConfiguration.setLookupField(ATTR_EMAIL);
+        processor = new MarketoProcessor(outputConfiguration, service);
         processor.init();
         data = service.getRecordBuilder().newRecordBuilder().withString(ATTR_EMAIL, "egallois@talend.com")
                 .withString("firstName", "Emmanuel").build();
         processor.map(data);
 
-        inputDataSet.setLeadAction(LeadAction.getMultipleLeads);
-        inputDataSet.setLeadKeyName(ATTR_EMAIL);
-        inputDataSet.setLeadKeyValues("egallois@talend.com");
-        LeadSource source = new LeadSource(inputDataSet, service);
+        inputConfiguration.setLeadAction(LeadAction.getMultipleLeads);
+        inputConfiguration.setLeadKeyName(ATTR_EMAIL);
+        inputConfiguration.setLeadKeyValues("egallois@talend.com");
+        LeadSource source = new LeadSource(inputConfiguration, service);
         source.init();
         Record result;
         keyName = ATTR_ID;
@@ -76,65 +76,65 @@ class ProcessorsTest extends MarketoBaseTest {
     void initTest(String entity) {
         generator = entity + "Generator";
         expectedErrorMessage = "[1013] Record not found";
-        outputDataSet.setEntity(MarketoEntity.valueOf(entity));
-        inputDataSet.setEntity(MarketoEntity.valueOf(entity));
+        outputConfiguration.getDataSet().setEntity(MarketoEntity.valueOf(entity));
+        inputConfiguration.getDataSet().setEntity(MarketoEntity.valueOf(entity));
         switch (MarketoEntity.valueOf(entity)) {
         case Lead:
             expectedErrorMessage = "[1004] Lead not found";
             ensureLeadExist();
             if (action.equals("sync")) {
-                inputDataSet.setLeadAction(LeadAction.getMultipleLeads);
-                inputDataSet.setLeadKeyName(keyName);
-                inputDataSet.setLeadKeyValues(keyValue);
+                inputConfiguration.setLeadAction(LeadAction.getMultipleLeads);
+                inputConfiguration.setLeadKeyName(keyName);
+                inputConfiguration.setLeadKeyValues(keyValue);
             } else {
-                inputDataSet.setLeadAction(LeadAction.getLead);
-                inputDataSet.setLeadId(Integer.parseInt(keyValue));
+                inputConfiguration.setLeadAction(LeadAction.getLead);
+                inputConfiguration.setLeadId(Integer.parseInt(keyValue));
             }
             break;
         case List:
             break;
         case CustomObject:
 
-            outputDataSet.setCustomObjectName("car_c");
-            outputDataSet.setDedupeBy("dedupeFields");
+            outputConfiguration.setCustomObjectName("car_c");
+            outputConfiguration.setDedupeBy("dedupeFields");
 
-            inputDataSet.setOtherAction(OtherEntityAction.get);
-            inputDataSet.setCustomObjectName("car_c");
-            inputDataSet.setFilterType("dedupeFields");
-            inputDataSet.setUseCompoundKey(true);
+            inputConfiguration.setOtherAction(OtherEntityAction.get);
+            inputConfiguration.setCustomObjectName("car_c");
+            inputConfiguration.setFilterType("dedupeFields");
+            inputConfiguration.setUseCompoundKey(true);
             List<CompoundKey> compoundKey = new ArrayList<>();
             compoundKey.add(new CompoundKey("customerId", "3"));
             compoundKey.add(new CompoundKey("VIN", "ABC-DEF-12345-GIN"));
-            inputDataSet.setCompoundKey(compoundKey);
-            inputDataSet.setFields(asList("createdAt,marketoGUID,updatedAt,VIN,customerId,model,year".split(",")));
+            inputConfiguration.setCompoundKey(compoundKey);
+            inputConfiguration.setFields(asList("createdAt,marketoGUID,updatedAt,VIN,customerId,model,year".split(",")));
 
             break;
         // company
         case Company:
-            outputDataSet.setDedupeBy("dedupeFields");
+            outputConfiguration.setDedupeBy("dedupeFields");
 
-            inputDataSet.setOtherAction(OtherEntityAction.get);
-            inputDataSet.setFilterType("externalCompanyId");
-            inputDataSet.setFilterValues("google666");
-            inputDataSet.setFields(asList("mainPhone", "company", "website"));
+            inputConfiguration.setOtherAction(OtherEntityAction.get);
+            inputConfiguration.setFilterType("externalCompanyId");
+            inputConfiguration.setFilterValues("google666");
+            inputConfiguration.setFields(asList("mainPhone", "company", "website"));
 
             data = service.getRecordBuilder().newRecordBuilder().withString("externalCompanyId", "google666").build();
             // we create a record
-            outputDataSet.setAction(OutputAction.sync);
-            outputDataSet.setSyncMethod(SyncMethod.createOrUpdate);
-            processor = new MarketoProcessor(outputDataSet, service);
+            outputConfiguration.setAction(OutputAction.sync);
+            outputConfiguration.setSyncMethod(SyncMethod.createOrUpdate);
+            processor = new MarketoProcessor(outputConfiguration, service);
             processor.init();
             processor.map(data);
 
             break;
         case Opportunity:
         case OpportunityRole:
-            outputDataSet.setDedupeBy(ATTR_DEDUPE_FIELDS);
-            outputDataSet.setDeleteBy(DeleteBy.dedupeFields);
+            outputConfiguration.setDedupeBy(ATTR_DEDUPE_FIELDS);
+            outputConfiguration.setDeleteBy(DeleteBy.dedupeFields);
 
-            inputDataSet.setOtherAction(OtherEntityAction.get);
-            inputDataSet.setFilterType(ATTR_EXTERNAL_OPPORTUNITY_ID);
-            inputDataSet.setFilterValues("opportunity102");
+            inputConfiguration.setOtherAction(OtherEntityAction.get);
+            inputConfiguration.setFilterType(ATTR_EXTERNAL_OPPORTUNITY_ID);
+            inputConfiguration.setFilterValues("opportunity102");
 
             break;
         }
@@ -147,9 +147,9 @@ class ProcessorsTest extends MarketoBaseTest {
         action = "delete";
         initTest(entity);
         final Exception error = assertThrows(Exception.class, () -> {
-            outputDataSet.setAction(OutputAction.delete);
-            outputDataSet.setDeleteBy(DeleteBy.dedupeFields);
-            final String config = configurationByExample().forInstance(outputDataSet).configured().toQueryString();
+            outputConfiguration.setAction(OutputAction.delete);
+            outputConfiguration.setDeleteBy(DeleteBy.dedupeFields);
+            final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
             final String inputConfig = "config.isInvalid=true";
             runOutputPipeline(generator, inputConfig, config);
         });
@@ -161,13 +161,13 @@ class ProcessorsTest extends MarketoBaseTest {
     void delete(String entity) {
         action = "delete";
         initTest(entity);
-        outputDataSet.setAction(OutputAction.delete);
-        outputDataSet.setDeleteBy(DeleteBy.dedupeFields);
-        final String config = configurationByExample().forInstance(outputDataSet).configured().toQueryString();
+        outputConfiguration.setAction(OutputAction.delete);
+        outputConfiguration.setDeleteBy(DeleteBy.dedupeFields);
+        final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
         final String inputConfig = "config.isInvalid=false&config.keyName=" + keyName + "&config.keyValue=" + keyValue;
         runOutputPipeline(generator, inputConfig, config);
         //
-        runInputPipeline(configurationByExample().forInstance(inputDataSet).configured().toQueryString());
+        runInputPipeline(configurationByExample().forInstance(inputConfiguration).configured().toQueryString());
         assertEquals(0, DataCollector.getData().size());
     }
 
@@ -177,9 +177,9 @@ class ProcessorsTest extends MarketoBaseTest {
         action = "sync";
         initTest(entity);
         final Exception error = assertThrows(Exception.class, () -> {
-            outputDataSet.setAction(OutputAction.sync);
-            outputDataSet.setSyncMethod(SyncMethod.updateOnly);
-            final String config = configurationByExample().forInstance(outputDataSet).configured().toQueryString();
+            outputConfiguration.setAction(OutputAction.sync);
+            outputConfiguration.setSyncMethod(SyncMethod.updateOnly);
+            final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
             final String inputConfig = "config.isInvalid=true&config.action=sync";
             runOutputPipeline(generator, inputConfig, config);
         });
@@ -191,14 +191,14 @@ class ProcessorsTest extends MarketoBaseTest {
     void sync(String entity) {
         action = "sync";
         initTest(entity);
-        outputDataSet.setAction(OutputAction.sync);
-        outputDataSet.setSyncMethod(SyncMethod.createOrUpdate);
-        final String config = configurationByExample().forInstance(outputDataSet).configured().toQueryString();
+        outputConfiguration.setAction(OutputAction.sync);
+        outputConfiguration.setSyncMethod(SyncMethod.createOrUpdate);
+        final String config = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
         final String inputConfig = "config.isInvalid=false&config.action=sync&config.keyName=" + keyName + "&config.keyValue="
                 + keyValue;
         runOutputPipeline(generator, inputConfig, config);
         //
-        runInputPipeline(configurationByExample().forInstance(inputDataSet).configured().toQueryString());
+        runInputPipeline(configurationByExample().forInstance(inputConfiguration).configured().toQueryString());
         assertEquals(1, DataCollector.getData().size());
     }
 

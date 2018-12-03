@@ -28,7 +28,7 @@ class MarketoInputMapperTest extends MarketoBaseTest {
     @BeforeEach
     protected void setUp() {
         super.setUp();
-        mapper = new MarketoInputMapper(inputDataSet, service);
+        mapper = new MarketoInputMapper(inputConfiguration, service);
         mapper.init();
     }
 
@@ -44,17 +44,17 @@ class MarketoInputMapperTest extends MarketoBaseTest {
 
     @Test
     void createWorker() {
-        inputDataSet.setEntity(MarketoEntity.Lead);
+        inputConfiguration.getDataSet().setEntity(MarketoEntity.Lead);
         assertTrue(mapper.createWorker() instanceof LeadSource);
-        inputDataSet.setEntity(MarketoEntity.List);
+        inputConfiguration.getDataSet().setEntity(MarketoEntity.List);
         assertTrue(mapper.createWorker() instanceof ListSource);
-        inputDataSet.setEntity(MarketoEntity.Company);
+        inputConfiguration.getDataSet().setEntity(MarketoEntity.Company);
         assertTrue(mapper.createWorker() instanceof CompanySource);
-        inputDataSet.setEntity(MarketoEntity.CustomObject);
+        inputConfiguration.getDataSet().setEntity(MarketoEntity.CustomObject);
         assertTrue(mapper.createWorker() instanceof CustomObjectSource);
-        inputDataSet.setEntity(MarketoEntity.Opportunity);
+        inputConfiguration.getDataSet().setEntity(MarketoEntity.Opportunity);
         assertTrue(mapper.createWorker() instanceof OpportunitySource);
-        inputDataSet.setEntity(MarketoEntity.OpportunityRole);
+        inputConfiguration.getDataSet().setEntity(MarketoEntity.OpportunityRole);
         assertTrue(mapper.createWorker() instanceof OpportunitySource);
     }
 }

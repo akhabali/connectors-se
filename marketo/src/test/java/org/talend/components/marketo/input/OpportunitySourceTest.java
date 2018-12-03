@@ -29,7 +29,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.talend.components.marketo.dataset.CompoundKey;
 import org.talend.components.marketo.dataset.MarketoDataSet.MarketoEntity;
-import org.talend.components.marketo.dataset.MarketoInputDataSet.OtherEntityAction;
+import org.talend.components.marketo.dataset.MarketoInputConfiguration.OtherEntityAction;
 import org.talend.sdk.component.junit.http.junit5.HttpApi;
 import org.talend.sdk.component.junit5.WithComponents;
 
@@ -44,20 +44,20 @@ class OpportunitySourceTest extends SourceBaseTest {
     @BeforeEach
     protected void setUp() {
         super.setUp();
-        inputDataSet.setEntity(MarketoEntity.Opportunity);
-        inputDataSet.setUseCompoundKey(false);
+        inputConfiguration.getDataSet().setEntity(MarketoEntity.Opportunity);
+        inputConfiguration.setUseCompoundKey(false);
     }
 
     private void initSource() {
-        source = new OpportunitySource(inputDataSet, service);
+        source = new OpportunitySource(inputConfiguration, service);
         source.init();
     }
 
     @ParameterizedTest
     @ValueSource(strings = { "Opportunity" })
     void testDescribeOpportunity(String entity) {
-        inputDataSet.setEntity(MarketoEntity.valueOf(entity));
-        inputDataSet.setOtherAction(OtherEntityAction.describe);
+        inputConfiguration.getDataSet().setEntity(MarketoEntity.valueOf(entity));
+        inputConfiguration.setOtherAction(OtherEntityAction.describe);
         initSource();
         while ((result = source.next()) != null) {
             assertNotNull(result);
@@ -68,8 +68,8 @@ class OpportunitySourceTest extends SourceBaseTest {
 
     @Test
     void testDescribeOpportunityRole() {
-        inputDataSet.setEntity(MarketoEntity.OpportunityRole);
-        inputDataSet.setOtherAction(OtherEntityAction.describe);
+        inputConfiguration.getDataSet().setEntity(MarketoEntity.OpportunityRole);
+        inputConfiguration.setOtherAction(OtherEntityAction.describe);
         initSource();
         while ((result = source.next()) != null) {
             assertNotNull(result);
@@ -81,10 +81,10 @@ class OpportunitySourceTest extends SourceBaseTest {
     @ParameterizedTest
     @ValueSource(strings = { "Opportunity" })
     void testGetOpportunities(String entity) {
-        inputDataSet.setEntity(MarketoEntity.valueOf(entity));
-        inputDataSet.setOtherAction(OtherEntityAction.get);
-        inputDataSet.setFilterType(ATTR_EXTERNAL_OPPORTUNITY_ID);
-        inputDataSet.setFilterValues(TEST_OPPORTUNITY_EXISTING);
+        inputConfiguration.getDataSet().setEntity(MarketoEntity.valueOf(entity));
+        inputConfiguration.setOtherAction(OtherEntityAction.get);
+        inputConfiguration.setFilterType(ATTR_EXTERNAL_OPPORTUNITY_ID);
+        inputConfiguration.setFilterValues(TEST_OPPORTUNITY_EXISTING);
         initSource();
         while ((result = source.next()) != null) {
             assertNotNull(result);
@@ -98,10 +98,10 @@ class OpportunitySourceTest extends SourceBaseTest {
 
     @Test
     void testGetOpportunityRoles() {
-        inputDataSet.setEntity(MarketoEntity.OpportunityRole);
-        inputDataSet.setOtherAction(OtherEntityAction.get);
-        inputDataSet.setFilterType(ATTR_EXTERNAL_OPPORTUNITY_ID);
-        inputDataSet.setFilterValues(TEST_OPPORTUNITY_EXISTING);
+        inputConfiguration.getDataSet().setEntity(MarketoEntity.OpportunityRole);
+        inputConfiguration.setOtherAction(OtherEntityAction.get);
+        inputConfiguration.setFilterType(ATTR_EXTERNAL_OPPORTUNITY_ID);
+        inputConfiguration.setFilterValues(TEST_OPPORTUNITY_EXISTING);
         initSource();
         while ((result = source.next()) != null) {
             assertNotNull(result);
@@ -113,16 +113,16 @@ class OpportunitySourceTest extends SourceBaseTest {
 
     @Test
     void testGetOpportunityRolesWithCompoundKey() {
-        inputDataSet.setEntity(MarketoEntity.OpportunityRole);
-        inputDataSet.setOtherAction(OtherEntityAction.get);
-        inputDataSet.setFields(asList("marketoGuid", "externalOpportunityId", "leadId", "role"));
-        inputDataSet.setFilterType("dedupeFields");
-        inputDataSet.setUseCompoundKey(true);
+        inputConfiguration.getDataSet().setEntity(MarketoEntity.OpportunityRole);
+        inputConfiguration.setOtherAction(OtherEntityAction.get);
+        inputConfiguration.setFields(asList("marketoGuid", "externalOpportunityId", "leadId", "role"));
+        inputConfiguration.setFilterType("dedupeFields");
+        inputConfiguration.setUseCompoundKey(true);
         List<CompoundKey> compoundKey = new ArrayList<>();
         compoundKey.add(new CompoundKey(ATTR_EXTERNAL_OPPORTUNITY_ID, "opportunity102"));
         compoundKey.add(new CompoundKey(ATTR_LEAD_ID, "4"));
         compoundKey.add(new CompoundKey(ATTR_ROLE, "newCust"));
-        inputDataSet.setCompoundKey(compoundKey);
+        inputConfiguration.setCompoundKey(compoundKey);
         initSource();
         while ((result = source.next()) != null) {
             assertNotNull(result);
