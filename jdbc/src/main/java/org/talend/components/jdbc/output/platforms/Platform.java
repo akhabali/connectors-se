@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -55,7 +56,7 @@ public abstract class Platform implements Serializable {
                 throw e;
             }
 
-            log.debug("create table issue was ignored. The table and it's name space has been created by an other worker", e);
+            log.trace("create table issue was ignored. The table and it's name space has been created by an other worker", e);
         }
     }
 
@@ -79,11 +80,24 @@ public abstract class Platform implements Serializable {
         }
         final List<Schema.Entry> entries = records.stream().flatMap(record -> record.getSchema().getEntries().stream()).distinct()
                 .collect(toList());
-        return builder.columns(entries.stream().map(entry -> Column.builder().entry(entry).build()).collect(toList()))
+        return builder
+                .columns(entries.stream().map(entry -> Column.builder().entry(entry).size(inferSize(entry, records)).build())
+                        .collect(toList()))
                 .primaryKeys(keys.stream()
-                        .map(k -> new Column(entries.stream().filter(e -> e.getName().equals(k)).findFirst()
-                                .orElseThrow(() -> new IllegalStateException("can't find key {" + k + "}"))))
+                        .map(k -> Column.builder()
+                                .entry(entries.stream().filter(e -> e.getName().equals(k)).findFirst()
+                                        .orElseThrow(() -> new IllegalStateException("can't find key {" + k + "}")))
+                                .build())
                         .collect(toList()))
                 .build();
+    }
+
+    private Integer inferSize(Schema.Entry entry, List<Record> records) {
+        if (!Schema.Type.STRING.equals(entry.getType())) {
+            return null;
+        }
+
+        return records.stream().map(record -> record.get(String.class, entry.getName())).filter(Objects::nonNull)
+                .mapToInt(String::length).max().orElse(0);
     }
 }

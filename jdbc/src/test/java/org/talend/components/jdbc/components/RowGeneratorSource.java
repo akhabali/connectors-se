@@ -17,6 +17,7 @@ import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
+import org.testcontainers.shaded.org.apache.commons.lang.RandomStringUtils;
 
 import javax.annotation.PostConstruct;
 import java.io.Serializable;
@@ -56,10 +57,14 @@ public class RowGeneratorSource implements Serializable {
 
         if (config.withNullValues) {
             builder.withString("t_string", null);
+            builder.withString("t_string2", null);
+            builder.withString("t_text", null);
             builder.withDateTime("t_date", (Date) null);
 
         } else {
             builder.withString("t_string", ofNullable(config.stringPrefix).orElse("customer") + currentCount);
+            builder.withString("t_string2", RandomStringUtils.randomAlphabetic(50));
+            builder.withString("t_text", RandomStringUtils.randomAlphabetic(300));
             builder.withBoolean("t_boolean", true);
             builder.withLong("t_long", 10000000000L);
             builder.withDouble("t_double", 1000.85d);

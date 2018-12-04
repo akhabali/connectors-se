@@ -116,6 +116,7 @@ public abstract class BaseJdbcTest {
         configuration.setActionOnData(OutputConfig.ActionOnData.INSERT);
         configuration.setCreateTableIfNotExists(true);
         configuration.setKeys(asList("id"));
+        configuration.setRewriteBatchedStatements(true);
         final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
         Job.components()
                 .component("rowGenerator",

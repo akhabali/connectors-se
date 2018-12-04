@@ -16,7 +16,7 @@
     <properties>
         <xbean-finder-shaded.version>4.8</xbean-finder-shaded.version>
         <derby.version>10.12.1.1</derby.version>
-        <testcontainers.version>1.10.1</testcontainers.version>
+        <testcontainers.version>1.10.2</testcontainers.version>
         <HikariCP.version>3.1.0</HikariCP.version>
         <metrics.version>4.0.3</metrics.version>
         <jooq.version>3.11.7</jooq.version>
@@ -36,6 +36,12 @@
         </dependency>
 
         <!-- test -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.7</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.apache.derby</groupId>
             <artifactId>derby</artifactId>

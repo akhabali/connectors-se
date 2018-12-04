@@ -14,7 +14,6 @@ package org.talend.components.jdbc.output.platforms;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,8 +25,6 @@ import java.util.stream.Collectors;
 public class MySQLPlatform extends Platform {
 
     public static final String NAME = "mysql";
-
-    private final static String VARCHAR_UTF8_MAX_LENGTH = "21844";
 
     @Override
     public String name() {
@@ -85,7 +82,10 @@ public class MySQLPlatform extends Platform {
     private String toDBType(final Column column) {
         switch (column.getType()) {
         case STRING:
-            return "VARCHAR(" + VARCHAR_UTF8_MAX_LENGTH + ")";
+            if (column.getSize() != null && column.getSize() > 255) {
+                return "TEXT";
+            }
+            return "VARCHAR(255)";
         case BOOLEAN:
             return "BOOLEAN";
         case DOUBLE:

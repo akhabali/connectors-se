@@ -26,4 +26,6 @@ class Column implements Serializable {
     @Delegate
     private final Schema.Entry entry;
 
+    private final Integer size;
+
 }
