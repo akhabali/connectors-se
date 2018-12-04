@@ -39,6 +39,7 @@
     <module>processing-tck</module>
     <module>jdbc</module>
     <module>salesforce</module>
+    <module>components-jms</module>
   </modules>
 
   <scm>
@@ -84,6 +85,8 @@
     <commons-csv.version>1.4</commons-csv.version>
     <guava.version>20.0</guava.version>
 
+    <docker-maven-plugin.version>0.26.0</docker-maven-plugin.version>
+    <jms-api.version>2.0.1</jms-api.version>
     <validation.model>true</validation.model>
   </properties>
 
@@ -191,6 +194,11 @@
         <version>${daikon.version}</version>
         <classifier>tests</classifier>
         <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>javax.jms</groupId>
+        <artifactId>javax.jms-api</artifactId>
+        <version>${jms-api.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
