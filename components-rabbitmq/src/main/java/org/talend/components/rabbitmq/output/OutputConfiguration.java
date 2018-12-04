@@ -24,7 +24,7 @@ import java.io.Serializable;
 @GridLayout(value = { @GridLayout.Row({ "basicConfig" }), @GridLayout.Row({ "actionOnExchange" }),
         @GridLayout.Row({ "actionOnQueue" }) }, names = GridLayout.FormType.MAIN)
 @GridLayout(value = { @GridLayout.Row({ "basicConfig" }) }, names = GridLayout.FormType.ADVANCED)
-@Documentation("Main configuration class for JMSOutput component")
+@Documentation("Main configuration class for RabbitMQOutput component")
 @Data
 public class OutputConfiguration implements Serializable {
 

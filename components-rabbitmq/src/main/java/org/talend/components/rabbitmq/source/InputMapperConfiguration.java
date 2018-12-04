@@ -25,7 +25,7 @@ import java.io.Serializable;
 @GridLayout(value = { @GridLayout.Row({ "basicConfig" }),
         @GridLayout.Row({ "maximumMessages" }) }, names = GridLayout.FormType.MAIN)
 @GridLayout(value = { @GridLayout.Row({ "basicConfig" }) }, names = GridLayout.FormType.ADVANCED)
-@Documentation("Main configuration class for JMSInput component")
+@Documentation("Main configuration class for RabbitMQInput component")
 @Data
 public class InputMapperConfiguration implements Serializable {
 
