@@ -9,7 +9,7 @@
         "Content-Type":"text/xml; charset=UTF-8"
       },
       "method":"POST",
-      "uri":"https://login.salesforce.com/services/Soap/u/42.0"
+      "uri":"https://login.salesforce.com/services/Soap/u/44.0"
     },
     "response":{
       "headers":{
@@ -17,7 +17,7 @@
         "Date":"Fri, 21 Sep 2018 08:13:07 GMT",
         "Content-Type":"text/xml; charset=utf-8"
       },
-      "payload":"<?xml version=\"1.0\" encoding=\"UTF-8\"?><soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns=\"urn:partner.soap.sforce.com\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"><soapenv:Body><loginResponse><result><metadataServerUrl>https://ap1.salesforce.com/services/Soap/m/42.0/00D90000000eSq3</metadataServerUrl><passwordExpired>false</passwordExpired><sandbox>false</sandbox><serverUrl>https://ap1.salesforce.com/services/Soap/u/42.0/00D90000000eSq3</serverUrl><sessionId>00D90000000eSq3!ARsAQIXJYE8lbhfd8zm2mq4VxO3Rik8SpKgGsmtnAig9WEwEGGX4hqKZL2YK9rscS3py_sxY5PB2bEejrHuWKCBKaflVGXNP</sessionId><userId>00590000000rQ0TAAU</userId><userInfo><accessibilityMode>true</accessibilityMode><chatterExternal>false</chatterExternal><currencySymbol>￥</currencySymbol><orgAttachmentFileSizeLimit>5242880</orgAttachmentFileSizeLimit><orgDefaultCurrencyIsoCode>CNY</orgDefaultCurrencyIsoCode><orgDefaultCurrencyLocale>zh_CN</orgDefaultCurrencyLocale><orgDisallowHtmlAttachments>false</orgDisallowHtmlAttachments><orgHasPersonAccounts>false</orgHasPersonAccounts><organizationId>00D90000000eSq3EAE</organizationId><organizationMultiCurrency>false</organizationMultiCurrency><organizationName>Talend</organizationName><profileId>00e90000000xuSyAAI</profileId><roleId>00E90000000sbNUEAY</roleId><sessionSecondsValid>86400</sessionSecondsValid><userDefaultCurrencyIsoCode xsi:nil=\"true\"/><userEmail>jzhao@talend.com</userEmail><userFullName>jin ZHAO</userFullName><userId>00590000000rQ0TAAU</userId><userLanguage>en_US</userLanguage><userLocale>en_US</userLocale><userName>jzhao@talend.com</userName><userTimeZone>Asia/Hong_Kong</userTimeZone><userType>Standard</userType><userUiSkin>Theme3</userUiSkin></userInfo></result></loginResponse></soapenv:Body></soapenv:Envelope>",
+      "payload":"<?xml version=\"1.0\" encoding=\"UTF-8\"?><soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns=\"urn:partner.soap.sforce.com\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"><soapenv:Body><loginResponse><result><metadataServerUrl>https://ap1.salesforce.com/services/Soap/m/44.0/00D90000000eSq3</metadataServerUrl><passwordExpired>false</passwordExpired><sandbox>false</sandbox><serverUrl>https://ap1.salesforce.com/services/Soap/u/44.0/00D90000000eSq3</serverUrl><sessionId>00D90000000eSq3!ARsAQIXJYE8lbhfd8zm2mq4VxO3Rik8SpKgGsmtnAig9WEwEGGX4hqKZL2YK9rscS3py_sxY5PB2bEejrHuWKCBKaflVGXNP</sessionId><userId>00590000000rQ0TAAU</userId><userInfo><accessibilityMode>true</accessibilityMode><chatterExternal>false</chatterExternal><currencySymbol>￥</currencySymbol><orgAttachmentFileSizeLimit>5242880</orgAttachmentFileSizeLimit><orgDefaultCurrencyIsoCode>CNY</orgDefaultCurrencyIsoCode><orgDefaultCurrencyLocale>zh_CN</orgDefaultCurrencyLocale><orgDisallowHtmlAttachments>false</orgDisallowHtmlAttachments><orgHasPersonAccounts>false</orgHasPersonAccounts><organizationId>00D90000000eSq3EAE</organizationId><organizationMultiCurrency>false</organizationMultiCurrency><organizationName>Talend</organizationName><profileId>00e90000000xuSyAAI</profileId><roleId>00E90000000sbNUEAY</roleId><sessionSecondsValid>86400</sessionSecondsValid><userDefaultCurrencyIsoCode xsi:nil=\"true\"/><userEmail>jzhao@talend.com</userEmail><userFullName>jin ZHAO</userFullName><userId>00590000000rQ0TAAU</userId><userLanguage>en_US</userLanguage><userLocale>en_US</userLocale><userName>jzhao@talend.com</userName><userTimeZone>Asia/Hong_Kong</userTimeZone><userType>Standard</userType><userUiSkin>Theme3</userUiSkin></userInfo></result></loginResponse></soapenv:Body></soapenv:Envelope>",
       "status":200
     }
   },
@@ -31,7 +31,7 @@
         "Content-Type":"text/xml; charset=UTF-8"
       },
       "method":"POST",
-      "uri":"https://ap1.salesforce.com/services/Soap/u/42.0/00D90000000eSq3"
+      "uri":"https://ap1.salesforce.com/services/Soap/u/44.0/00D90000000eSq3"
     },
     "response":{
       "headers":{

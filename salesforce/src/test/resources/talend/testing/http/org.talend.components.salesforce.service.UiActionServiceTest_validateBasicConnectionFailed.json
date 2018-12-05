@@ -9,7 +9,7 @@
         "Content-Type":"text/xml; charset=UTF-8"
       },
       "method":"POST",
-      "uri":"https://login.salesforce.com/services/Soap/u/42.0"
+      "uri":"https://login.salesforce.com/services/Soap/u/44.0"
     },
     "response":{
       "headers":{

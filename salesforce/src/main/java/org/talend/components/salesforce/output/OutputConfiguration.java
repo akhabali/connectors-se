@@ -29,9 +29,8 @@ import lombok.Data;
 @GridLayout({
         // the generated layout put one configuration entry per line,
         // customize it as much as needed
-        @GridLayout.Row({ "moduleDataSet" }), @GridLayout.Row({ "outputAction" }),
-        @GridLayout.Row({ "upsertKeyColumn" }), @GridLayout.Row({ "batchMode" }), @GridLayout.Row("commitLevel"),
-        @GridLayout.Row("exceptionForErrors") })
+        @GridLayout.Row({ "moduleDataSet" }), @GridLayout.Row({ "outputAction" }), @GridLayout.Row({ "upsertKeyColumn" }),
+        @GridLayout.Row({ "batchMode" }), @GridLayout.Row("commitLevel"), @GridLayout.Row("exceptionForErrors") })
 @Documentation("TODO fill the documentation for this configuration")
 public class OutputConfiguration implements Serializable {
 
@@ -50,13 +49,12 @@ public class OutputConfiguration implements Serializable {
 
     @Option
     @Documentation("whether use batch operation")
-    private boolean batchMode;
+    private boolean batchMode = true;
 
     @Option
     @ActiveIf(target = "batchMode", value = "true")
-    @DefaultValue("200")
     @Documentation("size of every batch")
-    private int commitLevel;
+    private int commitLevel = 200;
 
     @Option
     @DefaultValue("true")

@@ -58,9 +58,8 @@ public abstract class AbstractQueryEmitter implements Serializable {
 
     private Messages messages;
 
-    public AbstractQueryEmitter(@Option("configuration") final QueryDataSet queryDataSet,
-            final SalesforceService service, LocalConfiguration configuration,
-            final RecordBuilderFactory recordBuilderFactory, final Messages messages) {
+    public AbstractQueryEmitter(@Option("configuration") final QueryDataSet queryDataSet, final SalesforceService service,
+            LocalConfiguration configuration, final RecordBuilderFactory recordBuilderFactory, final Messages messages) {
         this.service = service;
         this.dataset = queryDataSet;
         this.localConfiguration = configuration;
@@ -72,8 +71,7 @@ public abstract class AbstractQueryEmitter implements Serializable {
     public void init() {
         try {
             final BulkConnection bulkConnection = service.bulkConnect(dataset.getDataStore(), localConfiguration);
-            Map<String, Field> fieldMap =
-                    service.getFieldMap(dataset.getDataStore(), getModuleName(), localConfiguration);
+            Map<String, Field> fieldMap = service.getFieldMap(dataset.getDataStore(), getModuleName(), localConfiguration);
             bulkQueryService = new BulkQueryService(bulkConnection, recordBuilderFactory, messages);
             bulkQueryService.setFieldMap(fieldMap);
             bulkQueryService.doBulkQuery(getModuleName(), getQuery());

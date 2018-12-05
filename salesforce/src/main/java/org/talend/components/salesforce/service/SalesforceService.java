@@ -52,7 +52,7 @@ public class SalesforceService {
 
     public static final String ACTIVE_ENDPOINT = "login.salesforce.com";
 
-    public static final String DEFAULT_API_VERSION = "42.0";
+    public static final String DEFAULT_API_VERSION = "44.0";
 
     public static final String URL = "https://" + ACTIVE_ENDPOINT + "/services/Soap/u/" + DEFAULT_API_VERSION;
 

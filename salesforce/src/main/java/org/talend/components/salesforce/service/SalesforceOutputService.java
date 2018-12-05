@@ -195,8 +195,8 @@ public class SalesforceOutputService implements Serializable {
                     so.getChild(lookupRelationshipFieldName).setField("type", relationMap.get("lookupFieldModuleName"));
                     // No need get the real type. Because of the External IDs should not be special type in
                     // addSObjectField()
-                    addSObjectField(so.getChild(lookupRelationshipFieldName),
-                            relationMap.get("lookupFieldExternalIdName"), sfField.getType(), value);
+                    addSObjectField(so.getChild(lookupRelationshipFieldName), relationMap.get("lookupFieldExternalIdName"),
+                            sfField.getType(), value);
                 } else {
                     // Skip column "Id" for upsert, when "Id" is not specified as "upsertKey.Column"
                     if (!"Id".equals(field.getName()) || field.getName().equals(upsertKeyColumn)) {
