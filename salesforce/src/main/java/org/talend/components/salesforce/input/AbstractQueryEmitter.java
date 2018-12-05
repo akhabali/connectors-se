@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.talend.components.salesforce.BulkResultSet;
 import org.talend.components.salesforce.dataset.QueryDataSet;
@@ -37,6 +38,9 @@ import com.sforce.async.BulkConnection;
 import com.sforce.soap.partner.Field;
 import com.sforce.ws.ConnectionException;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Documentation("Salesforce query input ")
 public abstract class AbstractQueryEmitter implements Serializable {
 
@@ -54,8 +58,9 @@ public abstract class AbstractQueryEmitter implements Serializable {
 
     private Messages messages;
 
-    public AbstractQueryEmitter(@Option("configuration") final QueryDataSet queryDataSet, final SalesforceService service,
-            LocalConfiguration configuration, final RecordBuilderFactory recordBuilderFactory, final Messages messages) {
+    public AbstractQueryEmitter(@Option("configuration") final QueryDataSet queryDataSet,
+            final SalesforceService service, LocalConfiguration configuration,
+            final RecordBuilderFactory recordBuilderFactory, final Messages messages) {
         this.service = service;
         this.dataset = queryDataSet;
         this.localConfiguration = configuration;
@@ -67,7 +72,8 @@ public abstract class AbstractQueryEmitter implements Serializable {
     public void init() {
         try {
             final BulkConnection bulkConnection = service.bulkConnect(dataset.getDataStore(), localConfiguration);
-            Map<String, Field> fieldMap = service.getFieldMap(dataset.getDataStore(), getModuleName(), localConfiguration);
+            Map<String, Field> fieldMap =
+                    service.getFieldMap(dataset.getDataStore(), getModuleName(), localConfiguration);
             bulkQueryService = new BulkQueryService(bulkConnection, recordBuilderFactory, messages);
             bulkQueryService.setFieldMap(fieldMap);
             bulkQueryService.doBulkQuery(getModuleName(), getQuery());
@@ -101,6 +107,15 @@ public abstract class AbstractQueryEmitter implements Serializable {
             throw new IllegalStateException(e.getExceptionMessage(), e);
         } catch (IOException e) {
             throw new IllegalStateException(e);
+        }
+    }
+
+    @PreDestroy
+    public void release() {
+        try {
+            bulkQueryService.closeJob();
+        } catch (AsyncApiException | ConnectionException e) {
+            log.error(e.getMessage());
         }
     }
 

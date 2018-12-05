@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +32,7 @@ import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import com.sforce.soap.partner.DeleteResult;
+import com.sforce.soap.partner.Error;
 import com.sforce.soap.partner.Field;
 import com.sforce.soap.partner.FieldType;
 import com.sforce.soap.partner.PartnerConnection;
@@ -195,8 +195,8 @@ public class SalesforceOutputService implements Serializable {
                     so.getChild(lookupRelationshipFieldName).setField("type", relationMap.get("lookupFieldModuleName"));
                     // No need get the real type. Because of the External IDs should not be special type in
                     // addSObjectField()
-                    addSObjectField(so.getChild(lookupRelationshipFieldName), relationMap.get("lookupFieldExternalIdName"),
-                            sfField.getType(), value);
+                    addSObjectField(so.getChild(lookupRelationshipFieldName),
+                            relationMap.get("lookupFieldExternalIdName"), sfField.getType(), value);
                 } else {
                     // Skip column "Id" for upsert, when "Id" is not specified as "upsertKey.Column"
                     if (!"Id".equals(field.getName()) || field.getName().equals(upsertKeyColumn)) {
@@ -313,7 +313,7 @@ public class SalesforceOutputService implements Serializable {
                         if (saveResults[i].getSuccess()) {
                             successCount++;
                         } else {
-                            rejectCount++;
+                            handleReject(saveResults[i].getErrors(), changedItemKeys, batch_idx);
                         }
                     }
                 }
@@ -358,7 +358,7 @@ public class SalesforceOutputService implements Serializable {
                         if (saveResults[i].getSuccess()) {
                             successCount++;
                         } else {
-                            rejectCount++;
+                            handleReject(saveResults[i].getErrors(), changedItemKeys, batch_idx);
                         }
                     }
                 }
@@ -406,7 +406,7 @@ public class SalesforceOutputService implements Serializable {
                         if (upsertResults[i].getSuccess()) {
                             successCount++;
                         } else {
-                            rejectCount++;
+                            handleReject(upsertResults[i].getErrors(), changedItemKeys, batch_idx);
                         }
                     }
                 }
@@ -450,18 +450,22 @@ public class SalesforceOutputService implements Serializable {
             // Clean the feedback records at each batch write.
             cleanWrites();
             String[] delIDs = new String[deleteItems.size()];
+            String[] changedItemKeys = new String[delIDs.length];
             for (int ix = 0; ix < delIDs.length; ++ix) {
                 delIDs[ix] = deleteItems.get(ix).getString(ID);
+                changedItemKeys[ix] = delIDs[ix];
             }
             DeleteResult[] dr;
             try {
                 dr = connection.delete(delIDs);
                 if (dr != null && dr.length != 0) {
+                    int batch_idx = -1;
                     for (int i = 0; i < dr.length; i++) {
+                        ++batch_idx;
                         if (dr[i].getSuccess()) {
                             successCount++;
                         } else {
-                            rejectCount++;
+                            handleReject(dr[i].getErrors(), changedItemKeys, batch_idx);
                         }
                     }
                 }
@@ -514,6 +518,38 @@ public class SalesforceOutputService implements Serializable {
 
     public void setFieldMap(Map<String, Field> fieldMap) {
         this.fieldMap = fieldMap;
+    }
+
+    /**
+     *
+     * Handle failed operation,
+     */
+    private void handleReject(Error[] resultErrors, String[] changedItemKeys, int batchIdx) throws IOException {
+        String changedItemKey = null;
+        if (batchIdx < changedItemKeys.length) {
+            if (changedItemKeys[batchIdx] != null) {
+                changedItemKey = changedItemKeys[batchIdx];
+            } else {
+                changedItemKey = String.valueOf(batchIdx + 1);
+            }
+        } else {
+            changedItemKey = "Batch index out of bounds";
+        }
+        StringBuilder errors = new StringBuilder("");
+        if (resultErrors != null) {
+            for (Error error : resultErrors) {
+                errors.append(error.getMessage()).append("\n");
+            }
+        }
+        if (errors.toString().length() > 0) {
+            if (exceptionForErrors) {
+                throw new IOException(errors.toString());
+            } else {
+                rejectCount++;
+                log.error("RowKey/RowNo:{}", changedItemKey);
+                log.error(errors.toString());
+            }
+        }
     }
 
 }

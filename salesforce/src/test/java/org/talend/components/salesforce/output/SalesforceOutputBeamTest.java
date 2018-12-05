@@ -17,7 +17,9 @@ package org.talend.components.salesforce.output;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.StreamSupport;
@@ -36,7 +38,6 @@ import org.talend.components.salesforce.dataset.ModuleDataSet;
 import org.talend.components.salesforce.dataset.SOQLQueryDataSet;
 import org.talend.components.salesforce.input.SOQLQueryEmitter;
 import org.talend.sdk.component.api.record.Record;
-import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.junit.JoinInputFactory;
 import org.talend.sdk.component.junit.beam.Data;
@@ -88,6 +89,68 @@ public class SalesforceOutputBeamTest extends SalesforceBaseTest {
 
         // run the writePip and ensure the execution was successful
         assertEquals(PipelineResult.State.DONE, writePip.run().waitUntilFinish());
+    }
+
+    @Test
+    @DisplayName("test insert no field value set")
+    public void testInsertNoFieldValueSet() {
+        final OutputConfiguration configuration = new OutputConfiguration();
+        final ModuleDataSet moduleDataSet = new ModuleDataSet();
+        moduleDataSet.setModuleName("Account");
+        moduleDataSet.setDataStore(dataStore);
+        configuration.setOutputAction(OutputConfiguration.OutputAction.INSERT);
+        configuration.setModuleDataSet(moduleDataSet);
+        configuration.setExceptionForErrors(false);
+
+        // We create the component processor instance using the configuration filled above
+        final Processor processor = COMPONENT_FACTORY.createProcessor(SalesforceOutput.class, configuration);
+
+        Record record = factory.newRecordBuilder().withString("Wrong_Field_Name", "test_" + UNIQUE_ID).build();
+
+        // The join input factory construct inputs test data for every input branch you have defined for this component
+        // Make sure to fil in some test data for the branches you want to test
+        // You can also remove the branches that you don't need from the factory below
+        final JoinInputFactory joinInputFactory = new JoinInputFactory().withInput("__default__", asList(record));
+
+        // Convert it to a beam "source"
+        final PCollection<Record> inputs = writePip.apply(Data.of(processor.plugin(), joinInputFactory.asInputRecords()));
+
+        // add our processor right after to see each data as configured previously
+        inputs.apply(TalendFn.asFn(processor)).apply(Data.map(processor.plugin(), Record.class));
+
+        // run the writePip and ensure the execution was successful
+        assertEquals(PipelineResult.State.DONE, writePip.run().waitUntilFinish());
+    }
+
+    @Test
+    @DisplayName("test insert failed with exception")
+    public void testExceptionOnError() {
+        final OutputConfiguration configuration = new OutputConfiguration();
+        final ModuleDataSet moduleDataSet = new ModuleDataSet();
+        moduleDataSet.setModuleName("Account");
+        moduleDataSet.setDataStore(dataStore);
+        configuration.setOutputAction(OutputConfiguration.OutputAction.INSERT);
+        configuration.setModuleDataSet(moduleDataSet);
+        configuration.setExceptionForErrors(true);
+
+        // We create the component processor instance using the configuration filled above
+        final Processor processor = COMPONENT_FACTORY.createProcessor(SalesforceOutput.class, configuration);
+
+        Record record = factory.newRecordBuilder().withString("Wrong_Field_Name", "test_" + UNIQUE_ID).build();
+
+        // The join input factory construct inputs test data for every input branch you have defined for this component
+        // Make sure to fil in some test data for the branches you want to test
+        // You can also remove the branches that you don't need from the factory below
+        final JoinInputFactory joinInputFactory = new JoinInputFactory().withInput("__default__", asList(record));
+
+        // Convert it to a beam "source"
+        final PCollection<Record> inputs = writePip.apply(Data.of(processor.plugin(), joinInputFactory.asInputRecords()));
+
+        // add our processor right after to see each data as configured previously
+        inputs.apply(TalendFn.asFn(processor)).apply(Data.map(processor.plugin(), Record.class));
+
+        // run the writePip and ensure the execution was successful
+        assertThrows(IOException.class, ()->writePip.run().waitUntilFinish());
     }
 
     @Test

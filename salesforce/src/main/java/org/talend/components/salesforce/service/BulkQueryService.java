@@ -43,6 +43,7 @@ import com.sforce.async.BulkConnection;
 import com.sforce.async.ConcurrencyMode;
 import com.sforce.async.ContentType;
 import com.sforce.async.JobInfo;
+import com.sforce.async.JobStateEnum;
 import com.sforce.async.OperationEnum;
 import com.sforce.async.QueryResultList;
 import com.sforce.soap.partner.Field;
@@ -112,8 +113,9 @@ public class BulkQueryService {
         this.bulkConnection = bulkConnection;
         this.recordBuilderFactory = recordBuilderFactory;
         this.messagesI18n = messages;
-        this.chunkSize = DEFAULT_CHUNK_SIZE;
-        chunkSleepTime = DEFAULT_CHUNK_SLEEP_TIME;
+        // PK Chunking is not supported in dataset
+        // this.chunkSize = DEFAULT_CHUNK_SIZE;
+        // chunkSleepTime = DEFAULT_CHUNK_SLEEP_TIME;
         this.jobTimeOut = DEFAULT_JOB_TIME_OUT;
     }
 
@@ -193,8 +195,9 @@ public class BulkQueryService {
      * Get bulk resultset base on the resultId
      */
     public BulkResultSet getQueryResultSet(String resultId) throws AsyncApiException, IOException, ConnectionException {
-        final com.csvreader.CsvReader baseFileReader = new com.csvreader.CsvReader(new BufferedReader(
-                new InputStreamReader(getQueryResultStream(job.getId(), batchInfoList.get(0).getId(), resultId), FILE_ENCODING)),
+        final com.csvreader.CsvReader baseFileReader = new com.csvreader.CsvReader(
+                new BufferedReader(new InputStreamReader(
+                        getQueryResultStream(job.getId(), batchInfoList.get(0).getId(), resultId), FILE_ENCODING)),
                 ',');
         baseFileReader.setSafetySwitch(safetySwitch);
         if (baseFileReader.readRecord()) {
@@ -230,7 +233,8 @@ public class BulkQueryService {
     /**
      * Get batch information from the stream
      */
-    private BatchInfo createBatchFromStream(JobInfo job, InputStream input) throws AsyncApiException, ConnectionException {
+    private BatchInfo createBatchFromStream(JobInfo job, InputStream input)
+            throws AsyncApiException, ConnectionException {
         try {
             return bulkConnection.createBatchFromStream(job, input);
         } catch (AsyncApiException sfException) {
@@ -275,7 +279,8 @@ public class BulkQueryService {
     /**
      * Get query result list
      */
-    private QueryResultList getQueryResultList(String jobID, String batchID) throws AsyncApiException, ConnectionException {
+    private QueryResultList getQueryResultList(String jobID, String batchID)
+            throws AsyncApiException, ConnectionException {
         try {
             return bulkConnection.getQueryResultList(jobID, batchID);
         } catch (AsyncApiException sfException) {
@@ -321,7 +326,8 @@ public class BulkQueryService {
      * @throws ConnectionException
      * @throws InterruptedException
      */
-    private void retrieveResultsOfQuery(BatchInfo info) throws AsyncApiException, ConnectionException, InterruptedException {
+    private void retrieveResultsOfQuery(BatchInfo info)
+            throws AsyncApiException, ConnectionException, InterruptedException {
 
         if (BatchStateEnum.Completed == info.getState()) {
             QueryResultList list = getQueryResultList(job.getId(), info.getId());
@@ -409,6 +415,30 @@ public class BulkQueryService {
     }
 
     /**
+     * Close the job
+     *
+     * @throws AsyncApiException
+     * @throws ConnectionException
+     */
+    public void closeJob() throws AsyncApiException, ConnectionException {
+        JobInfo closeJob = new JobInfo();
+        closeJob.setId(job.getId());
+        closeJob.setState(JobStateEnum.Closed);
+        try {
+            bulkConnection.updateJob(closeJob);
+        } catch (AsyncApiException sfException) {
+            if (AsyncExceptionCode.InvalidSessionId.equals(sfException.getExceptionCode())) {
+                renewSession();
+                closeJob();
+            } else if (AsyncExceptionCode.InvalidJobState.equals(sfException.getExceptionCode())) {
+                // Job is already closed on Salesforce side. We don't need to close it again.
+                return;
+            }
+            throw sfException;
+        }
+    }
+
+    /**
      * Convert result to record
      */
     public Record convertToRecord(Map<String, String> result) throws IOException {
@@ -452,6 +482,7 @@ public class BulkQueryService {
                 builder.withDateTime(field.getName(), DATE_FORMAT.parse(value));
                 break;
             case datetime:
+                builder.withTimestamp(field.getName(), DATETIME_FORMAT.parse(value).getTime());
                 break;
             case time:
                 builder.withTimestamp(field.getName(), TIME_FORMAT.parse(value).getTime());
