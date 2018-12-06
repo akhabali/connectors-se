@@ -19,7 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.talend.components.jdbc.BaseJdbcTest;
 import org.talend.components.jdbc.Disabled;
 import org.talend.components.jdbc.DisabledDatabases;
-import org.talend.components.jdbc.JdbcInvocationContextProvider;
+import org.talend.components.jdbc.WithDatabasesEnvironments;
 import org.talend.components.jdbc.containers.JdbcTestContainer;
 import org.talend.components.jdbc.dataset.TableNameDataset;
 import org.talend.components.jdbc.datastore.JdbcConnection;
@@ -32,7 +32,6 @@ import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.junit.environment.Environment;
 import org.talend.sdk.component.junit.environment.builtin.ContextualEnvironment;
-import org.talend.sdk.component.junit5.WithComponents;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -45,9 +44,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.talend.components.jdbc.Database.SNOWFLAKE;
 
 @DisplayName("UIActionService")
-@WithComponents("org.talend.components.jdbc")
-@ExtendWith({ JdbcInvocationContextProvider.class })
 @Environment(ContextualEnvironment.class)
+@ExtendWith({ WithDatabasesEnvironments.class })
 @DisabledDatabases({ @Disabled(value = SNOWFLAKE, reason = "Snowflake credentials need to be setup on ci") })
 class UIActionServiceTest extends BaseJdbcTest {
 

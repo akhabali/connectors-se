@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -34,7 +35,6 @@
             <artifactId>HikariCP</artifactId>
             <version>${HikariCP.version}</version>
         </dependency>
-
         <!-- test -->
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -120,8 +120,8 @@
                         <talend.component.junit.handler.state>static</talend.component.junit.handler.state>
 
                         <!-- check it used -->
-                        <talend.beam.job.enforceImmutability>false</talend.beam.job.enforceImmutability>
-                        <talend.beam.job.enforceEncodability>false</talend.beam.job.enforceEncodability>
+                        <talend.beam.job.enforceImmutability>true</talend.beam.job.enforceImmutability>
+                        <talend.beam.job.enforceEncodability>true</talend.beam.job.enforceEncodability>
                         <!--
                            You can activate the targetParallelism to control the parallelism of the test pipeline.
                            You can also set it to 1 to debug more easily

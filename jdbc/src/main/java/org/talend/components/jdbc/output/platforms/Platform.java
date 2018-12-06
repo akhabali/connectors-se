@@ -12,6 +12,7 @@
  */
 package org.talend.components.jdbc.output.platforms;
 
+import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
@@ -99,5 +100,12 @@ public abstract class Platform implements Serializable {
 
         return records.stream().map(record -> record.get(String.class, entry.getName())).filter(Objects::nonNull)
                 .mapToInt(String::length).max().orElse(0);
+    }
+
+    /**
+     * Add platform related properties to jdbc connections
+     */
+    public void addDataSourceProperties(final HikariDataSource dataSource) {
+
     }
 }

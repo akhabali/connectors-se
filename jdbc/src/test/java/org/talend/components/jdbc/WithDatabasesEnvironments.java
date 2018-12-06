@@ -1,19 +1,22 @@
 package org.talend.components.jdbc;
 
-import lombok.Data;
 import org.junit.jupiter.api.extension.*;
 import org.talend.components.jdbc.containers.*;
+import org.talend.sdk.component.junit.BaseComponentsHandler;
+import org.talend.sdk.component.junit.base.junit5.JUnit5InjectionSupport;
 import org.talend.sdk.component.junit.environment.DecoratingEnvironmentProvider;
 import org.talend.sdk.component.junit.environment.EnvironmentProvider;
 import org.talend.sdk.component.junit.environment.EnvironmentsConfigurationParser;
+import org.talend.sdk.component.junit5.Injected;
 
+import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.lang.Boolean.getBoolean;
-import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
+import static java.util.Collections.singletonList;
 import static java.util.Locale.ROOT;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
@@ -23,7 +26,7 @@ import static org.junit.jupiter.api.extension.ConditionEvaluationResult.disabled
 import static org.talend.components.jdbc.Database.ALL;
 import static org.talend.components.jdbc.Database.DERBY;
 
-public class JdbcInvocationContextProvider implements TestTemplateInvocationContextProvider, BeforeAllCallback, AfterAllCallback {
+public class WithDatabasesEnvironments implements TestTemplateInvocationContextProvider, BeforeAllCallback, AfterAllCallback {
 
     @Override
     public boolean supportsTestTemplate(final ExtensionContext ctx) {
@@ -46,17 +49,64 @@ public class JdbcInvocationContextProvider implements TestTemplateInvocationCont
 
             @Override
             public List<Extension> getAdditionalExtensions() {
-                return asList(new JdbcTestContainerParameterResolver(database),
-                        new DatabaseBeforeEachCallback(database, provider), new DatabaseAfterEachCallback(database),
-                        new DatabaseExecutionCondition(database));
+                return singletonList(new WithDatabaseExtension(database, provider));
             }
         };
     }
 
-    @Data
-    private static class JdbcTestContainerParameterResolver implements ParameterResolver {
+    private static class WithDatabaseExtension extends BaseComponentsHandler
+            implements BeforeEachCallback, AfterEachCallback, ParameterResolver, ExecutionCondition, JUnit5InjectionSupport {
 
         private final Database database;
+
+        private final EnvironmentProvider provider;
+
+        private static final String ENV_PREFIX = "talend.jdbc.it";
+
+        private static final ConditionEvaluationResult ENABLED = ConditionEvaluationResult.enabled("");
+
+        public WithDatabaseExtension(Database database, EnvironmentProvider provider) {
+            this.database = database;
+            this.provider = provider;
+            this.packageName = "org.talend.components.jdbc";
+        }
+
+        @Override
+        public void beforeEach(ExtensionContext context) {
+            final ExtensionContext.Store store = getStore(context);
+            store.put(AutoCloseable.class,
+                    provider.start(context.getRequiredTestClass(), context.getRequiredTestClass().getAnnotations()));
+            ofNullable(store.get(database, JdbcTestContainer.class)).filter(c -> !c.isRunning())
+                    .ifPresent(JdbcTestContainer::start);
+            store.put(EmbeddedComponentManager.class, start());
+            context.getTestInstance().ifPresent(this::injectServices);
+
+        }
+
+        @Override
+        public void afterEach(ExtensionContext context) {
+            final ExtensionContext.Store store = getStore(context);
+            ofNullable(store.get(AutoCloseable.class, AutoCloseable.class)).ifPresent(c -> {
+                try {
+                    c.close();
+                } catch (final Exception e) {
+                    throw new IllegalStateException(e);
+                }
+            });
+            ofNullable(store.get(database, JdbcTestContainer.class)).ifPresent(c -> {
+                if (!c.isRunning()) { // can't use is healthy here as it's not implemented in all containers
+                    c.stop();
+                }
+            });
+
+            this.resetState();
+            store.get(EmbeddedComponentManager.class, EmbeddedComponentManager.class).close();
+        }
+
+        @Override
+        public Class<? extends Annotation> injectionMarker() {
+            return Injected.class;
+        }
 
         @Override
         public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
@@ -69,16 +119,6 @@ public class JdbcInvocationContextProvider implements TestTemplateInvocationCont
                 throws ParameterResolutionException {
             return getStore(extensionContext).get(database);
         }
-    }
-
-    @Data
-    private static class DatabaseExecutionCondition implements ExecutionCondition {
-
-        private static final String ENV_PREFIX = "talend.jdbc.it";
-
-        private static final ConditionEvaluationResult ENABLED = ConditionEvaluationResult.enabled("");
-
-        private final Database database;
 
         @Override
         public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
@@ -97,47 +137,6 @@ public class JdbcInvocationContextProvider implements TestTemplateInvocationCont
 
             return getDisableConditions(context).stream().filter(d -> d.value().equals(ALL) || d.value().equals(database))
                     .findFirst().map(disabled -> disabled(disabled.reason())).orElse(ENABLED);
-        }
-    }
-
-    @Data
-    private static class DatabaseBeforeEachCallback implements BeforeEachCallback {
-
-        private final Database database;
-
-        private final EnvironmentProvider provider;
-
-        @Override
-        public void beforeEach(ExtensionContext context) {
-            final ExtensionContext.Store store = getStore(context);
-            store.put(AutoCloseable.class,
-                    provider.start(context.getRequiredTestClass(), context.getRequiredTestClass().getAnnotations()));
-            ofNullable(store.get(database, JdbcTestContainer.class)).filter(c -> !c.isRunning())
-                    .ifPresent(JdbcTestContainer::start);
-
-        }
-    }
-
-    @Data
-    private static class DatabaseAfterEachCallback implements AfterEachCallback {
-
-        private final Database database;
-
-        @Override
-        public void afterEach(ExtensionContext context) {
-            final ExtensionContext.Store store = getStore(context);
-            ofNullable(store.get(AutoCloseable.class, AutoCloseable.class)).ifPresent(c -> {
-                try {
-                    c.close();
-                } catch (final Exception e) {
-                    throw new IllegalStateException(e);
-                }
-            });
-            ofNullable(store.get(database, JdbcTestContainer.class)).ifPresent(c -> {
-                if (!c.isRunning()) { // can't use is healthy here as it's not implemented in all containers
-                    c.stop();
-                }
-            });
         }
     }
 
@@ -199,6 +198,6 @@ public class JdbcInvocationContextProvider implements TestTemplateInvocationCont
 
     private static ExtensionContext.Store getStore(ExtensionContext context) {
         return context
-                .getStore(ExtensionContext.Namespace.create(JdbcInvocationContextProvider.class, context.getRequiredTestClass()));
+                .getStore(ExtensionContext.Namespace.create(WithDatabasesEnvironments.class, context.getRequiredTestClass()));
     }
 }

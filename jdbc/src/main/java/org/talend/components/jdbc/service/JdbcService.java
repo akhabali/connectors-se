@@ -16,6 +16,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.configuration.JdbcConfiguration;
 import org.talend.components.jdbc.datastore.JdbcConnection;
+import org.talend.components.jdbc.output.platforms.PlatformFactory;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.configuration.Configuration;
 import org.talend.sdk.component.api.service.dependency.Resolver;
@@ -127,11 +128,12 @@ public class JdbcService {
                 dataSource.setConnectionTimeout(30 * 1000);
                 dataSource.setValidationTimeout(10 * 1000);
                 dataSource.setPoolName("Hikari-" + thread.getName() + "#" + thread.getId());
+                PlatformFactory.get(connection).addDataSourceProperties(dataSource);
                 dataSource.addDataSourceProperty("rewriteBatchedStatements", String.valueOf(rewriteBatchedStatements));
-                dataSource.addDataSourceProperty("cachePrepStmts", "true");
-                dataSource.addDataSourceProperty("prepStmtCacheSize", "250");
-                dataSource.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-                dataSource.addDataSourceProperty("useServerPrepStmts", "true");
+                // dataSource.addDataSourceProperty("cachePrepStmts", "true");
+                // dataSource.addDataSourceProperty("prepStmtCacheSize", "250");
+                // dataSource.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+                // dataSource.addDataSourceProperty("useServerPrepStmts", "true");
             } finally {
                 thread.setContextClassLoader(prev);
             }

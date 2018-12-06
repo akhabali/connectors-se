@@ -19,7 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.talend.components.jdbc.BaseJdbcTest;
 import org.talend.components.jdbc.Disabled;
 import org.talend.components.jdbc.DisabledDatabases;
-import org.talend.components.jdbc.JdbcInvocationContextProvider;
+import org.talend.components.jdbc.WithDatabasesEnvironments;
 import org.talend.components.jdbc.configuration.InputAdvancedCommonConfig;
 import org.talend.components.jdbc.configuration.InputQueryConfig;
 import org.talend.components.jdbc.configuration.InputTableNameConfig;
@@ -30,7 +30,6 @@ import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.junit.environment.Environment;
 import org.talend.sdk.component.junit.environment.builtin.ContextualEnvironment;
 import org.talend.sdk.component.junit.environment.builtin.beam.DirectRunnerEnvironment;
-import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
 import java.util.List;
@@ -41,10 +40,9 @@ import static org.talend.components.jdbc.Database.SNOWFLAKE;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 @DisplayName("Input")
-@ExtendWith({ JdbcInvocationContextProvider.class })
 @Environment(ContextualEnvironment.class)
 @Environment(DirectRunnerEnvironment.class)
-@WithComponents("org.talend.components.jdbc")
+@ExtendWith(WithDatabasesEnvironments.class)
 @DisabledDatabases({ @Disabled(value = SNOWFLAKE, reason = "Snowflake credentials need to be setup on ci") })
 class InputTest extends BaseJdbcTest {
 

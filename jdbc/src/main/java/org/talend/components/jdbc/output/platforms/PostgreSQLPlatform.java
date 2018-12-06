@@ -44,6 +44,9 @@ public class PostgreSQLPlatform extends Platform {
         sql.append(" ");
         sql.append("IF NOT EXISTS");
         sql.append(" ");
+        if (table.getSchema() != null && !table.getSchema().isEmpty()) {
+            sql.append(identifier(table.getSchema())).append(".");
+        }
         sql.append(identifier(table.getName()));
         sql.append("(");
         sql.append(createColumns(table.getColumns()));
@@ -99,7 +102,7 @@ public class PostgreSQLPlatform extends Platform {
         case BYTES:
             return "BYTEA";
         case DATETIME:
-            return "DATE";
+            return "timestamp";
         case RECORD: // todo ??
         case ARRAY: // todo ??
         default:

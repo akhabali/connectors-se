@@ -37,7 +37,7 @@ public class DerbyPlatform extends Platform {
 
     @Override
     protected String delimiterToken() {
-        return "";
+        return "\"";
     }
 
     @Override
@@ -45,6 +45,9 @@ public class DerbyPlatform extends Platform {
         // keep the string builder for readability
         final StringBuilder sql = new StringBuilder("CREATE TABLE");
         sql.append(" ");
+        if (table.getSchema() != null && !table.getSchema().isEmpty()) {
+            sql.append(identifier(table.getSchema())).append(".");
+        }
         sql.append(identifier(table.getName()));
         sql.append("(");
         sql.append(createColumns(table.getColumns()));
@@ -98,7 +101,7 @@ public class DerbyPlatform extends Platform {
         case BYTES:
             return "BLOB";
         case DATETIME:
-            return "DATE";
+            return "TIMESTAMP";
         case RECORD: // todo ??
         case ARRAY: // todo ??
         default:

@@ -22,6 +22,8 @@ import org.testcontainers.shaded.org.apache.commons.lang.RandomStringUtils;
 import javax.annotation.PostConstruct;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static java.util.Optional.ofNullable;
@@ -45,7 +47,7 @@ public class RowGeneratorSource implements Serializable {
     }
 
     @Producer
-    public Record next() {
+    public Record next() throws ParseException {
         if (currentCount > config.rowCount) {
             return null;
         }
@@ -60,8 +62,13 @@ public class RowGeneratorSource implements Serializable {
             builder.withString("t_string2", null);
             builder.withString("t_text", null);
             builder.withDateTime("t_date", (Date) null);
+            builder.withDateTime("t_datetime", (Date) null);
+            builder.withDateTime("t_time", (Date) null);
 
         } else {
+            final Date date = new Date(new SimpleDateFormat("yyyy-MM-dd").parse("2018-12-6").getTime());
+            final Date datetime = new Date();
+            final Date time = new Date(1000 * 60 * 60 * 15 + 1000 * 60 * 20 + 39000); // 15:20:39
             builder.withString("t_string", ofNullable(config.stringPrefix).orElse("customer") + currentCount);
             builder.withString("t_string2", RandomStringUtils.randomAlphabetic(50));
             builder.withString("t_text", RandomStringUtils.randomAlphabetic(300));
@@ -69,8 +76,9 @@ public class RowGeneratorSource implements Serializable {
             builder.withLong("t_long", 10000000000L);
             builder.withDouble("t_double", 1000.85d);
             builder.withFloat("t_float", 15.50f);
-            builder.withDateTime("t_date", new Date());
-
+            builder.withDateTime("t_date", date);
+            builder.withDateTime("t_datetime", datetime);
+            builder.withDateTime("t_time", time);
         }
 
         if (config.withBytes) {

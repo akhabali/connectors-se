@@ -12,6 +12,7 @@
  */
 package org.talend.components.jdbc.output.platforms;
 
+import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.SQLException;
@@ -38,7 +39,7 @@ public class OraclePlatform extends Platform {
 
     @Override
     protected String delimiterToken() {
-        return "";
+        return "\"";
     }
 
     @Override
@@ -59,6 +60,12 @@ public class OraclePlatform extends Platform {
         log.debug("### create table query ###");
         log.debug(sql.toString());
         return sql.toString();
+    }
+
+    @Override
+    public void addDataSourceProperties(HikariDataSource dataSource) {
+        super.addDataSourceProperties(dataSource);
+        dataSource.addDataSourceProperty("oracle.jdbc.J2EE13Compliant", "TRUE");
     }
 
     @Override
@@ -99,7 +106,7 @@ public class OraclePlatform extends Platform {
         case BYTES:
             return "BLOB";
         case DATETIME:
-            return "DATE";
+            return "TIMESTAMP(6)";
         case RECORD: // todo ??
         case ARRAY: // todo ??
         default:

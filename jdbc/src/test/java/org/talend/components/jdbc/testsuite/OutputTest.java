@@ -19,34 +19,43 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.talend.components.jdbc.BaseJdbcTest;
 import org.talend.components.jdbc.Disabled;
 import org.talend.components.jdbc.DisabledDatabases;
-import org.talend.components.jdbc.JdbcInvocationContextProvider;
+import org.talend.components.jdbc.WithDatabasesEnvironments;
 import org.talend.components.jdbc.configuration.OutputConfig;
 import org.talend.components.jdbc.containers.JdbcTestContainer;
 import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.service.Service;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.junit.environment.Environment;
 import org.talend.sdk.component.junit.environment.builtin.ContextualEnvironment;
 import org.talend.sdk.component.junit.environment.builtin.beam.DirectRunnerEnvironment;
-import org.talend.sdk.component.junit5.WithComponents;
+import org.talend.sdk.component.junit5.environment.EnvironmentalTest;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.IntStream;
 
 import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toSet;
-import static org.apache.derby.vti.XmlVTI.asList;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.talend.components.jdbc.Database.SNOWFLAKE;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 @DisplayName("Output")
-@WithComponents("org.talend.components.jdbc")
-@ExtendWith({ JdbcInvocationContextProvider.class })
 @Environment(ContextualEnvironment.class)
 @Environment(DirectRunnerEnvironment.class)
+@ExtendWith(WithDatabasesEnvironments.class)
 @DisabledDatabases({ @Disabled(value = SNOWFLAKE, reason = "Snowflake credentials need to be setup on ci") })
 class OutputTest extends BaseJdbcTest {
+
+    @Service
+    private RecordBuilderFactory recordBuilderFactory;
 
     @TestTemplate
     @DisplayName("Insert - valid use case")
@@ -56,7 +65,7 @@ class OutputTest extends BaseJdbcTest {
         configuration.setDataset(newTableNameDataset(testTableName, container));
         configuration.setActionOnData(OutputConfig.ActionOnData.INSERT);
         configuration.setCreateTableIfNotExists(true);
-        configuration.setKeys(asList("id"));
+        configuration.setKeys(singletonList("id"));
         final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
         final int rowCount = getRandomRowCount();
         Job.components().component("rowGenerator", "jdbcTest://RowGenerator?" + rowGeneratorConfig(rowCount, false, 0, null))
@@ -73,7 +82,7 @@ class OutputTest extends BaseJdbcTest {
         configuration.setDataset(newTableNameDataset(testTableName, container));
         configuration.setActionOnData(OutputConfig.ActionOnData.INSERT);
         configuration.setCreateTableIfNotExists(true);
-        configuration.setKeys(asList("id"));
+        configuration.setKeys(singletonList("id"));
         final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
         final int rowCount = 10;
         Job.components().component("rowGenerator", "jdbcTest://RowGenerator?" + rowGeneratorConfig(rowCount, true, 0, null))
@@ -223,5 +232,33 @@ class OutputTest extends BaseJdbcTest {
         assertEquals(newRecords, users.size());
         assertEquals(IntStream.rangeClosed(1, newRecords).mapToObj(i -> "updated" + i).collect(toSet()), users.stream()
                 .map(r -> ofNullable(r.getString("t_string")).orElseGet(() -> r.getString("T_STRING"))).collect(toSet()));
+    }
+
+    @TestTemplate
+    @DisplayName("Insert - Date type handling")
+    void dateTypesTest(final TestInfo testInfo, final JdbcTestContainer container) throws ParseException {
+        final Date date = new Date(new SimpleDateFormat("yyyy-MM-dd").parse("2018-12-6").getTime());
+        final Date datetime = new Date();
+        final Date time = new Date(1000 * 60 * 60 * 15 + 1000 * 60 * 20 + 39000); // 15:20:39
+        final Record record = recordBuilderFactory.newRecordBuilder().withDateTime("date", date)
+                .withDateTime("datetime", datetime).withDateTime("time", time).build();
+        final List<Record> data = new ArrayList<>();
+        data.add(record);
+        getComponentsHandler().setInputData(data);
+        final OutputConfig configuration = new OutputConfig();
+        final String testTableName = getTestTableName(testInfo);
+        configuration.setDataset(newTableNameDataset(testTableName, container));
+        configuration.setActionOnData(OutputConfig.ActionOnData.INSERT);
+        configuration.setCreateTableIfNotExists(true);
+        final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
+        Job.components().component("emitter", "test://emitter").component("jdbcOutput", "Jdbc://Output?" + config).connections()
+                .from("emitter").to("jdbcOutput").build().run();
+        List<Record> inserted = readAll(testTableName, container);
+        assertEquals(1, inserted.size());
+        final Record result = inserted.iterator().next();
+        assertEquals(date.getTime(), result.getDateTime("date").toInstant().toEpochMilli());
+        assertEquals(time.getTime(), result.getDateTime("time").toInstant().toEpochMilli());
+        assertEquals(datetime.getTime(), result.getDateTime("datetime").toInstant().toEpochMilli());
+
     }
 }

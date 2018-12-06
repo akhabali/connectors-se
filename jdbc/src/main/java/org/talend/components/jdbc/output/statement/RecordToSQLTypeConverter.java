@@ -15,10 +15,7 @@ package org.talend.components.jdbc.output.statement;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
 
 import static java.util.Optional.ofNullable;
 
@@ -146,8 +143,8 @@ public enum RecordToSQLTypeConverter {
         @Override
         public void setValue(final PreparedStatement statement, final int index, final Schema.Entry entry, final Record record)
                 throws SQLException {
-            statement.setDate(index,
-                    ofNullable(record.getDateTime(entry.getName())).map(d -> Date.valueOf(d.toLocalDate())).orElse(null));
+            statement.setTimestamp(index, ofNullable(record.getDateTime(entry.getName()))
+                    .map(d -> new Timestamp(d.toInstant().toEpochMilli())).orElse(null));
         }
 
         @Override
