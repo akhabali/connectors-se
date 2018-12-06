@@ -42,6 +42,9 @@ public class RabbitMQServiceTestIT {
     @Service
     private JsonBuilderFactory factory;
 
+    @Service
+    private RabbitMQService service;
+
     @Test
     public void sendAndReceiveQueueMessage() {
         componentsHandler.setInputData(asList(factory.createObjectBuilder().add(MESSAGE_CONTENT, TEST_MESSAGE).build()));
@@ -140,7 +143,7 @@ public class RabbitMQServiceTestIT {
         factory.setHost(store.getHostname());
         factory.setUsername(store.getUserName());
         factory.setPassword(store.getPassword());
-        try (Connection connection = factory.newConnection(); Channel channel = connection.createChannel()) {
+        try (Connection connection = service.getConnection(store); Channel channel = connection.createChannel()) {
             channel.exchangeDeclare(exchangeName, exchangeType);
             channel.basicPublish(exchangeName, "", null, TEST_MESSAGE.getBytes(StandardCharsets.UTF_8));
         } catch (IOException | TimeoutException e) {

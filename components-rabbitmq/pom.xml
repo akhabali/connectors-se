@@ -33,6 +33,7 @@
 
         TIP: it is recommended to set this property into your settings.xml in an active by default profile.
         -->
+<!--        <talend-docker-registry>registry.datapwn.com</talend-docker-registry>-->
         <talend.component.studioHome/>
     </properties>
 
@@ -40,6 +41,18 @@
         <dependency>
             <groupId>com.rabbitmq</groupId>
             <artifactId>amqp-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.talend.sdk.component</groupId>
+            <artifactId>component-runtime-beam</artifactId>
+            <version>${component-runtime.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.beam</groupId>
+            <artifactId>beam-runners-direct-java</artifactId>
+            <version>${beam.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -92,6 +105,33 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-test</id>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <classpathDependencyExcludes>
+                                <classpathDependencyExcludes>org.talend.sdk.component:component-runtime-beam
+                                </classpathDependencyExcludes>
+                                <classpathDependencyExcludes>org.apache.beam:beam-runners-direct-java
+                                </classpathDependencyExcludes>
+                            </classpathDependencyExcludes>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>surefire-beam-test</id>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>${surefire.version}</version>
                 <configuration>
@@ -104,10 +144,26 @@
                         <javax.net.ssl.keyStorePassword>password</javax.net.ssl.keyStorePassword>
                         <javax.net.ssl.trustStore>src/test/resources/rabbitstore</javax.net.ssl.trustStore>
                         <javax.net.ssl.trustStorePassword>password</javax.net.ssl.trustStorePassword>
+                        <talend.component.junit.handler.state>static</talend.component.junit.handler.state>
                     </systemPropertyVariables>
                 </configuration>
                 <executions>
                     <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                        <configuration>
+                            <classpathDependencyExcludes>
+                                <classpathDependencyExcludes>org.talend.sdk.component:component-runtime-beam
+                                </classpathDependencyExcludes>
+                                <classpathDependencyExcludes>org.apache.beam:beam-runners-direct-java
+                                </classpathDependencyExcludes>
+                            </classpathDependencyExcludes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>filesafe-beam-test</id>
                         <goals>
                             <goal>integration-test</goal>
                             <goal>verify</goal>
@@ -133,17 +189,29 @@
                 <version>${docker-maven-plugin.version}</version>
                 <configuration>
                     <skip>${skipTests}</skip>
+                    <registry>registry.datapwn.com</registry>
                     <images>
                         <image>
                             <alias>rmqtest</alias>
-                            <name>vizotenko/rabbitmq:1.0.0</name>
-                            <build>
+                            <name>vizotenko/components-integration-test-rabbitmq:1.0.0</name>
+<!--                            <build>
                                 <dockerFileDir>demo</dockerFileDir>
-                            </build>
+                            </build>-->
                             <run>
                                 <ports>
                                     <port>amqp.port:5671</port>
+<!--                                    <port>amqp.port:5672</port>-->
+<!--                                    <port>amqp.port.admin:15672</port>-->
                                 </ports>
+                                <wait>
+                                    <tcp>
+                                        <host>192.168.99.100</host>
+                                        <ports>
+                                            <port>5671</port>
+                                        </ports>
+                                    </tcp>
+                                    <time>60000</time>
+                                </wait>
                             </run>
                         </image>
                     </images>
@@ -153,30 +221,8 @@
                         <id>start</id>
                         <phase>pre-integration-test</phase>
                         <goals>
-                            <goal>build</goal>
                             <goal>start</goal>
                         </goals>
-                        <configuration>
-                            <images>
-                                <image>
-                                    <name>vizotenko/rabbitmq:1.0.0</name>
-                                    <run>
-                                        <ports>
-                                            <port>amqp.port:5671</port>
-                                        </ports>
-                                        <wait>
-                                            <tcp>
-                                                <host>localhost</host>
-                                                <ports>
-                                                    <port>5671</port>
-                                                </ports>
-                                            </tcp>
-                                            <time>60000</time>
-                                        </wait>
-                                    </run>
-                                </image>
-                            </images>
-                        </configuration>
                     </execution>
                     <execution>
                         <id>stop</id>
