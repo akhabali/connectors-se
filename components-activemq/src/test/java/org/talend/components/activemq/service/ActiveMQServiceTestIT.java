@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.talend.components.activemq.configuration.BasicConfiguration;
 import org.talend.components.activemq.configuration.Broker;
 import org.talend.components.activemq.configuration.MessageType;
-import org.talend.components.activemq.datastore.JmsDataStore;
+import org.talend.components.activemq.datastore.ActiveMQDataStore;
 import org.talend.components.activemq.output.OutputConfiguration;
 import org.talend.components.activemq.source.DurableSubscriptionConfiguration;
 import org.talend.components.activemq.source.InputMapperConfiguration;
@@ -25,11 +25,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.talend.components.activemq.MessageConst.MESSAGE_CONTENT;
-import static org.talend.components.activemq.testutils.JmsTestConstants.*;
+import static org.talend.components.activemq.testutils.ActiveMQTestConstants.*;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 @WithComponents("org.talend.components.activemq") // component package
-public class JMSServiceTestIT {
+public class ActiveMQServiceTestIT {
 
     @Injected
     private BaseComponentsHandler componentsHandler;
@@ -314,7 +314,7 @@ public class JMSServiceTestIT {
     private OutputConfiguration getOutputConfiguration() {
         OutputConfiguration configuration = new OutputConfiguration();
         BasicConfiguration basicConfiguration = new BasicConfiguration();
-        JmsDataStore dataStore = new JmsDataStore();
+        ActiveMQDataStore dataStore = new ActiveMQDataStore();
         dataStore.setHost(LOCALHOST);
         dataStore.setPort(PORT);
         dataStore.setSSL(true);
@@ -328,7 +328,7 @@ public class JMSServiceTestIT {
     private InputMapperConfiguration getInputConfiguration() {
         InputMapperConfiguration configuration = new InputMapperConfiguration();
         BasicConfiguration basicConfiguration = new BasicConfiguration();
-        JmsDataStore dataStore = new JmsDataStore();
+        ActiveMQDataStore dataStore = new ActiveMQDataStore();
         dataStore.setHost(LOCALHOST);
         dataStore.setPort(PORT);
         dataStore.setSSL(true);

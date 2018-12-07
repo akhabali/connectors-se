@@ -23,7 +23,7 @@ import javax.jms.Session;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.talend.components.activemq.configuration.Broker;
 import org.talend.components.activemq.configuration.MessageType;
-import org.talend.components.activemq.datastore.JmsDataStore;
+import org.talend.components.activemq.datastore.ActiveMQDataStore;
 import org.talend.sdk.component.api.service.Service;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,7 +31,7 @@ import java.util.StringJoiner;
 
 @Slf4j
 @Service
-public class JmsService {
+public class ActiveMQService {
 
     @Service
     private I18nMessage i18n;
@@ -40,7 +40,7 @@ public class JmsService {
         return (MessageType.QUEUE == messageType) ? session.createQueue(destination) : session.createTopic(destination);
     }
 
-    public ConnectionFactory createConnectionFactory(JmsDataStore dataStore) {
+    public ConnectionFactory createConnectionFactory(ActiveMQDataStore dataStore) {
         String url;
         if (!dataStore.getFailover() && !dataStore.getStaticDiscovery()) {
             url = getBrokerURL(dataStore.getSSL(), dataStore.getHost(), dataStore.getPort());
@@ -55,7 +55,7 @@ public class JmsService {
         return new ActiveMQConnectionFactory(url);
     }
 
-    private String getURIParameters(JmsDataStore dataStore) {
+    private String getURIParameters(ActiveMQDataStore dataStore) {
         String URIParameters = "";
         if (dataStore.getFailover()) {
             URIParameters = dataStore.getFailoverURIParameters();
@@ -70,7 +70,7 @@ public class JmsService {
         return isSecured(isSSLUsed) + "://" + host + ":" + port;
     }
 
-    private String getTransport(JmsDataStore dataStore) {
+    private String getTransport(ActiveMQDataStore dataStore) {
         String transport = null;
         if (dataStore.getFailover()) {
             transport = "failover";
@@ -90,7 +90,7 @@ public class JmsService {
         return connection.createSession(transacted, acknowledge);
     }
 
-    public Connection getConnection(ConnectionFactory connectionFactory, JmsDataStore dataStore) throws JMSException {
+    public Connection getConnection(ConnectionFactory connectionFactory, ActiveMQDataStore dataStore) throws JMSException {
         return dataStore.isUserIdentity() ? connectionFactory.createConnection(dataStore.getUserName(), dataStore.getPassword())
                 : connectionFactory.createConnection();
     }

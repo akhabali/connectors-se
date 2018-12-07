@@ -19,6 +19,7 @@ import java.util.List;
 
 import javax.json.JsonBuilderFactory;
 
+import org.talend.components.activemq.service.ActiveMQService;
 import org.talend.components.activemq.service.I18nMessage;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
@@ -30,7 +31,6 @@ import org.talend.sdk.component.api.input.PartitionSize;
 import org.talend.sdk.component.api.input.Split;
 import org.talend.sdk.component.api.meta.Documentation;
 
-import org.talend.components.activemq.service.JmsService;
 import org.talend.sdk.component.api.service.Service;
 
 @Version(1)
@@ -41,14 +41,14 @@ public class InputMapper implements Serializable {
 
     private final InputMapperConfiguration configuration;
 
-    private final JmsService service;
+    private final ActiveMQService service;
 
     private final JsonBuilderFactory jsonBuilderFactory;
 
     @Service
     private final I18nMessage i18nMessage;
 
-    public InputMapper(@Option("configuration") final InputMapperConfiguration configuration, final JmsService service,
+    public InputMapper(@Option("configuration") final InputMapperConfiguration configuration, final ActiveMQService service,
             final JsonBuilderFactory jsonBuilderFactory, final I18nMessage i18nMessage) {
         this.configuration = configuration;
         this.service = service;

@@ -38,7 +38,7 @@ import static org.talend.sdk.component.api.configuration.condition.ActiveIfs.Ope
 @DataStore("basic")
 @Checkable(ACTION_BASIC_HEALTH_CHECK)
 @Documentation("A connection to a data base")
-public class JmsDataStore implements Serializable {
+public class ActiveMQDataStore implements Serializable {
 
     @Option
     @ActiveIf(target = "staticDiscovery", value = "false")

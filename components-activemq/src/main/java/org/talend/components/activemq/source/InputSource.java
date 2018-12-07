@@ -31,12 +31,11 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
 import lombok.extern.slf4j.Slf4j;
+import org.talend.components.activemq.service.ActiveMQService;
 import org.talend.components.activemq.service.I18nMessage;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.meta.Documentation;
-
-import org.talend.components.activemq.service.JmsService;
 
 import static org.talend.components.activemq.MessageConst.MESSAGE_CONTENT;
 
@@ -46,7 +45,7 @@ public class InputSource implements Serializable {
 
     private final InputMapperConfiguration configuration;
 
-    private final JmsService service;
+    private final ActiveMQService service;
 
     private final JsonBuilderFactory jsonBuilderFactory;
 
@@ -64,7 +63,7 @@ public class InputSource implements Serializable {
 
     private Queue<String> messages = new LinkedList<>();
 
-    public InputSource(@Option final InputMapperConfiguration configuration, final JmsService service,
+    public InputSource(@Option final InputMapperConfiguration configuration, final ActiveMQService service,
             final JsonBuilderFactory jsonBuilderFactory, final I18nMessage i18nMessage) {
         this.configuration = configuration;
         this.service = service;

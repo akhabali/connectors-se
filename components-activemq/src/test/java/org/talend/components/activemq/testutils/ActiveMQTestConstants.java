@@ -1,6 +1,6 @@
 package org.talend.components.activemq.testutils;
 
-public class JmsTestConstants {
+public class ActiveMQTestConstants {
 
     public static final String LOCALHOST = "localhost";
 

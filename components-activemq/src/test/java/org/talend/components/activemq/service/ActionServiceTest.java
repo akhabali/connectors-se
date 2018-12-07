@@ -2,7 +2,7 @@ package org.talend.components.activemq.service;
 
 import org.junit.jupiter.api.Test;
 import org.talend.components.activemq.configuration.BasicConfiguration;
-import org.talend.components.activemq.datastore.JmsDataStore;
+import org.talend.components.activemq.datastore.ActiveMQDataStore;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
@@ -13,8 +13,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.talend.components.activemq.MessageConst.MESSAGE_CONTENT;
-import static org.talend.components.activemq.testutils.JmsTestConstants.LOCALHOST;
-import static org.talend.components.activemq.testutils.JmsTestConstants.PORT;
+import static org.talend.components.activemq.testutils.ActiveMQTestConstants.LOCALHOST;
+import static org.talend.components.activemq.testutils.ActiveMQTestConstants.PORT;
 
 @WithComponents("org.talend.components.activemq")
 class ActionServiceTest {
@@ -24,7 +24,7 @@ class ActionServiceTest {
 
     @Test
     public void testJMSNoConnection() {
-        JmsDataStore dataStore = new JmsDataStore();
+        ActiveMQDataStore dataStore = new ActiveMQDataStore();
         dataStore.setHost(LOCALHOST);
         dataStore.setPort(PORT);
         dataStore.setSSL(true);

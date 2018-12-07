@@ -13,7 +13,7 @@
 package org.talend.components.activemq.service;
 
 import org.talend.components.activemq.configuration.BasicConfiguration;
-import org.talend.components.activemq.datastore.JmsDataStore;
+import org.talend.components.activemq.datastore.ActiveMQDataStore;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
@@ -36,7 +36,7 @@ public class ActionService {
     public static final String DISCOVER_SCHEMA = "discoverSchema";
 
     @Service
-    private JmsService jmsService;
+    private ActiveMQService activeMQService;
 
     @Service
     private I18nMessage i18n;
@@ -52,7 +52,7 @@ public class ActionService {
     }
 
     @HealthCheck(ACTION_BASIC_HEALTH_CHECK)
-    public HealthCheckStatus validateBasicDatastore(@Option final JmsDataStore datastore) {
+    public HealthCheckStatus validateBasicDatastore(@Option final ActiveMQDataStore datastore) {
         if (datastore.getFailover()) {
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, i18n.failoverHealthCheckIsNotSupported());
         }
@@ -62,16 +62,16 @@ public class ActionService {
         }
         Connection connection = null;
         // create ConnectionFactory
-        ConnectionFactory connectionFactory = jmsService.createConnectionFactory(datastore);
+        ConnectionFactory connectionFactory = activeMQService.createConnectionFactory(datastore);
 
         try {
-            connection = jmsService.getConnection(connectionFactory, datastore);
+            connection = activeMQService.getConnection(connectionFactory, datastore);
             connection.start();
             return new HealthCheckStatus(HealthCheckStatus.Status.OK, i18n.successConnection());
         } catch (JMSException e) {
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, i18n.errorInvalidConnection());
         } finally {
-            jmsService.closeConnection(connection);
+            activeMQService.closeConnection(connection);
         }
     }
 

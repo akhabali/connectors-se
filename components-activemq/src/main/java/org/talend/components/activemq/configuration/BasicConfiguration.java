@@ -13,7 +13,7 @@
 package org.talend.components.activemq.configuration;
 
 import lombok.Data;
-import org.talend.components.activemq.datastore.JmsDataStore;
+import org.talend.components.activemq.datastore.ActiveMQDataStore;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.type.DataSet;
@@ -34,7 +34,7 @@ public class BasicConfiguration implements Serializable {
 
     @Option
     @Documentation("JMS connection information")
-    private JmsDataStore connection;
+    private ActiveMQDataStore connection;
 
     @Option
     @Documentation("Drop down list for Message Type")
