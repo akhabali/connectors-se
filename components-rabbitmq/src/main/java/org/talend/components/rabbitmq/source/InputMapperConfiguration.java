@@ -16,7 +16,6 @@ import lombok.Data;
 import org.talend.components.rabbitmq.configuration.BasicConfiguration;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.constraint.Min;
-import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
@@ -34,10 +33,9 @@ public class InputMapperConfiguration implements Serializable {
     private BasicConfiguration basicConfig;
 
     @Option
-    @Required
     @Min(0)
     @Documentation("Maximum messages defines a number of messages this component will listen to. "
             + "After reaching the maximum component will stop receiving messages")
-    private Integer maximumMessages;
+    private Integer maximumMessages = 100;
 
 }
