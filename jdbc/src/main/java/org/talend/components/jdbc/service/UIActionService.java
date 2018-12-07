@@ -25,6 +25,7 @@ import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.completion.Suggestions;
 import org.talend.sdk.component.api.service.completion.Values;
 import org.talend.sdk.component.api.service.configuration.Configuration;
+import org.talend.sdk.component.api.service.configuration.LocalConfiguration;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 
@@ -66,19 +67,20 @@ public class UIActionService {
 
     @DynamicValues(ACTION_LIST_SUPPORTED_DB)
     public Values loadSupportedDataBaseTypes() {
-        return new Values(jdbcConfiguration.get().getDrivers().stream().sorted(comparingInt(JdbcConfiguration.Driver::getOrder))
+        return new Values(jdbcConfiguration.get().getDrivers().stream().filter(d -> jdbcService.driverNotDisabled(d))
+                .sorted(comparingInt(JdbcConfiguration.Driver::getOrder))
                 .map(driver -> new Values.Item(driver.getId(), driver.getDisplayName())).collect(toList()));
     }
 
     @Suggestions(ACTION_LIST_HANDLERS_DB)
     public SuggestionValues getHandlersDataBaseTypes(@Option final String dbType) {
-        List<JdbcConfiguration.Driver> drivers = jdbcConfiguration.get().getDrivers();
-        return new SuggestionValues(false,
-                drivers.stream().filter(db -> db.getId().equals(dbType) && !db.getHandlers().isEmpty())
-                        .flatMap(db -> db.getHandlers().stream())
-                        .flatMap(handler -> drivers.stream().filter(d -> d.getId().equals(handler))).distinct()
-                        .sorted(comparingInt(JdbcConfiguration.Driver::getOrder))
-                        .map(driver -> new SuggestionValues.Item(driver.getId(), driver.getDisplayName())).collect(toList()));
+        List<JdbcConfiguration.Driver> drivers = jdbcConfiguration.get().getDrivers().stream()
+                .filter(d -> jdbcService.driverNotDisabled(d)).collect(toList());
+        return new SuggestionValues(false, drivers.stream().filter(d -> jdbcService.driverNotDisabled(d))
+                .filter(db -> db.getId().equals(dbType) && !db.getHandlers().isEmpty()).flatMap(db -> db.getHandlers().stream())
+                .flatMap(handler -> drivers.stream().filter(d -> d.getId().equals(handler))).distinct()
+                .sorted(comparingInt(JdbcConfiguration.Driver::getOrder))
+                .map(driver -> new SuggestionValues.Item(driver.getId(), driver.getDisplayName())).collect(toList()));
     }
 
     @HealthCheck(ACTION_BASIC_HEALTH_CHECK)

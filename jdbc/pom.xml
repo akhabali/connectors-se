@@ -114,6 +114,7 @@
                 <configuration>
                     <argLine>
                         -Djdbc.drivers[2].paths[0].path=com.oracle:ojdbc7:12.1.0.2
+                        -Djdbc.driver.derby.skip=false
                     </argLine>
                     <systemPropertyVariables>
                         <talend.jdbc.it>${jdbc.it}</talend.jdbc.it>

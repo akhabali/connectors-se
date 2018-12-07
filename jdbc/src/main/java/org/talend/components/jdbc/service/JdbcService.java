@@ -19,6 +19,7 @@ import org.talend.components.jdbc.datastore.JdbcConnection;
 import org.talend.components.jdbc.output.platforms.PlatformFactory;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.configuration.Configuration;
+import org.talend.sdk.component.api.service.configuration.LocalConfiguration;
 import org.talend.sdk.component.api.service.dependency.Resolver;
 
 import java.io.ByteArrayInputStream;
@@ -32,6 +33,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -57,6 +59,14 @@ public class JdbcService {
 
     @Configuration("jdbc")
     private Supplier<JdbcConfiguration> jdbcConfiguration;
+
+    @Service
+    private LocalConfiguration localConfiguration;
+
+    public boolean driverNotDisabled(JdbcConfiguration.Driver driver) {
+        return !ofNullable(localConfiguration.get("jdbc.driver." + driver.getId().toLowerCase(Locale.ROOT) + ".skip"))
+                .map(Boolean::valueOf).orElse(false);
+    }
 
     private URL[] getDriverFiles(final JdbcConfiguration.Driver driver) {
         return drivers.computeIfAbsent(driver, key -> {
@@ -86,7 +96,7 @@ public class JdbcService {
     }
 
     private JdbcConfiguration.Driver getDriver(final JdbcConnection dataStore) {
-        return jdbcConfiguration.get().getDrivers().stream()
+        return jdbcConfiguration.get().getDrivers().stream().filter(this::driverNotDisabled)
                 .filter(d -> d.getId()
                         .equals(ofNullable(dataStore.getHandler()).filter(h -> !h.isEmpty()).orElse(dataStore.getDbType())))
                 .filter(d -> d.getHandlers() == null || d.getHandlers().isEmpty()).findFirst()
