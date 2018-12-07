@@ -28,8 +28,6 @@ public class DerbyPlatform extends Platform {
 
     public static final String NAME = "derby";
 
-    private final static String VARCHAR_MAX_LENGTH = "32672";
-
     @Override
     public String name() {
         return NAME;
@@ -87,7 +85,7 @@ public class DerbyPlatform extends Platform {
     private String toDBType(final Column column) {
         switch (column.getType()) {
         case STRING:
-            return "VARCHAR(" + VARCHAR_MAX_LENGTH + ")";
+            return "VARCHAR(32672)";
         case BOOLEAN:
             return "BOOLEAN";
         case DOUBLE:

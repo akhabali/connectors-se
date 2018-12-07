@@ -81,8 +81,8 @@ public abstract class JdbcAction {
                         continue;
                     }
                     for (final Map.Entry<Integer, Schema.Entry> entry : getQueryParams().entrySet()) {
-                        RecordToSQLTypeConverter.valueOf(entry.getValue().getType().name())
-                                .setValue(statement, entry.getKey(), entry.getValue(), record);
+                        RecordToSQLTypeConverter.valueOf(entry.getValue().getType().name()).setValue(statement, entry.getKey(),
+                                entry.getValue(), record);
                     }
                     statement.addBatch();
                     batchNumber++;
@@ -121,8 +121,8 @@ public abstract class JdbcAction {
         return "40001".equals(ofNullable(e.getNextException()).orElse(e).getSQLState());
     }
 
-    private List<Reject> handleRejects(final List<Record> records, Map<Integer, Integer> batchOrder,
-            final SQLException e) throws SQLException {
+    private List<Reject> handleRejects(final List<Record> records, Map<Integer, Integer> batchOrder, final SQLException e)
+            throws SQLException {
         if (!(e instanceof BatchUpdateException)) {
             throw e;
         }
@@ -143,8 +143,7 @@ public abstract class JdbcAction {
             discards.add(new Reject(error.getMessage(), error.getSQLState(), error.getErrorCode(),
                     records.get(batchOrder.get(failurePoint))));
             // todo we may retry for this sub list
-            discards.addAll(records.subList(batchOrder.get(failurePoint) + 1, records.size())
-                    .stream()
+            discards.addAll(records.subList(batchOrder.get(failurePoint) + 1, records.size()).stream()
                     .map(r -> new Reject("rejected due to error in previous elements error in this transaction", r))
                     .collect(toList()));
         }

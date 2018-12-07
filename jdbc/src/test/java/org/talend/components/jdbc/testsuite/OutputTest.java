@@ -22,24 +22,31 @@ import org.talend.components.jdbc.DisabledDatabases;
 import org.talend.components.jdbc.WithDatabasesEnvironments;
 import org.talend.components.jdbc.configuration.OutputConfig;
 import org.talend.components.jdbc.containers.JdbcTestContainer;
+import org.talend.components.jdbc.datastore.JdbcConnection;
+import org.talend.components.jdbc.output.platforms.PlatformFactory;
 import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.junit.environment.Environment;
 import org.talend.sdk.component.junit.environment.builtin.ContextualEnvironment;
 import org.talend.sdk.component.junit.environment.builtin.beam.DirectRunnerEnvironment;
-import org.talend.sdk.component.junit5.environment.EnvironmentalTest;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
+import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.IntStream;
 
 import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -89,6 +96,68 @@ class OutputTest extends BaseJdbcTest {
                 .component("jdbcOutput", "Jdbc://Output?" + config).connections().from("rowGenerator").to("jdbcOutput").build()
                 .run();
         assertEquals(rowCount, countAll(testTableName, container));
+    }
+
+    @TestTemplate
+    @DisplayName("Insert - Bad types handling")
+    void insertBadTypes(final TestInfo testInfo, final JdbcTestContainer container) throws ParseException, SQLException {
+        final Date date = new Date(new SimpleDateFormat("yyyy-MM-dd").parse("2018-12-6").getTime());
+        final Date datetime = new Date();
+        final Date time = new Date(1000 * 60 * 60 * 15 + 1000 * 60 * 20 + 39000); // 15:20:39
+        final Record record = recordBuilderFactory.newRecordBuilder()
+                .withInt(recordBuilderFactory.newEntryBuilder().withType(Schema.Type.INT).withNullable(true).withName("id")
+                        .build(), 1)
+                .withLong(recordBuilderFactory.newEntryBuilder().withType(Schema.Type.LONG).withNullable(true).withName("t_long")
+                        .build(), 10L)
+                .withDouble(recordBuilderFactory.newEntryBuilder().withType(Schema.Type.DOUBLE).withNullable(true)
+                        .withName("t_double").build(), 20.02d)
+                .withFloat(recordBuilderFactory.newEntryBuilder().withType(Schema.Type.FLOAT).withNullable(true)
+                        .withName("t_float").build(), 30.03f)
+                .withBoolean(recordBuilderFactory.newEntryBuilder().withType(Schema.Type.BOOLEAN).withNullable(true)
+                        .withName("t_boolean").build(), false)
+                .withBytes("t_bytes", "bytes".getBytes(StandardCharsets.UTF_8)).withString("t_string", "some text")
+                .withDateTime("date", date).withDateTime("datetime", datetime).withDateTime("time", time).build();
+        // create a table from valid record
+        final JdbcConnection dataStore = newConnection(container);
+        final String testTableName = getTestTableName(testInfo);
+        try (final Connection connection = getJdbcService().createDataSource(dataStore).getConnection()) {
+            PlatformFactory.get(dataStore).createTableIfNotExist(connection, testTableName, Collections.emptyList(),
+                    Collections.singletonList(record));
+        }
+        runWithBad("id", "bad id", testTableName, container);
+        runWithBad("t_long", "bad long", testTableName, container);
+        runWithBad("t_double", "bad double", testTableName, container);
+        runWithBad("t_float", "bad float", testTableName, container);
+        runWithBad("t_boolean", "bad boolean", testTableName, container);
+        runWithBad("date", "bad date", testTableName, container);
+        runWithBad("datetime", "bad datetime", testTableName, container);
+        runWithBad("time", "bad time", testTableName, container);
+
+        assertEquals(0, countAll(testTableName, container));
+    }
+
+    private void runWithBad(final String field, final String value, final String testTableName,
+            final JdbcTestContainer container) {
+        final Record record = recordBuilderFactory.newRecordBuilder().withString(field, value).build();
+        getComponentsHandler().setInputData(IntStream.range(0, 20).mapToObj(i -> record).collect(toList()));
+        final OutputConfig configuration = new OutputConfig();
+        configuration.setDataset(newTableNameDataset(testTableName, container));
+        configuration.setActionOnData(OutputConfig.ActionOnData.INSERT);
+        configuration.setCreateTableIfNotExists(false);
+        final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
+        try {
+            Job.components().component("emitter", "test://emitter")
+                    .component("jdbcOutput", "Jdbc://Output?$configuration.$maxBatchSize=4&" + config).connections()
+                    .from("emitter").to("jdbcOutput").build().run();
+
+        } catch (final Throwable e) {
+            // those 2 database don't comply with jdbc spec and don't return a batch update exception when there is a batch error.
+            if (!"mssql".equalsIgnoreCase(container.getDatabaseType())
+                    && !"snowflake".equalsIgnoreCase(container.getDatabaseType())) {
+                throw e;
+            }
+        }
+
     }
 
     @TestTemplate
@@ -259,6 +328,5 @@ class OutputTest extends BaseJdbcTest {
         assertEquals(date.getTime(), result.getDateTime("date").toInstant().toEpochMilli());
         assertEquals(time.getTime(), result.getDateTime("time").toInstant().toEpochMilli());
         assertEquals(datetime.getTime(), result.getDateTime("datetime").toInstant().toEpochMilli());
-
     }
 }
