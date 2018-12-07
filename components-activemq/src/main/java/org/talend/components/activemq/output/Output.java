@@ -35,7 +35,7 @@ import org.talend.sdk.component.api.processor.ElementListener;
 import org.talend.sdk.component.api.processor.Input;
 import org.talend.sdk.component.api.processor.Processor;
 
-import org.talend.components.activemq.service.JmsService;
+import org.talend.components.activemq.service.ActiveMQService;
 import org.talend.sdk.component.api.service.Service;
 
 import static org.talend.components.activemq.MessageConst.MESSAGE_CONTENT;
@@ -52,7 +52,7 @@ public class Output implements Serializable {
     private final I18nMessage i18n;
 
     @Service
-    private final JmsService service;
+    private final ActiveMQService service;
 
     private Connection connection;
 
@@ -60,7 +60,7 @@ public class Output implements Serializable {
 
     private MessageProducer producer;
 
-    public Output(@Option("configuration") final OutputConfiguration configuration, final JmsService service,
+    public Output(@Option("configuration") final OutputConfiguration configuration, final ActiveMQService service,
             final I18nMessage i18nMessage) {
         this.configuration = configuration;
         this.service = service;
