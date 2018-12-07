@@ -33,7 +33,7 @@
 
         TIP: it is recommended to set this property into your settings.xml in an active by default profile.
         -->
-<!--        <talend-docker-registry>registry.datapwn.com</talend-docker-registry>-->
+        <talend-docker-registry>registry.datapwn.com</talend-docker-registry>
         <talend.component.studioHome/>
     </properties>
 
@@ -194,14 +194,9 @@
                         <image>
                             <alias>rmqtest</alias>
                             <name>vizotenko/components-integration-test-rabbitmq:1.0.0</name>
-<!--                            <build>
-                                <dockerFileDir>demo</dockerFileDir>
-                            </build>-->
                             <run>
                                 <ports>
                                     <port>amqp.port:5671</port>
-<!--                                    <port>amqp.port:5672</port>-->
-<!--                                    <port>amqp.port.admin:15672</port>-->
                                 </ports>
                                 <wait>
                                     <tcp>
