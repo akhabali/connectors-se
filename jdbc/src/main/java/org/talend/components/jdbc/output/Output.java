@@ -98,9 +98,9 @@ public class Output implements Serializable {
         // TODO : handle discarded records
         try {
             final List<Reject> discards = jdbcAction.execute(records);
-            discards.stream().map(Object::toString).forEach(log::info);
+            discards.stream().map(Object::toString).forEach(log::error);
         } catch (final Exception e) {
-            records.stream().map(r -> new Reject(e.getMessage(), r)).map(Reject::toString).forEach(log::info);
+            records.stream().map(r -> new Reject(e.getMessage(), r)).map(Reject::toString).forEach(log::error);
             throw e;
         }
     }
