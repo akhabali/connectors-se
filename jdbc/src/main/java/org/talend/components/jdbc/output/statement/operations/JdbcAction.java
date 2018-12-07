@@ -100,7 +100,7 @@ public abstract class JdbcAction {
                         break;
                     }
                     retryCount++;
-                    log.warn("Deadlock detected. retrying", e);
+                    log.warn("Deadlock detected. retrying for the " + retryCount + " time", e);
                     try {
                         Thread.sleep((long) Math.exp(retryCount) * 2000);
                     } catch (InterruptedException e1) {

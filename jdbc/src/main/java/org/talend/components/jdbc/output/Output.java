@@ -31,9 +31,12 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.Serializable;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.util.Optional.ofNullable;
 
 @Slf4j
 @Processor(name = "Output")
@@ -56,6 +59,8 @@ public class Output implements Serializable {
 
     private transient Platform platform;
 
+    private boolean tableExists;
+
     private boolean tableCreated;
 
     public Output(@Option("configuration") final OutputConfig outputConfig, final JdbcService jdbcService,
@@ -66,13 +71,19 @@ public class Output implements Serializable {
     }
 
     @PostConstruct
-    public void init() {
+    public void init() throws SQLException {
         platform = PlatformFactory.get(configuration.getDataset().getConnection());
         dataSource = jdbcService.createDataSource(configuration.getDataset().getConnection(),
                 configuration.isRewriteBatchedStatements());
         final JdbcActionFactory jdbcActionFactory = new JdbcActionFactory(platform, i18n, dataSource, configuration);
         this.jdbcAction = jdbcActionFactory.createAction();
         this.records = new ArrayList<>();
+        try (final Connection connection = dataSource.getConnection()) {
+            tableExists = checkTableExistence(configuration.getDataset().getTableName(), connection);
+            if (!tableExists && !this.configuration.isCreateTableIfNotExists()) {
+                throw new IllegalStateException(i18n.errorTaberDoesNotExists(configuration.getDataset().getTableName()));
+            }
+        }
     }
 
     @BeforeGroup
@@ -87,7 +98,7 @@ public class Output implements Serializable {
 
     @AfterGroup
     public void afterGroup() throws SQLException {
-        if (configuration.isCreateTableIfNotExists() && !tableCreated) {
+        if (!tableExists && !tableCreated && configuration.isCreateTableIfNotExists()) {
             try (final Connection connection = dataSource.getConnection()) {
                 platform.createTableIfNotExist(connection, configuration.getDataset().getTableName(), configuration.getKeys(),
                         records);
@@ -102,6 +113,24 @@ public class Output implements Serializable {
         } catch (final Exception e) {
             records.stream().map(r -> new Reject(e.getMessage(), r)).map(Reject::toString).forEach(log::error);
             throw e;
+        }
+    }
+
+    private boolean checkTableExistence(final String tableName, final Connection connection) throws SQLException {
+        try (final ResultSet resultSet = connection.getMetaData().getTables(connection.getCatalog(), connection.getSchema(),
+                tableName, new String[] { "TABLE", "SYNONYM" })) {
+            while (resultSet.next()) {
+                if (ofNullable(ofNullable(resultSet.getString("TABLE_NAME")).orElseGet(() -> {
+                    try {
+                        return resultSet.getString("SYNONYM_NAME");
+                    } catch (final SQLException e) {
+                        return null;
+                    }
+                })).filter(tableName::equals).isPresent()) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 

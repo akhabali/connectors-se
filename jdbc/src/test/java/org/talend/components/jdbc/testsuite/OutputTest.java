@@ -55,8 +55,8 @@ import static org.talend.components.jdbc.Database.SNOWFLAKE;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 @DisplayName("Output")
-@Environment(ContextualEnvironment.class)
 @Environment(DirectRunnerEnvironment.class)
+// @Environment(ContextualEnvironment.class)
 @ExtendWith(WithDatabasesEnvironments.class)
 @DisabledDatabases({ @Disabled(value = SNOWFLAKE, reason = "Snowflake credentials need to be setup on ci") })
 class OutputTest extends BaseJdbcTest {
@@ -74,7 +74,7 @@ class OutputTest extends BaseJdbcTest {
         configuration.setCreateTableIfNotExists(true);
         configuration.setKeys(singletonList("id"));
         final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
-        final int rowCount = getRandomRowCount();
+        final int rowCount = 100;
         Job.components().component("rowGenerator", "jdbcTest://RowGenerator?" + rowGeneratorConfig(rowCount, false, 0, null))
                 .component("jdbcOutput", "Jdbc://Output?" + config).connections().from("rowGenerator").to("jdbcOutput").build()
                 .run();
@@ -328,5 +328,22 @@ class OutputTest extends BaseJdbcTest {
         assertEquals(date.getTime(), result.getDateTime("date").toInstant().toEpochMilli());
         assertEquals(time.getTime(), result.getDateTime("time").toInstant().toEpochMilli());
         assertEquals(datetime.getTime(), result.getDateTime("datetime").toInstant().toEpochMilli());
+    }
+
+    @TestTemplate
+    @DisplayName("Table handling - Not exist and No creation requested")
+    void tableNotExistCase(final JdbcTestContainer container) {
+        final Record record = recordBuilderFactory.newRecordBuilder().withString("data", "some data").build();
+        getComponentsHandler().setInputData(singletonList(record));
+        final OutputConfig configuration = new OutputConfig();
+        configuration.setDataset(newTableNameDataset("AlienTableThatNeverExist999", container));
+        configuration.setActionOnData(OutputConfig.ActionOnData.INSERT);
+        configuration.setCreateTableIfNotExists(false);
+        final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
+        final Exception error = assertThrows(Exception.class, () -> Job.components().component("emitter", "test://emitter")
+                .component("jdbcOutput", "Jdbc://Output?" + config).connections().from("emitter").to("jdbcOutput").build().run());
+
+        assertTrue(
+                error.getMessage().contains(getI18nMessage().errorTaberDoesNotExists(configuration.getDataset().getTableName())));
     }
 }

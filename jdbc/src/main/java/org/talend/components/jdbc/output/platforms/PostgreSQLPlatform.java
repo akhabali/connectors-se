@@ -34,7 +34,7 @@ public class PostgreSQLPlatform extends Platform {
 
     @Override
     protected String delimiterToken() {
-        return "";
+        return "\"";
     }
 
     @Override

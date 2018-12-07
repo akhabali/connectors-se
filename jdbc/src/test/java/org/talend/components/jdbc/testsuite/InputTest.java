@@ -26,6 +26,8 @@ import org.talend.components.jdbc.configuration.InputTableNameConfig;
 import org.talend.components.jdbc.containers.JdbcTestContainer;
 import org.talend.components.jdbc.dataset.SqlQueryDataset;
 import org.talend.components.jdbc.dataset.TableNameDataset;
+import org.talend.components.jdbc.datastore.JdbcConnection;
+import org.talend.components.jdbc.output.platforms.PlatformFactory;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.junit.environment.Environment;
 import org.talend.sdk.component.junit.environment.builtin.ContextualEnvironment;
@@ -40,21 +42,22 @@ import static org.talend.components.jdbc.Database.SNOWFLAKE;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 @DisplayName("Input")
-@Environment(ContextualEnvironment.class)
 @Environment(DirectRunnerEnvironment.class)
+// @Environment(ContextualEnvironment.class)
 @ExtendWith(WithDatabasesEnvironments.class)
 @DisabledDatabases({ @Disabled(value = SNOWFLAKE, reason = "Snowflake credentials need to be setup on ci") })
 class InputTest extends BaseJdbcTest {
 
     @TestTemplate
-    @DisplayName("Query - valid query")
+    @DisplayName("Query - valid select query")
     void validQuery(final TestInfo testInfo, final JdbcTestContainer container) {
-        final int rowCount = getRandomRowCount();
+        final int rowCount = 50;
         final String testTableName = getTestTableName(testInfo);
         insertRows(testTableName, container, rowCount, false, 0, null);
         final SqlQueryDataset sqlQueryDataset = new SqlQueryDataset();
-        sqlQueryDataset.setConnection(newConnection(container));
-        sqlQueryDataset.setSqlQuery("select * from " + testTableName);
+        final JdbcConnection connection = newConnection(container);
+        sqlQueryDataset.setConnection(connection);
+        sqlQueryDataset.setSqlQuery("select * from " + PlatformFactory.get(connection).identifier(testTableName));
         final InputQueryConfig config = new InputQueryConfig();
         config.setAdvancedCommonConfig(new InputAdvancedCommonConfig());
         config.setFetchSize(rowCount / 3);
@@ -71,7 +74,8 @@ class InputTest extends BaseJdbcTest {
     @DisplayName("Query - unvalid query ")
     void invalidQuery(final TestInfo testInfo, final JdbcTestContainer container) {
         final SqlQueryDataset sqlQueryDataset = new SqlQueryDataset();
-        sqlQueryDataset.setConnection(newConnection(container));
+        final JdbcConnection connection = newConnection(container);
+        sqlQueryDataset.setConnection(connection);
         sqlQueryDataset.setSqlQuery("select fromm " + getTestTableName(testInfo));
         final InputQueryConfig config = new InputQueryConfig();
         config.setDataSet(sqlQueryDataset);
@@ -113,7 +117,7 @@ class InputTest extends BaseJdbcTest {
     @TestTemplate
     @DisplayName("TableName - valid table name")
     void validTableName(final TestInfo testInfo, final JdbcTestContainer container) {
-        final int rowCount = getRandomRowCount();
+        final int rowCount = 50;
         final String testTableName = getTestTableName(testInfo);
         insertRows(testTableName, container, rowCount, false, 0, null);
         final InputTableNameConfig config = new InputTableNameConfig();
@@ -129,7 +133,6 @@ class InputTest extends BaseJdbcTest {
     @TestTemplate
     @DisplayName("TableName - invalid table name")
     void invalidTableName(final JdbcTestContainer container) {
-
         final TableNameDataset dataset = new TableNameDataset();
         dataset.setConnection(newConnection(container));
         dataset.setTableName("xxx");

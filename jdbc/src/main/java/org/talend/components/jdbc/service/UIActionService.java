@@ -138,12 +138,10 @@ public class UIActionService {
                     ofNullable(ofNullable(tables.getString("TABLE_NAME")).orElseGet(() -> {
                         try {
                             return tables.getString("SYNONYM_NAME");
-                        } catch (SQLException e) {
-                            // no-op
+                        } catch (final SQLException e) {
                             return null;
                         }
                     })).ifPresent(t -> items.add(new SuggestionValues.Item(t, t)));
-
                 }
             }
         } catch (final Exception unexpected) { // catch all exceptions for this ui action to return empty list

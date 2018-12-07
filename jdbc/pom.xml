@@ -118,8 +118,6 @@
                     <systemPropertyVariables>
                         <talend.jdbc.it>${jdbc.it}</talend.jdbc.it>
                         <talend.component.junit.handler.state>static</talend.component.junit.handler.state>
-                        <talend.beam.job.enforceImmutability>true</talend.beam.job.enforceImmutability>
-                        <talend.beam.job.enforceEncodability>true</talend.beam.job.enforceEncodability>
                         <!--
                            You can activate the targetParallelism to control the parallelism of the test pipeline.
                            You can also set it to 1 to debug more easily

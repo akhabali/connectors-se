@@ -118,16 +118,17 @@ public class JdbcService {
             try {
                 thread.setContextClassLoader(classLoader);
                 dataSource = new HikariDataSource();
+                dataSource.setPoolName("Hikari-" + thread.getName() + "#" + thread.getId());
                 dataSource.setUsername(connection.getUserId());
                 dataSource.setPassword(connection.getPassword());
                 dataSource.setDriverClassName(driver.getClassName());
                 dataSource.setJdbcUrl(connection.getJdbcUrl());
                 dataSource.setAutoCommit(isAutoCommit);
                 dataSource.setMaximumPoolSize(1);
+                // todo : make this configurable
                 dataSource.setLeakDetectionThreshold(15 * 60 * 1000);
                 dataSource.setConnectionTimeout(30 * 1000);
                 dataSource.setValidationTimeout(10 * 1000);
-                dataSource.setPoolName("Hikari-" + thread.getName() + "#" + thread.getId());
                 PlatformFactory.get(connection).addDataSourceProperties(dataSource);
                 dataSource.addDataSourceProperty("rewriteBatchedStatements", String.valueOf(rewriteBatchedStatements));
                 // dataSource.addDataSourceProperty("cachePrepStmts", "true");

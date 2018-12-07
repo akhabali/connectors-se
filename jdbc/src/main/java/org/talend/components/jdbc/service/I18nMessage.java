@@ -68,4 +68,6 @@ public interface I18nMessage {
     String errorCantCloseJdbcConnectionProperly();
 
     String errorCantLoadTableSuggestions();
+
+    String errorTaberDoesNotExists(final String tableName);
 }

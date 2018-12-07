@@ -1,6 +1,8 @@
 package org.talend.components.jdbc;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
 import org.talend.components.jdbc.configuration.InputQueryConfig;
@@ -28,14 +30,13 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
-import static java.util.Locale.ROOT;
 import static java.util.Optional.ofNullable;
 import static org.apache.derby.vti.XmlVTI.asList;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 @Data
+@Slf4j
 public abstract class BaseJdbcTest {
 
     @Injected
@@ -52,31 +53,36 @@ public abstract class BaseJdbcTest {
 
     public String getTestTableName(final TestInfo info) {
         return info.getTestClass().map(Class::getSimpleName).map(name -> name.substring(0, Math.min(5, name.length())))
-                .orElse("TEST").toUpperCase(ROOT) + "_"
+                .orElse("TEST") + "_"
                 + info.getTestMethod().map(Method::getName).map(name -> name.substring(0, Math.min(10, name.length())))
-                        .orElse("TABLE").toUpperCase(ROOT);
+                        .orElse("TABLE");
     }
 
     @BeforeEach
     void beforeEach(final TestInfo testInfo, final JdbcTestContainer container) {
+        dropTestTable(testInfo, container);
+    }
+
+    @AfterEach
+    void afterEach(final TestInfo testInfo, final JdbcTestContainer container) {
+        dropTestTable(testInfo, container);
+    }
+
+    private void dropTestTable(TestInfo testInfo, JdbcTestContainer container) {
         final String testTable = getTestTableName(testInfo);
         final JdbcConnection datastore = newConnection(container);
-        uiActionService.getTableFromDatabase(datastore).getItems().stream()
-                .filter(item -> item.getId().equalsIgnoreCase(testTable)).findFirst().ifPresent(item -> {
-                    final Platform platform = PlatformFactory.get(datastore);
-                    try (final Connection connection = jdbcService.createDataSource(datastore, false).getConnection()) {
-                        try (final PreparedStatement stm = connection
-                                .prepareStatement("DROP TABLE " + platform.identifier(testTable))) {
-                            stm.executeUpdate();
-                            connection.commit();
-                        } catch (final SQLException e) {
-                            connection.rollback();
-                            throw e;
-                        }
-                    } catch (final SQLException e) {
-                        throw new IllegalStateException(e);
-                    }
-                });
+        final Platform platform = PlatformFactory.get(datastore);
+        try (final Connection connection = jdbcService.createDataSource(datastore).getConnection()) {
+            try (final PreparedStatement stm = connection.prepareStatement("DROP TABLE " + platform.identifier(testTable))) {
+                stm.executeUpdate();
+                connection.commit();
+            } catch (final SQLException e) {
+                connection.rollback();
+                throw e;
+            }
+        } catch (final SQLException e) {
+            log.trace("maybe table don't exists", e);
+        }
     }
 
     public List<Record> readAll(final String table, final JdbcTestContainer container) {
@@ -92,9 +98,10 @@ public abstract class BaseJdbcTest {
 
     public long countAll(final String table, final JdbcTestContainer container) {
         final SqlQueryDataset dataset = new SqlQueryDataset();
-        dataset.setConnection(newConnection(container));
+        final JdbcConnection connection = newConnection(container);
+        dataset.setConnection(connection);
         final String total = "total";
-        dataset.setSqlQuery("select count(*) as " + total + " from " + table);
+        dataset.setSqlQuery("select count(*) as " + total + " from " + PlatformFactory.get(connection).identifier(table));
         final InputQueryConfig config = new InputQueryConfig();
         config.setDataSet(dataset);
         final String inConfig = configurationByExample().forInstance(config).configured().toQueryString();
@@ -140,14 +147,6 @@ public abstract class BaseJdbcTest {
         dataset.setConnection(newConnection(container));
         dataset.setTableName(table);
         return dataset;
-    }
-
-    /**
-     * @return random count between available processor count and available processor *100
-     */
-    public static int getRandomRowCount() {
-        final int availableProcessors = Runtime.getRuntime().availableProcessors();
-        return new Random().nextInt(((availableProcessors * 10) - availableProcessors * 5)) + availableProcessors * 5;
     }
 
     public static String rowGeneratorConfig(final long rowCount, final boolean withNullValues, final int withMissingIdEvery,
