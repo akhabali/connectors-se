@@ -91,7 +91,7 @@
                         <include>**/*IT.java</include>
                     </includes>
                     <systemPropertyVariables>
-                        <jms.port>${jms.port}</jms.port>
+                        <activemq.port>${activemq.port}</activemq.port>
                         <javax.net.ssl.trustStore>src/test/resources/client.ts</javax.net.ssl.trustStore>
                         <javax.net.ssl.trustStorePassword>password</javax.net.ssl.trustStorePassword>
                     </systemPropertyVariables>
@@ -132,8 +132,17 @@
                             </build>
                             <run>
                                 <ports>
-                                    <port>jms.port:61617</port>
+                                    <port>activemq.port:61617</port>
                                 </ports>
+                                <wait>
+                                    <tcp>
+                                        <host>localhost</host>
+                                        <ports>
+                                            <port>61617</port>
+                                        </ports>
+                                    </tcp>
+                                    <time>60000</time>
+                                </wait>
                             </run>
                         </image>
                     </images>
@@ -146,27 +155,6 @@
                             <goal>build</goal>
                             <goal>start</goal>
                         </goals>
-                        <configuration>
-                            <images>
-                                <image>
-                                    <name>vizotenko/activemq:1.0.0</name>
-                                    <run>
-                                        <ports>
-                                            <port>jms.port:61617</port>
-                                        </ports>
-                                        <wait>
-                                            <tcp>
-                                                <host>localhost</host>
-                                                <ports>
-                                                    <port>61617</port>
-                                                </ports>
-                                            </tcp>
-                                            <time>60000</time>
-                                        </wait>
-                                    </run>
-                                </image>
-                            </images>
-                        </configuration>
                     </execution>
                     <execution>
                         <id>stop</id>
