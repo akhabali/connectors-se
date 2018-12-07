@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class OraclePlatform extends Platform {
 
-    public static final String NAME = "oracle";
+    public static final String ORACLE = "oracle";
 
     /*
      * https://docs.oracle.com/cd/B14117_01/server.101/b10758/sqlqr06.htm
@@ -34,7 +34,7 @@ public class OraclePlatform extends Platform {
 
     @Override
     public String name() {
-        return NAME;
+        return ORACLE;
     }
 
     @Override
@@ -63,7 +63,7 @@ public class OraclePlatform extends Platform {
     }
 
     @Override
-    public void addDataSourceProperties(HikariDataSource dataSource) {
+    public void addDataSourceProperties(final HikariDataSource dataSource) {
         super.addDataSourceProperties(dataSource);
         dataSource.addDataSourceProperty("oracle.jdbc.J2EE13Compliant", "TRUE");
     }

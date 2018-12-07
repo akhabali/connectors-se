@@ -25,11 +25,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class PostgreSQLPlatform extends Platform {
 
-    public static final String NAME = "postgresql";
+    public static final String POSTGRESQL = "postgresql";
 
     @Override
     public String name() {
-        return NAME;
+        return POSTGRESQL;
     }
 
     @Override

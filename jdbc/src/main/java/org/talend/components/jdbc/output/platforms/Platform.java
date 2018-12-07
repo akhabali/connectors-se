@@ -106,6 +106,6 @@ public abstract class Platform implements Serializable {
      * Add platform related properties to jdbc connections
      */
     public void addDataSourceProperties(final HikariDataSource dataSource) {
-
+        // to be override by impl
     }
 }

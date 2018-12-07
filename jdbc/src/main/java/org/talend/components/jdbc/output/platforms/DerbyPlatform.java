@@ -26,11 +26,11 @@ import static java.util.stream.Collectors.joining;
 @Slf4j
 public class DerbyPlatform extends Platform {
 
-    public static final String NAME = "derby";
+    public static final String DERBY = "derby";
 
     @Override
     public String name() {
-        return NAME;
+        return DERBY;
     }
 
     @Override

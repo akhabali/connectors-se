@@ -24,11 +24,11 @@ import static java.util.stream.Collectors.joining;
 @Slf4j
 public class SnowflakePlatform extends Platform {
 
-    public static final String NAME = "snowflake";
+    public static final String SNOWFLAKE = "snowflake";
 
     @Override
     public String name() {
-        return NAME;
+        return SNOWFLAKE;
     }
 
     @Override

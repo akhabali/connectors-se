@@ -24,11 +24,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class MySQLPlatform extends Platform {
 
-    public static final String NAME = "mysql";
+    public static final String MYSQL = "mysql";
 
     @Override
     public String name() {
-        return NAME;
+        return MYSQL;
     }
 
     @Override

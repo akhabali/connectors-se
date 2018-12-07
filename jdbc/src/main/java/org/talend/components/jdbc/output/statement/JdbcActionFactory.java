@@ -7,6 +7,15 @@ import org.talend.components.jdbc.output.statement.operations.*;
 import org.talend.components.jdbc.service.I18nMessage;
 import org.talend.components.jdbc.service.JdbcService;
 
+import static org.talend.components.jdbc.output.platforms.DerbyPlatform.DERBY;
+import static org.talend.components.jdbc.output.platforms.MSSQLPlatform.MSSQL;
+import static org.talend.components.jdbc.output.platforms.MariaDbPlatform.MARIADB;
+import static org.talend.components.jdbc.output.platforms.MySQLPlatform.MYSQL;
+import static org.talend.components.jdbc.output.platforms.OraclePlatform.ORACLE;
+import static org.talend.components.jdbc.output.platforms.PostgreSQLPlatform.POSTGRESQL;
+import static org.talend.components.jdbc.output.platforms.RedshiftPlatform.REDSHIFT;
+import static org.talend.components.jdbc.output.platforms.SnowflakePlatform.SNOWFLAKE;
+
 @Data
 public class JdbcActionFactory {
 
@@ -33,11 +42,14 @@ public class JdbcActionFactory {
         case UPSERT:
             // todo : provide native upsert operation for every database
             switch (configuration.getDataset().getConnection().getDbType()) {
-            case MySQLPlatform.NAME:
-            case SnowflakePlatform.NAME:
-            case OraclePlatform.NAME:
-            case PostgreSQLPlatform.NAME:
-            case DerbyPlatform.NAME:
+            case MYSQL:
+            case SNOWFLAKE:
+            case ORACLE:
+            case POSTGRESQL:
+            case MARIADB:
+            case REDSHIFT:
+            case MSSQL:
+            case DERBY:
             default:
                 action = new UpsertDefault(platform, configuration, i18n, dataSource);
                 break;

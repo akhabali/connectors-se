@@ -23,11 +23,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class RedshiftPlatform extends Platform {
 
-    public static final String NAME = "redshift";
+    public static final String REDSHIFT = "redshift";
 
     @Override
     public String name() {
-        return NAME;
+        return REDSHIFT;
     }
 
     @Override

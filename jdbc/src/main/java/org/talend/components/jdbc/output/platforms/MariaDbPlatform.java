@@ -20,11 +20,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class MariaDbPlatform extends Platform {
 
-    public static final String NAME = "mariadb";
+    public static final String MARIADB = "mariadb";
 
     @Override
     public String name() {
-        return NAME;
+        return MARIADB;
     }
 
     @Override

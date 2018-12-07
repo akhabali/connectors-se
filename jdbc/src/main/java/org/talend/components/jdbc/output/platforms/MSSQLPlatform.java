@@ -24,11 +24,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class MSSQLPlatform extends Platform {
 
-    public static final String NAME = "mssql";
+    public static final String MSSQL = "mssql";
 
     @Override
     public String name() {
-        return NAME;
+        return MSSQL;
     }
 
     @Override

@@ -23,21 +23,21 @@ public final class PlatformFactory {
     public static Platform get(final JdbcConnection connection) {
         final String dbType = ofNullable(connection.getHandler()).orElseGet(connection::getDbType);
         switch (dbType.toLowerCase(Locale.ROOT)) {
-        case MySQLPlatform.NAME:
+        case MySQLPlatform.MYSQL:
             return new MySQLPlatform();
-        case MariaDbPlatform.NAME:
+        case MariaDbPlatform.MARIADB:
             return new MariaDbPlatform();
-        case PostgreSQLPlatform.NAME:
+        case PostgreSQLPlatform.POSTGRESQL:
             return new PostgreSQLPlatform();
-        case RedshiftPlatform.NAME:
+        case RedshiftPlatform.REDSHIFT:
             return new RedshiftPlatform();
-        case SnowflakePlatform.NAME:
+        case SnowflakePlatform.SNOWFLAKE:
             return new SnowflakePlatform();
-        case OraclePlatform.NAME:
+        case OraclePlatform.ORACLE:
             return new OraclePlatform();
-        case MSSQLPlatform.NAME:
+        case MSSQLPlatform.MSSQL:
             return new MSSQLPlatform();
-        case DerbyPlatform.NAME:
+        case DerbyPlatform.DERBY:
             return new DerbyPlatform();
         default:
             throw new RuntimeException("unsupported database " + dbType);
