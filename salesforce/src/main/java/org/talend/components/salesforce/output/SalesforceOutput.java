@@ -28,14 +28,11 @@ import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.meta.Documentation;
-import org.talend.sdk.component.api.processor.AfterGroup;
-import org.talend.sdk.component.api.processor.BeforeGroup;
 import org.talend.sdk.component.api.processor.ElementListener;
 import org.talend.sdk.component.api.processor.Input;
 import org.talend.sdk.component.api.processor.Processor;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.configuration.LocalConfiguration;
-import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import com.sforce.soap.partner.Field;
 import com.sforce.soap.partner.PartnerConnection;
@@ -58,17 +55,14 @@ public class SalesforceOutput implements Serializable {
 
     private SalesforceOutputService outputService;
 
-    private RecordBuilderFactory recordBuilderFactory;
-
     private Messages messages;
 
     public SalesforceOutput(@Option("outputConfig") final OutputConfiguration outputConfig, LocalConfiguration localConfiguration,
-            final SalesforceService service, final RecordBuilderFactory recordBuilderFactory, final Messages messages) {
+            final SalesforceService service, final Messages messages) {
         this.outputConfig = outputConfig;
         this.service = service;
         this.localConfiguration = localConfiguration;
         this.messages = messages;
-        this.recordBuilderFactory = recordBuilderFactory;
     }
 
     @PostConstruct
@@ -76,7 +70,7 @@ public class SalesforceOutput implements Serializable {
         try {
             final PartnerConnection connection = service.connect(outputConfig.getModuleDataSet().getDataStore(),
                     localConfiguration);
-            outputService = new SalesforceOutputService(outputConfig, connection, recordBuilderFactory, messages);
+            outputService = new SalesforceOutputService(outputConfig, connection, messages);
             Map<String, Field> fieldMap = service.getFieldMap(outputConfig.getModuleDataSet().getDataStore(),
                     outputConfig.getModuleDataSet().getModuleName(), localConfiguration);
             outputService.setFieldMap(fieldMap);

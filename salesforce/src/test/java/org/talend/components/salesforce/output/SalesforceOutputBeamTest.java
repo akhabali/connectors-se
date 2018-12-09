@@ -121,7 +121,6 @@ public class SalesforceOutputBeamTest extends SalesforceTestBase {
         assertEquals(PipelineResult.State.DONE, pipeline.run().waitUntilFinish());
     }
 
-    @Ignore
     @Test
     public void test003_ExceptionOnError() {
         final OutputConfiguration configuration = new OutputConfiguration();
@@ -149,7 +148,7 @@ public class SalesforceOutputBeamTest extends SalesforceTestBase {
         inputs.apply(TalendFn.asFn(processor)).apply(Data.map(processor.plugin(), Record.class));
 
         // run the pipeline and ensure the execution was successful
-        assertThrows(IOException.class, () -> pipeline.run().waitUntilFinish());
+        assertThrows(IllegalStateException.class, () -> pipeline.run().waitUntilFinish());
     }
 
     @Test
@@ -267,13 +266,49 @@ public class SalesforceOutputBeamTest extends SalesforceTestBase {
     }
 
     @Test
-    public void test007_cleanupModuleAccount() {
+    public void test003_BatchModeExceptionOnError() {
+        final OutputConfiguration configuration = new OutputConfiguration();
+        final ModuleDataSet moduleDataSet = new ModuleDataSet();
+        moduleDataSet.setModuleName("Account");
+        moduleDataSet.setDataStore(dataStore);
+        configuration.setOutputAction(OutputConfiguration.OutputAction.INSERT);
+        configuration.setModuleDataSet(moduleDataSet);
+        configuration.setExceptionForErrors(true);
+        configuration.setBatchMode(true);
+        configuration.setCommitLevel(2);
+
+        // We create the component processor instance using the configuration filled above
+        final Processor processor = COMPONENT_FACTORY.createProcessor(SalesforceOutput.class, configuration);
+
+        Record record_1 = factory.newRecordBuilder().withString("Name", "test_batch_1_" + UNIQUE_ID).build();
+        Record record_2 = factory.newRecordBuilder().withString("Wrong_Field_Name", "test_batch_2_" + UNIQUE_ID).build();
+        Record record_3 = factory.newRecordBuilder().withString("Wrong_Field_Name", "test_batch_3_" + UNIQUE_ID).build();
+        // The join input factory construct inputs test data for every input branch you have defined for this component
+        // Make sure to fil in some test data for the branches you want to test
+        // You can also remove the branches that you don't need from the factory below
+        final JoinInputFactory joinInputFactory = new JoinInputFactory().withInput("__default__",
+                asList(record_1, record_2, record_3));
+
+        // Convert it to a beam "source"
+        final PCollection<Record> inputs = pipeline.apply(Data.of(processor.plugin(), joinInputFactory.asInputRecords()));
+
+        // add our processor right after to see each data as configured previously
+        inputs.apply(TalendFn.asFn(processor)).apply(Data.map(processor.plugin(), Record.class));
+
+        // run the pipeline and ensure the execution was successful
+        assertThrows(IllegalStateException.class, () -> pipeline.run().waitUntilFinish());
+
+        checkModuleData("Account", "Name Like 'test_batch_%" + UNIQUE_ID + "%'", 1);
+    }
+
+    @Test
+    public void test998_cleanupModuleAccount() {
         cleanTestRecords("Account", "Name Like '%" + UNIQUE_ID + "%'", PLUGIN);
         checkModuleData("Account", "Name Like '%" + UNIQUE_ID + "%'", 0);
     }
 
     @Test
-    public void test008_cleanupModuleContact() {
+    public void test999_cleanupModuleContact() {
         cleanTestRecords("Contact", "Email Like '%" + UNIQUE_ID + "%'", PLUGIN);
         checkModuleData("Contact", "Email Like '%" + UNIQUE_ID + "%'", 0);
     }

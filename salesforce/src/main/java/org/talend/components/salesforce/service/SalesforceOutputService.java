@@ -29,7 +29,6 @@ import java.util.Map;
 import org.talend.components.salesforce.output.OutputConfiguration;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
-import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import com.sforce.soap.partner.DeleteResult;
 import com.sforce.soap.partner.Error;
@@ -69,8 +68,6 @@ public class SalesforceOutputService implements Serializable {
 
     private final List<String> nullValueFields = new ArrayList<>();
 
-    private final RecordBuilderFactory factory;
-
     private final Messages messages;
 
     protected boolean exceptionForErrors;
@@ -82,6 +79,8 @@ public class SalesforceOutputService implements Serializable {
     private String moduleName;
 
     private String upsertKeyColumn;
+
+    private boolean isBatchMode;
 
     private int dataCount;
 
@@ -95,14 +94,13 @@ public class SalesforceOutputService implements Serializable {
 
     private Map<String, Field> fieldMap;
 
-    public SalesforceOutputService(OutputConfiguration outputConfig, PartnerConnection connection,
-            final RecordBuilderFactory factory, Messages messages) {
+    public SalesforceOutputService(OutputConfiguration outputConfig, PartnerConnection connection, Messages messages) {
         this.connection = connection;
         this.outputAction = outputConfig.getOutputAction();
         this.moduleName = outputConfig.getModuleDataSet().getModuleName();
         this.messages = messages;
-        this.factory = factory;
-        if (outputConfig.isBatchMode()) {
+        this.isBatchMode = outputConfig.isBatchMode();
+        if (isBatchMode) {
             commitLevel = outputConfig.getCommitLevel();
         } else {
             commitLevel = 1;
@@ -119,10 +117,6 @@ public class SalesforceOutputService implements Serializable {
         } else {
             upsertKeyColumn = "";
         }
-    }
-
-    public void setUpsertKeyColumn(String upsertKeyColumn) {
-        this.upsertKeyColumn = upsertKeyColumn;
     }
 
     public void write(Record record) throws IOException {
@@ -478,12 +472,23 @@ public class SalesforceOutputService implements Serializable {
         return null;
     }
 
+    /**
+     * Make sure all record submit before end
+     */
     public void finish() throws IOException {
-        // Finish anything uncommitted
-        doInsert();
-        doDelete();
-        doUpdate();
-        doUpsert();
+        switch (outputAction) {
+        case INSERT:
+            doInsert();
+            break;
+        case UPDATE:
+            doUpdate();
+            break;
+        case UPSERT:
+            doUpsert();
+            break;
+        case DELETE:
+            doDelete();
+        }
     }
 
     private Map<String, Map<String, String>> getReferenceFieldsMap() {
@@ -543,6 +548,22 @@ public class SalesforceOutputService implements Serializable {
         }
         if (errors.toString().length() > 0) {
             if (exceptionForErrors) {
+                if (isBatchMode) {
+                    // clear item list which not process successfully.
+                    switch (outputAction) {
+                    case INSERT:
+                        insertItems.clear();
+                        break;
+                    case UPDATE:
+                        updateItems.clear();
+                        break;
+                    case UPSERT:
+                        upsertItems.clear();
+                        break;
+                    case DELETE:
+                        deleteItems.clear();
+                    }
+                }
                 throw new IOException(errors.toString());
             } else {
                 rejectCount++;
