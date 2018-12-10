@@ -12,20 +12,16 @@
 // ============================================================================
 package org.talend.components.marketo.dataset;
 
-import static org.talend.components.marketo.service.UIActionService.CUSTOM_OBJECT_NAMES;
-import static org.talend.components.marketo.service.UIActionService.FIELD_NAMES;
+import lombok.Data;
+import lombok.ToString;
 
 import java.io.Serializable;
 
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
-
-import lombok.Data;
-import lombok.ToString;
 
 @Data
 @GridLayout({ //
@@ -75,7 +71,7 @@ public class MarketoOutputConfiguration implements Serializable {
     private MarketoDataSet dataSet;
 
     @Option
-    @ActiveIf(target = "entity", value = { "Lead", "CustomObject", "Company", "Opportunity", "OpportunityRole" })
+    // @ActiveIf(target = "../dataSet/entity", value = { "Lead", "CustomObject", "Company", "Opportunity", "OpportunityRole" })
     @Documentation("Action")
     private OutputAction action;
 
@@ -83,10 +79,9 @@ public class MarketoOutputConfiguration implements Serializable {
      * Lead Entity
      */
     @Option
-    @ActiveIf(target = "entity", value = "Lead")
+    @ActiveIf(target = "../dataSet/entity", value = "Lead")
     @ActiveIf(target = "action", value = "sync")
-    @Suggestable(value = FIELD_NAMES, parameters = { "../dataSet/dataStore", "../dataSet/entity",
-            "customObjectName" })
+    // @Suggestable(value = FIELD_NAMES, parameters = { "../dataSet/dataStore", "../dataSet/entity", "customObjectName" })
     @Documentation("Lookup Field")
     private String lookupField;
 
@@ -94,8 +89,8 @@ public class MarketoOutputConfiguration implements Serializable {
      * CustomObject Entity
      */
     @Option
-    @ActiveIf(target = "entity", value = { "CustomObject" })
-    @Suggestable(value = CUSTOM_OBJECT_NAMES, parameters = { "../dataSet/dataStore" })
+    @ActiveIf(target = "../dataSet/entity", value = { "CustomObject" })
+    // @Suggestable(value = CUSTOM_OBJECT_NAMES, parameters = { "../dataSet/dataStore" })
     @Documentation("Custom Object Name")
     private String customObjectName;
 
@@ -103,7 +98,7 @@ public class MarketoOutputConfiguration implements Serializable {
      * List Entity
      */
     @Option
-    @ActiveIf(target = "entity", value = { "List" })
+    @ActiveIf(target = "../dataSet/entity", value = { "List" })
     @Documentation("List Action")
     private ListAction listAction;
 
@@ -111,7 +106,7 @@ public class MarketoOutputConfiguration implements Serializable {
      * All entities
      */
     @Option
-    @ActiveIf(target = "entity", value = { "Lead", "CustomObject", "Company", "Opportunity", "OpportunityRole" })
+    @ActiveIf(target = "../dataSet/entity", value = { "Lead", "CustomObject", "Company", "Opportunity", "OpportunityRole" })
     @ActiveIf(target = "action", value = { "sync" })
     @Documentation("Synchronization method")
     private SyncMethod syncMethod;
@@ -123,7 +118,7 @@ public class MarketoOutputConfiguration implements Serializable {
     private String dedupeBy;
 
     @Option
-    @ActiveIf(target = "entity", value = { "CustomObject", "Company", "Opportunity", "OpportunityRole" })
+    @ActiveIf(target = "../dataSet/entity", value = { "CustomObject", "Company", "Opportunity", "OpportunityRole" })
     @ActiveIf(target = "action", value = { "delete" })
     @Documentation("Field to delete company records by. Key may be dedupeFields or idField")
     private DeleteBy deleteBy;
