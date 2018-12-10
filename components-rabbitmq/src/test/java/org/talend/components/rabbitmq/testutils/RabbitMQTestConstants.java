@@ -2,9 +2,9 @@ package org.talend.components.rabbitmq.testutils;
 
 public class RabbitMQTestConstants {
 
-    public static final String HOSTNAME = "192.168.99.100";
+    public static final String HOSTNAME = "localhost";
 
-    public static final String PORT = System.getProperty("amqp.port") != null ? System.getProperty("amqp.port") : "32787";
+    public static final String PORT = System.getProperty("amqp.port") != null ? System.getProperty("amqp.port") : "5671";
 
     public static final String USER_NAME = "user";
 

@@ -200,7 +200,7 @@
                                 </ports>
                                 <wait>
                                     <tcp>
-                                        <host>192.168.99.100</host>
+                                        <host>localhost</host>
                                         <ports>
                                             <port>5671</port>
                                         </ports>
