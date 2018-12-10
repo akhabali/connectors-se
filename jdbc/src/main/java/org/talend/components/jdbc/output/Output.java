@@ -110,9 +110,16 @@ public class Output implements Serializable {
         try {
             final List<Reject> discards = jdbcAction.execute(records);
             discards.stream().map(Object::toString).forEach(log::error);
-        } catch (final Exception e) {
+        } catch (final Throwable e) {
             records.stream().map(r -> new Reject(e.getMessage(), r)).map(Reject::toString).forEach(log::error);
-            throw e;
+            // unwrap sql exception to prevent class not found at runtime from the driver jar.
+            // driver jar is loaded dynamically at runtime by this component and class from it may not be accessible form other
+            // classloader
+            if (SQLException.class.isAssignableFrom(e.getClass())) {
+                throw (SQLException) e;
+            } else {
+                throw e;
+            }
         }
     }
 
