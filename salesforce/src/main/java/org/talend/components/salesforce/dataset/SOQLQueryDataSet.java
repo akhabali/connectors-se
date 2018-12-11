@@ -15,11 +15,28 @@
 
 package org.talend.components.salesforce.dataset;
 
-import java.io.Serializable;
-
 import org.talend.components.salesforce.datastore.BasicDataStore;
+import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.type.DataSet;
+import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
+import org.talend.sdk.component.api.configuration.ui.widget.Code;
+import org.talend.sdk.component.api.meta.Documentation;
 
-public interface QueryDataSet extends Serializable {
+import lombok.Data;
 
-    BasicDataStore getDataStore();
+@Data
+@DataSet("SOQLQuery")
+@GridLayout(value = { @GridLayout.Row("dataStore"), @GridLayout.Row("query"), })
+@Documentation("")
+public class SOQLQueryDataSet implements QueryDataSet {
+
+    @Option
+    @Documentation("")
+    private BasicDataStore dataStore;
+
+    @Option
+    @Code("sql")
+    @Documentation("")
+    private String query;
+
 }
