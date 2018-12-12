@@ -43,13 +43,13 @@ public class InputMapperConfiguration implements Serializable {
     @Option
     @Min(0)
     @Documentation("JMS receive message timeout. A timeout of zero never expires, and the call blocks indefinitely.")
-    private Integer timeout = -1;
+    private Integer timeout = 0;
 
     @Option
     @Min(0)
     @Documentation("Maximum messages defines a number of messages this component will listen to. "
             + "After reaching the maximum component will stop receiving messages")
-    private Integer maximumMessages = -1;
+    private Integer maximumMessages = 1000;
 
     @Option
     @Documentation("Message Selector Expression used to receive only messages whose headers and properties match the selector")
