@@ -79,7 +79,7 @@ public class MarketoOutputConfiguration implements Serializable {
      * Lead Entity
      */
     @Option
-    @ActiveIf(target = "../dataSet/entity", value = "Lead")
+    // @ActiveIf(target = "../dataSet/entity", value = "Lead")
     @ActiveIf(target = "action", value = "sync")
     // @Suggestable(value = FIELD_NAMES, parameters = { "../dataSet/dataStore", "../dataSet/entity", "customObjectName" })
     @Documentation("Lookup Field")
@@ -106,7 +106,7 @@ public class MarketoOutputConfiguration implements Serializable {
      * All entities
      */
     @Option
-    @ActiveIf(target = "../dataSet/entity", value = { "Lead", "CustomObject", "Company", "Opportunity", "OpportunityRole" })
+    // @ActiveIf(target = "../dataSet/entity", value = { "Lead", "CustomObject", "Company", "Opportunity", "OpportunityRole" })
     @ActiveIf(target = "action", value = { "sync" })
     @Documentation("Synchronization method")
     private SyncMethod syncMethod;

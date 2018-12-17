@@ -56,27 +56,6 @@ public class MarketoInputConfiguration implements Serializable {
 
     public static final String NAME = "MarketoInputConfiguration";
 
-    public enum LeadAction {
-        getLead,
-        getMultipleLeads,
-        getLeadActivity,
-        getLeadChanges,
-        describeLead
-    }
-
-    public enum ListAction {
-        list,
-        get,
-        isMemberOf,
-        getLeads
-    }
-
-    public enum OtherEntityAction {
-        describe,
-        list,
-        get
-    }
-
     /*
      * DataSet
      */
@@ -90,59 +69,28 @@ public class MarketoInputConfiguration implements Serializable {
      */
     @Option
     @DefaultValue(value = "getLead")
-    @ActiveIf(target = "configuration/dataSet/entity", value = { "Lead" })
+    // @ActiveIf(target = "configuration/dataSet/entity", value = { "Lead" })
     @Documentation("Lead Action")
     private LeadAction leadAction;
 
     @Option
-    @ActiveIf(target = "../configuration/dataSet/entity", value = { "Lead" })
+    // @ActiveIf(target = "../configuration/dataSet/entity", value = { "Lead" })
     @ActiveIf(target = "leadAction", value = "getLead")
     @Documentation("Lead Id")
     private Integer leadId;
 
     @Option
-    @ActiveIf(target = "./configuration/dataSet/entity", value = { "Lead" })
+    // @ActiveIf(target = "./configuration/dataSet/entity", value = { "Lead" })
     @ActiveIf(target = "leadAction", value = "getMultipleLeads")
     // @Suggestable(value = LEAD_KEY_NAME_LIST)
     @Documentation("Key Name")
     private String leadKeyName;
 
     @Option
-    @ActiveIf(target = "../dataSet/entity", value = { "Lead" })
+    // @ActiveIf(target = "../dataSet/entity", value = { "Lead" })
     @ActiveIf(target = "leadAction", value = "getMultipleLeads")
     @Documentation("Values (Comma-separated)")
     private String leadKeyValues;
-
-    /*
-     * List Entity DataSet Parameters/dataSet/entity", value = { "Lead" })
-     * 
-     * @ActiveIf(target = "leadAction", value = "getLead")
-     * 
-     * @Documentation("Lead Id")
-     * private Integer leadId;
-     * 
-     * @Option
-     * 
-     * @ActiveIf(target = "../dataSet/entity", value = { "Lead" })
-     * 
-     * @ActiveIf(target = "leadAction", value = "getMultipleLeads")
-     * // @Suggestable(value = LEAD_KEY_NAME_LIST)
-     * 
-     * @Documentation("Key Name")
-     * private String leadKeyName;
-     * 
-     * @Option
-     * 
-     * @ActiveIf(target = "../dataSet/entity", value = { "Lead" })
-     * 
-     * @ActiveIf(target = "leadAction", value = "getMultipleLeads")
-     * 
-     * @Documentation("Values (Comma-separated)")
-     * private String leadKeyValues;
-     * 
-     * /*
-     * List Entity DataSet Parameters
-     */
 
     @Option
     @DefaultValue(value = "list")
@@ -162,6 +110,9 @@ public class MarketoInputConfiguration implements Serializable {
     @Documentation("List ids : Comma-separated list of static list ids to return.")
     private String listIds;
 
+    /*
+     * List Entity DataSet Parameters
+     */
     @Option
     @ActiveIf(target = "../dataSet/entity", value = { "List" })
     @Documentation("Program Name : Comma-separated list of program names.")
@@ -207,10 +158,6 @@ public class MarketoInputConfiguration implements Serializable {
     @Documentation("Activity Type Ids (10 max supported")
     private List<String> activityTypeIds;
 
-    /*
-     * Other Entities DataSet parameters
-     */
-
     @Option
     @DefaultValue(value = "describe")
     @ActiveIf(target = "../dataSet/entity", value = { "CustomObject", "Company", "Opportunity", "OpportunityRole" })
@@ -232,6 +179,9 @@ public class MarketoInputConfiguration implements Serializable {
     @Documentation("Filter Type")
     private String filterType;
 
+    /*
+     * Other Entities DataSet parameters
+     */
     @Option
     @ActiveIf(target = "../dataSet/entity", value = { "CustomObject", "Company", "Opportunity", "OpportunityRole" })
     @ActiveIf(target = "otherAction", value = { "get" })
@@ -257,5 +207,26 @@ public class MarketoInputConfiguration implements Serializable {
     // "customObjectName" })
     @Documentation("Fields")
     private List<String> fields;
+
+    public enum LeadAction {
+        getLead,
+        getMultipleLeads,
+        getLeadActivity,
+        getLeadChanges,
+        describeLead
+    }
+
+    public enum ListAction {
+        list,
+        get,
+        isMemberOf,
+        getLeads
+    }
+
+    public enum OtherEntityAction {
+        describe,
+        list,
+        get
+    }
 
 }
