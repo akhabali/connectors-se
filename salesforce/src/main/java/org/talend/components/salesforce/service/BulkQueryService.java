@@ -1,15 +1,17 @@
-// ============================================================================
-//
-// Copyright (C) 2006-2018 Talend Inc. - www.talend.com
-//
-// This source code is available under agreement available at
-// %InstallDIR%\features\org.talend.rcp.branding.%PRODUCTNAME%\%PRODUCTNAME%license.txt
-//
-// You should have received a copy of the agreement
-// along with this program; if not, write to Talend SA
-// 9 rue Pages 92150 Suresnes, France
-//
-// ============================================================================
+/*
+ * Copyright (C) 2006-2018 Talend Inc. - www.talend.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ *
+ */
+
 package org.talend.components.salesforce.service;
 
 import java.io.BufferedReader;
@@ -18,15 +20,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.StandardCopyOption;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import javax.json.JsonBuilderFactory;
+import org.talend.components.salesforce.commons.BulkResultSet;
+import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import com.sforce.async.AsyncApiException;
 import com.sforce.async.AsyncExceptionCode;
@@ -37,11 +43,11 @@ import com.sforce.async.BulkConnection;
 import com.sforce.async.ConcurrencyMode;
 import com.sforce.async.ContentType;
 import com.sforce.async.JobInfo;
+import com.sforce.async.JobStateEnum;
 import com.sforce.async.OperationEnum;
 import com.sforce.async.QueryResultList;
+import com.sforce.soap.partner.Field;
 import com.sforce.ws.ConnectionException;
-
-import org.talend.components.salesforce.BulkResultSet;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -53,7 +59,29 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class BulkQueryService {
 
+    public static final int DEFAULT_JOB_TIME_OUT = 0;
+
+    private static final String PK_CHUNKING_HEADER_NAME = "Sforce-Enable-PKChunking";
+
+    private static final String CHUNK_SIZE_PROPERTY_NAME = "chunkSize=";
+
+    private static final int MAX_BATCH_EXECUTION_TIME = 600 * 1000;
+
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
+    private static final SimpleDateFormat DATETIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.000Z'");
+
+    private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm:ss.SSS'Z'");
+
     private final String FILE_ENCODING = "UTF-8";
+
+    private final Messages messagesI18n;
+
+    private final RecordBuilderFactory recordBuilderFactory;
+
+    private final BulkConnection bulkConnection;
+
+    private Map<String, Field> fieldMap;
 
     private List<BatchInfo> batchInfoList;
 
@@ -64,6 +92,7 @@ public class BulkQueryService {
     private ConcurrencyMode concurrencyMode = null;
 
     private Iterator<String> queryResultIDs = null;
+    // Default : no timeout to wait until the job fails or is in success
 
     private boolean safetySwitch = true;
 
@@ -73,34 +102,11 @@ public class BulkQueryService {
 
     private long jobTimeOut;
 
-    private final Messages messagesI18n;
-
-    private final JsonBuilderFactory jsonBuilderFactory;
-
-    private static final String PK_CHUNKING_HEADER_NAME = "Sforce-Enable-PKChunking";
-
-    private static final String CHUNK_SIZE_PROPERTY_NAME = "chunkSize=";
-
-    private static final int MAX_BATCH_EXECUTION_TIME = 600 * 1000;
-
-    public static final int DEFAULT_CHUNK_SIZE = 100_000;
-
-    public static final int DEFAULT_CHUNK_SLEEP_TIME = 15;
-
-    public static final int MAX_CHUNK_SIZE = 250_000;
-
-    public static final int DEFAULT_JOB_TIME_OUT = 0;
-    // Default : no timeout to wait until the job fails or is in success
-
-    private final BulkConnection bulkConnection;
-
-    public BulkQueryService(final BulkConnection bulkConnection, final JsonBuilderFactory jsonBuilderFactory,
+    public BulkQueryService(final BulkConnection bulkConnection, final RecordBuilderFactory recordBuilderFactory,
             final Messages messages) {
         this.bulkConnection = bulkConnection;
-        this.jsonBuilderFactory = jsonBuilderFactory;
+        this.recordBuilderFactory = recordBuilderFactory;
         this.messagesI18n = messages;
-        this.chunkSize = DEFAULT_CHUNK_SIZE;
-        chunkSleepTime = DEFAULT_CHUNK_SLEEP_TIME;
         this.jobTimeOut = DEFAULT_JOB_TIME_OUT;
     }
 
@@ -176,6 +182,9 @@ public class BulkQueryService {
         retrieveResultsOfQuery(info);
     }
 
+    /**
+     * Get bulk resultset base on the resultId
+     */
     public BulkResultSet getQueryResultSet(String resultId) throws AsyncApiException, IOException, ConnectionException {
         final com.csvreader.CsvReader baseFileReader = new com.csvreader.CsvReader(new BufferedReader(
                 new InputStreamReader(getQueryResultStream(job.getId(), batchInfoList.get(0).getId(), resultId), FILE_ENCODING)),
@@ -184,9 +193,12 @@ public class BulkQueryService {
         if (baseFileReader.readRecord()) {
             baseFileHeader = Arrays.asList(baseFileReader.getValues());
         }
-        return new BulkResultSet(baseFileReader, baseFileHeader, jsonBuilderFactory);
+        return new BulkResultSet(baseFileReader, baseFileHeader);
     }
 
+    /**
+     * Create bulk api job
+     */
     private JobInfo createJob(JobInfo job) throws AsyncApiException, ConnectionException {
         try {
             if (0 != chunkSize) {
@@ -208,6 +220,9 @@ public class BulkQueryService {
         }
     }
 
+    /**
+     * Get batch information from the stream
+     */
     private BatchInfo createBatchFromStream(JobInfo job, InputStream input) throws AsyncApiException, ConnectionException {
         try {
             return bulkConnection.createBatchFromStream(job, input);
@@ -220,6 +235,9 @@ public class BulkQueryService {
         }
     }
 
+    /**
+     * Get batch information list from the job
+     */
     private BatchInfoList getBatchInfoList(String jobID) throws AsyncApiException, ConnectionException {
         try {
             return bulkConnection.getBatchInfoList(jobID);
@@ -232,6 +250,9 @@ public class BulkQueryService {
         }
     }
 
+    /**
+     * Get batch information
+     */
     private BatchInfo getBatchInfo(String jobID, String batchID) throws AsyncApiException, ConnectionException {
         try {
             return bulkConnection.getBatchInfo(jobID, batchID);
@@ -244,6 +265,9 @@ public class BulkQueryService {
         }
     }
 
+    /**
+     * Get query result list
+     */
     private QueryResultList getQueryResultList(String jobID, String batchID) throws AsyncApiException, ConnectionException {
         try {
             return bulkConnection.getQueryResultList(jobID, batchID);
@@ -256,6 +280,9 @@ public class BulkQueryService {
         }
     }
 
+    /**
+     * Get query result stream
+     */
     private InputStream getQueryResultStream(String jobID, String batchID, String resultID)
             throws AsyncApiException, ConnectionException {
         try {
@@ -325,7 +352,8 @@ public class BulkQueryService {
     /**
      * Checks if job batch infos were processed correctly. Only if all batches were {@link BatchStateEnum#Completed} are
      * acceptable.<br/>
-     * If any of batches returns {@link BatchStateEnum#Failed} or {@link BatchStateEnum#NotProcessed} - throws an exception.
+     * If any of batches returns {@link BatchStateEnum#Failed} or {@link BatchStateEnum#NotProcessed} - throws an
+     * exception.
      *
      * @param batchInfoList - batch infos related to the specific job.
      * @param info - batch info for query batch.
@@ -339,7 +367,8 @@ public class BulkQueryService {
 
             /*
              * More details about every batch state can be found here:
-             * https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/asynch_api_batches_interpret_status.
+             * https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/
+             * asynch_api_batches_interpret_status.
              * htm
              */
             switch (batch.getState()) {
@@ -361,11 +390,105 @@ public class BulkQueryService {
         return false;
     }
 
+    /**
+     * Get next result Id
+     */
     public String nextResultId() {
         String resultId = null;
         if (queryResultIDs != null && queryResultIDs.hasNext()) {
             resultId = queryResultIDs.next();
         }
         return resultId;
+    }
+
+    /**
+     * Close the job
+     *
+     * @throws AsyncApiException
+     * @throws ConnectionException
+     */
+    public void closeJob() throws AsyncApiException, ConnectionException {
+        JobInfo closeJob = new JobInfo();
+        closeJob.setId(job.getId());
+        closeJob.setState(JobStateEnum.Closed);
+        try {
+            bulkConnection.updateJob(closeJob);
+        } catch (AsyncApiException sfException) {
+            if (AsyncExceptionCode.InvalidSessionId.equals(sfException.getExceptionCode())) {
+                renewSession();
+                closeJob();
+            } else if (AsyncExceptionCode.InvalidJobState.equals(sfException.getExceptionCode())) {
+                // Job is already closed on Salesforce side. We don't need to close it again.
+                return;
+            }
+            throw sfException;
+        }
+    }
+
+    /**
+     * Convert result to record
+     */
+    public Record convertToRecord(Map<String, String> result) throws IOException {
+        if (result == null) {
+            return null;
+        }
+        Record.Builder recordBuilder = recordBuilderFactory.newRecordBuilder();
+        for (String fieldName : result.keySet()) {
+            if (fieldName != null) {
+                addField(recordBuilder, fieldName, result.get(fieldName));
+            }
+        }
+        return recordBuilder.build();
+    }
+
+    public void setFieldMap(Map<String, Field> fieldMap) {
+        this.fieldMap = fieldMap;
+    }
+
+    /**
+     * Add field to record
+     */
+    private void addField(final Record.Builder builder, String fieldName, final String value) throws IOException {
+        if (value == null || value.isEmpty()) {
+            return;
+        }
+        try {
+            // Get field from module field mapping, if null means not a field of module
+            Field field = fieldMap.get(fieldName);
+            if (field != null) {
+                switch (field.getType()) {
+                case _boolean:
+                    builder.withBoolean(field.getName(), Boolean.valueOf(value));
+                    break;
+                case _double:
+                case percent:
+                case currency:
+                    builder.withDouble(field.getName(), Double.parseDouble(value));
+                    break;
+                case _int:
+                    builder.withInt(field.getName(), Integer.valueOf(value));
+                    break;
+                case date:
+                    builder.withDateTime(field.getName(), DATE_FORMAT.parse(value));
+                    break;
+                case datetime:
+                    builder.withTimestamp(field.getName(), DATETIME_FORMAT.parse(value).getTime());
+                    break;
+                case time:
+                    builder.withTimestamp(field.getName(), TIME_FORMAT.parse(value).getTime());
+                    break;
+                case base64:
+                default:
+                    builder.withString(field.getName(), value);
+                    break;
+                }
+            } else {
+                // if field not exist in the field mapping of module, put string type as default
+                builder.withString(fieldName, value);
+            }
+        } catch (ParseException e) {
+            // TODO
+            throw new IOException(e);
+        }
     }
 }
