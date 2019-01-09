@@ -40,28 +40,28 @@ public class BasicConfiguration implements Serializable {
     private RabbitMQDataStore connection;
 
     @Option
-    @Documentation("Drop down list for Message Type")
+    @Documentation("Message Type list")
     private ReceiverType receiverType = ReceiverType.QUEUE;
 
     @Option
     @ActiveIf(target = "receiverType", value = "QUEUE")
-    @Documentation("Input for QUEUE Name")
+    @Documentation("QUEUE Name")
     private String queue;
 
     @Option
     @ActiveIf(target = "receiverType", value = "EXCHANGE")
-    @Documentation("Input for EXCHANGE Type")
+    @Documentation("EXCHANGE Type")
     private ExchangeType exchangeType = ExchangeType.FANOUT;
 
     @Option
     @ActiveIf(target = "receiverType", value = "EXCHANGE")
-    @Documentation("Input for EXCHANGE Name")
+    @Documentation("EXCHANGE Name")
     private String exchange;
 
     @Option
     @ActiveIfs(value = { @ActiveIf(target = "exchangeType", value = { "DIRECT", "TOPIC" }),
             @ActiveIf(target = "receiverType", value = { "EXCHANGE" }) }, operator = ActiveIfs.Operator.AND)
-    @Documentation("Input for routing key")
+    @Documentation("Routing key")
     private String routingKey;
 
     @Option
@@ -74,7 +74,7 @@ public class BasicConfiguration implements Serializable {
 
     @Option
     @Structure(type = Structure.Type.OUT, discoverSchema = DISCOVER_SCHEMA)
-    @Documentation("Guess schema")
+    @Documentation("Describes record structure")
     private List<String> schema;
 
     public String getRoutingKey() {

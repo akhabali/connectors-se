@@ -29,7 +29,7 @@ import java.io.Serializable;
 public class InputMapperConfiguration implements Serializable {
 
     @Option
-    @Documentation("Common basicConfig")
+    @Documentation("Common configuration")
     private BasicConfiguration basicConfig;
 
     @Option

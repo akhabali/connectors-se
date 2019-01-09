@@ -32,23 +32,23 @@ import static org.talend.components.rabbitmq.service.ActionService.ACTION_BASIC_
 public class RabbitMQDataStore implements Serializable {
 
     @Option
-    @Documentation("Input for RabbitMQ server hostname")
+    @Documentation("RabbitMQ server hostname")
     private String hostname;
 
     @Option
-    @Documentation("Input for RabbitMQ server port")
+    @Documentation("RabbitMQ server port")
     private Integer port = 5672;
 
     @Option
-    @Documentation("Input for User Name")
+    @Documentation("User Name")
     private String userName;
 
     @Option
     @Credential
-    @Documentation("Input for password")
+    @Documentation("Password")
     private String password;
 
     @Option
-    @Documentation("TLS mode checkbox")
+    @Documentation("TLS mode")
     private Boolean TLS = false;
 }
