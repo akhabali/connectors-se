@@ -12,14 +12,8 @@
 // ============================================================================
 package org.talend.components.rabbitmq.service;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
 import java.util.concurrent.TimeoutException;
 
 import com.rabbitmq.client.Channel;
@@ -29,12 +23,8 @@ import org.talend.components.rabbitmq.datastore.RabbitMQDataStore;
 import org.talend.components.rabbitmq.output.ActionOnExchange;
 import org.talend.components.rabbitmq.output.ActionOnQueue;
 import org.talend.sdk.component.api.service.Service;
-
 import lombok.extern.slf4j.Slf4j;
-
-import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
 
 @Slf4j
 @Service
@@ -91,24 +81,8 @@ public class RabbitMQService {
     private SSLContext getSSLContext() {
         SSLContext sslContext;
         try {
-            char[] keyPassphrase = getKeyStorePassword().toCharArray();
-            KeyStore ks = KeyStore.getInstance("PKCS12");
-            ks.load(new FileInputStream(getKeyStore()), keyPassphrase);
-
-            KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-            kmf.init(ks, keyPassphrase);
-
-            char[] trustPassphrase = getTrustStorePassword().toCharArray();
-            KeyStore tks = KeyStore.getInstance("JKS");
-            tks.load(new FileInputStream(getTrustStore()), trustPassphrase);
-
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
-            tmf.init(tks);
-
-            sslContext = SSLContext.getInstance("TLSv1.2");
-            sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-        } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException | UnrecoverableKeyException | IOException
-                | CertificateException e) {
+            sslContext = SSLContext.getDefault();
+        } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException(i18n.errorTLS());
         }
 
@@ -123,22 +97,6 @@ public class RabbitMQService {
                 log.warn(i18n.warnConnectionCantBeClosed(), e);
             }
         }
-    }
-
-    private static String getKeyStore() {
-        return System.getProperty("javax.net.ssl.keyStore");
-    }
-
-    private static String getKeyStorePassword() {
-        return System.getProperty("javax.net.ssl.keyStorePassword");
-    }
-
-    private static String getTrustStore() {
-        return System.getProperty("javax.net.ssl.trustStore");
-    }
-
-    private static String getTrustStorePassword() {
-        return System.getProperty("javax.net.ssl.trustStorePassword");
     }
 
 }

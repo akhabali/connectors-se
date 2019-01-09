@@ -31,8 +31,6 @@ import org.talend.sdk.component.api.input.PartitionSize;
 import org.talend.sdk.component.api.input.Split;
 import org.talend.sdk.component.api.meta.Documentation;
 
-import org.talend.sdk.component.api.service.Service;
-
 @Version(1)
 @Icon(value = Icon.IconType.CUSTOM, custom = "RabbitMQInput")
 @PartitionMapper(name = "Input")
@@ -45,7 +43,6 @@ public class InputMapper implements Serializable {
 
     private final JsonBuilderFactory jsonBuilderFactory;
 
-    @Service
     private final I18nMessage i18nMessage;
 
     public InputMapper(@Option("configuration") final InputMapperConfiguration configuration, final RabbitMQService service,
@@ -63,21 +60,11 @@ public class InputMapper implements Serializable {
 
     @Split
     public List<InputMapper> split(@PartitionSize final long bundles) {
-        // overall idea here is to split the work related to configuration1 in bundles of size "bundles"
-        //
-        // for instance if your estimateSize() returned 1000 and you can run on 10 nodes
-        // then the environment can decide to run it concurrently (10 * 100).
-        // In this case bundles = 100 and we must try to return 10 InputMapper with 1/10 of the overall work each.
-        //
-        // default implementation returns this which means it doesn't support the work to be split
         return singletonList(this);
     }
 
     @Emitter
     public InputSource createWorker() {
-        // here we create an actual worker,
-        // you are free to rework the configuration1 etc but our default generated implementation
-        // propagates the partition mapper entries.
         return new InputSource(configuration, service, jsonBuilderFactory, i18nMessage);
     }
 }

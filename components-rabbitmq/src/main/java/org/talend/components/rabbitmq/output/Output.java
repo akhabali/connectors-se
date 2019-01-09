@@ -22,7 +22,6 @@ import javax.json.JsonObject;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
-import lombok.extern.slf4j.Slf4j;
 import org.talend.components.rabbitmq.service.I18nMessage;
 import org.talend.components.rabbitmq.service.RabbitMQService;
 import org.talend.sdk.component.api.component.Icon;
@@ -33,11 +32,8 @@ import org.talend.sdk.component.api.processor.ElementListener;
 import org.talend.sdk.component.api.processor.Input;
 import org.talend.sdk.component.api.processor.Processor;
 
-import org.talend.sdk.component.api.service.Service;
-
 import static org.talend.components.rabbitmq.MessageConst.MESSAGE_CONTENT;
 
-@Slf4j
 @Version(1)
 @Icon(value = Icon.IconType.CUSTOM, custom = "RabbitMQOutput")
 @Processor(name = "Output")
@@ -48,7 +44,6 @@ public class Output implements Serializable {
 
     private final I18nMessage i18n;
 
-    @Service
     private final RabbitMQService service;
 
     private Connection connection;
