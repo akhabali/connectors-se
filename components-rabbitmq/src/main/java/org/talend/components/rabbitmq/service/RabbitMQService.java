@@ -26,6 +26,9 @@ import org.talend.sdk.component.api.service.Service;
 import lombok.extern.slf4j.Slf4j;
 import javax.net.ssl.SSLContext;
 
+import static org.talend.components.rabbitmq.output.ActionOnExchange.DELETE_AND_CREATE_EXCHANGE;
+import static org.talend.components.rabbitmq.output.ActionOnQueue.DELETE_AND_CREATE_QUEUE;
+
 @Slf4j
 @Service
 public class RabbitMQService {
@@ -35,12 +38,8 @@ public class RabbitMQService {
 
     public void onExchange(Channel channel, ActionOnExchange action, String exchangeName) {
         try {
-            switch (action) {
-            case CREATE_EXCHANGE:
-                break;
-            case DELETE_AND_CREATE_EXCHANGE:
+            if (action == DELETE_AND_CREATE_EXCHANGE) {
                 channel.exchangeDelete(exchangeName);
-                break;
             }
         } catch (IOException e) {
             throw new IllegalStateException(i18n.errorCantRemoveExchange());
@@ -49,12 +48,8 @@ public class RabbitMQService {
 
     public void onQueue(Channel channel, ActionOnQueue action, String queueName) {
         try {
-            switch (action) {
-            case CREATE_QUEUE:
-                break;
-            case DELETE_AND_CREATE_QUEUE:
+            if (action == DELETE_AND_CREATE_QUEUE) {
                 channel.queueDelete(queueName);
-                break;
             }
         } catch (IOException e) {
             throw new IllegalStateException(i18n.errorCantRemoveQueue());
